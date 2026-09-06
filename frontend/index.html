@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MedWaste AI | Smart Medical Waste Management</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+
+    <header class="navbar">
+
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fa-solid fa-leaf"></i>
+            </div>
+
+            <div>
+                <h2>MedWaste <span>AI</span></h2>
+                <p>Clean Care • Safer Tomorrow</p>
+            </div>
+        </div>
+
+
+        <nav id="navMenu">
+            <a href="index.html" class="active">Home</a>
+            <a href="scanner.html">AI Scanner</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="pickup.html">Pickup</a>
+            <a href="#contact">Contact</a>
+        </nav>
+
+
+        <div class="nav-actions">
+            <button class="search-btn" title="Search System">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+
+            <div id="authNavContainer">
+                <a href="login.html" class="login-btn">
+                    <i class="fa-solid fa-user-lock"></i> Login / Register
+                </a>
+            </div>
+
+            <button class="primary-btn" onclick="window.location.href='scanner.html'">
+                Try AI Scanner
+            </button>
+        </div>
+
+
+        <button class="menu-btn" onclick="toggleMenu()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+    </header>
+
+
+    <!-- ================= HERO ================= -->
+
+    <section class="hero" id="home">
+
+        <div class="hero-content">
+
+            <p class="eyebrow">
+                SMART WASTE MANAGEMENT FOR A HEALTHIER TOMORROW
+            </p>
+
+            <h1>
+                Smarter Collection.<br>
+                Safer Healthcare.<br>
+                <span>Cleaner India.</span>
+            </h1>
+
+            <p class="hero-description">
+                An intelligent, mobile medical-waste collection and
+                segregation system that uses AI, IoT and smart logistics
+                to make healthcare safer and greener.
+            </p>
+
+            <div class="hero-buttons">
+                <button class="primary-btn hero-btn" onclick="window.location.href='dashboard.html'">
+                    Monitor Waste Now
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+
+                <button class="outline-btn hero-btn" onclick="window.location.href='scanner.html'" style="background: white;">
+                    <i class="fa-solid fa-camera"></i> Launch AI Scanner
+                </button>
+            </div>
+
+        </div>
+
+
+        <div class="hero-image">
+
+            <div class="robot">
+
+                <div class="robot-screen">
+                    <i class="fa-solid fa-leaf"></i>
+
+                    <h4>AI</h4>
+                    <p>SEGREGATES</p>
+                    <p>FOR A</p>
+                    <p>SAFER TOMORROW</p>
+                </div>
+
+
+                <div class="robot-body">
+
+                    <div class="robot-arm"></div>
+
+                    <div class="robot-camera">
+                        <i class="fa-solid fa-camera"></i>
+                    </div>
+
+                    <div class="robot-logo">
+                        <i class="fa-solid fa-leaf"></i>
+                        <strong>MedWaste AI</strong>
+                    </div>
+
+                </div>
+
+
+                <!-- Waste Bins -->
+
+                <div class="waste-bins">
+
+                    <div class="waste-bin yellow">
+                        <i class="fa-solid fa-biohazard"></i>
+                        <strong>INFECTIOUS</strong>
+                        <small>WASTE</small>
+                    </div>
+
+                    <div class="waste-bin red">
+                        <i class="fa-solid fa-biohazard"></i>
+                        <strong>CONTAMINATED</strong>
+                        <small>PLASTICS</small>
+                    </div>
+
+                    <div class="waste-bin blue">
+                        <i class="fa-solid fa-recycle"></i>
+                        <strong>GLASS &</strong>
+                        <small>METALS</small>
+                    </div>
+
+                    <div class="waste-bin white">
+                        <i class="fa-solid fa-biohazard"></i>
+                        <strong>SHARPS</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= FEATURES ================= -->
+
+    <section class="features">
+
+        <div class="feature">
+
+            <div class="feature-icon green">
+                <i class="fa-solid fa-microchip"></i>
+            </div>
+
+            <div>
+                <h3>AI-Powered Classification</h3>
+
+                <p>
+                    Identifies and segregates medical waste automatically
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="feature">
+
+            <div class="feature-icon blue">
+                <i class="fa-solid fa-wifi"></i>
+            </div>
+
+            <div>
+                <h3>IoT Monitoring</h3>
+
+                <p>
+                    Real-time bin status and smart alerts
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="feature">
+
+            <div class="feature-icon purple">
+                <i class="fa-solid fa-truck"></i>
+            </div>
+
+            <div>
+                <h3>Smart Collection</h3>
+
+                <p>
+                    Optimized routes for efficient pickup
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="feature">
+
+            <div class="feature-icon orange">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+
+            <div>
+                <h3>Safe & Compliant</h3>
+
+                <p>
+                    Supports biomedical waste management rules
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="feature">
+
+            <div class="feature-icon green">
+                <i class="fa-solid fa-leaf"></i>
+            </div>
+
+            <div>
+                <h3>Cleaner Environment</h3>
+
+                <p>
+                    Reducing risk for a healthier tomorrow
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= DEDICATED MODULES PREVIEW ================= -->
+    <section class="modules-cta-section">
+        <div class="modules-cta-grid">
+            <div class="module-cta-card">
+                <div class="module-cta-icon green">
+                    <i class="fa-solid fa-camera"></i>
+                </div>
+                <h3>AI Waste Scanner</h3>
+                <p>Real-time computer vision classification and segregation. Upload waste imagery, test clinical specimens, or launch live WebCam scanning with optical HUD.</p>
+                <a href="scanner.html" class="primary-btn module-link-btn" style="text-decoration: none;">
+                    Launch AI Scanner <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="module-cta-card">
+                <div class="module-cta-icon blue">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <h3>Smart Monitoring Dashboard</h3>
+                <p>Track fill levels, container weights, automated pickup alerts, and collection vehicle fleets in real time for your healthcare facility.</p>
+                <a href="dashboard.html" class="primary-btn module-link-btn" style="text-decoration: none;">
+                    Open Dashboard <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ================= CONTACT ================= -->
+
+    <section class="contact" id="contact">
+
+        <div class="contact-content">
+
+            <p class="section-label">GET STARTED</p>
+
+            <h2>
+                Build a Safer Medical-Waste
+                Management System
+            </h2>
+
+            <p>
+                Bring AI, IoT and smart collection technology
+                to your healthcare facility. Connect with our deployment team.
+            </p>
+
+            <form class="contact-form" id="contactForm" onsubmit="handleContactSubmit(event)">
+
+                <div class="form-row">
+                    <input type="text" id="contactName" placeholder="Your Name or Hospital Authority" required>
+                    <input type="email" id="contactEmail" placeholder="Email Address" required>
+                </div>
+
+                <div class="form-row">
+                    <input type="tel" id="contactPhone" placeholder="Phone Number (+91 ...)">
+                    <input type="text" id="contactHospital" placeholder="Hospital / Facility Name" required>
+                </div>
+
+                <textarea id="contactMessage" rows="3"
+                    placeholder="Tell us about your facility's daily waste capacity and requirements..."></textarea>
+
+                <button type="submit" class="primary-btn contact-submit-btn" id="contactSubmitBtn">
+                    Submit Demo Request
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer>
+
+        <div class="footer-main">
+
+            <div class="footer-brand">
+
+                <div class="logo">
+
+                    <div class="logo-icon">
+                        <i class="fa-solid fa-leaf"></i>
+                    </div>
+
+                    <div>
+                        <h2>MedWaste <span>AI</span></h2>
+                        <p>Clean Care • Safer Tomorrow</p>
+                    </div>
+
+                </div>
+
+                <p>
+                    Smart medical-waste collection,
+                    segregation and tracking powered by AI and IoT.
+                </p>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>Platform</h3>
+
+                <a href="index.html">Home</a>
+                <a href="scanner.html">AI Scanner</a>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="profile.html">User Profile</a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>Solutions</h3>
+
+                <a href="scanner.html">AI Classification</a>
+                <a href="dashboard.html">IoT Monitoring</a>
+                <a href="dashboard.html">Smart Collection</a>
+                <a href="dashboard.html">Analytics</a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>Contact</h3>
+
+                <a href="mailto:contact@medwasteai.com">
+                    contact@medwasteai.com
+                </a>
+
+                <a href="#">
+                    Pune, Maharashtra, India
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-bottom">
+
+            <p>
+                © 2026 MedWaste AI. All Rights Reserved.
+            </p>
+
+            <div class="socials">
+
+                <a href="#">
+                    <i class="fa-brands fa-linkedin"></i>
+                </a>
+
+                <a href="#">
+                    <i class="fa-brands fa-github"></i>
+                </a>
+
+                <a href="#">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

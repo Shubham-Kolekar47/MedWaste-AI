@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Waste Scanner | MedWaste AI</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+
+    <header class="navbar">
+
+        <div class="logo" onclick="window.location.href='index.html'" style="cursor: pointer;">
+            <div class="logo-icon">
+                <i class="fa-solid fa-leaf"></i>
+            </div>
+
+            <div>
+                <h2>MedWaste <span>AI</span></h2>
+                <p>Clean Care • Safer Tomorrow</p>
+            </div>
+        </div>
+
+
+        <nav id="navMenu">
+            <a href="index.html">Home</a>
+            <a href="scanner.html" class="active">AI Scanner</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="pickup.html">Pickup</a>
+            <a href="index.html#contact">Contact</a>
+        </nav>
+
+
+        <div class="nav-actions">
+            <div id="authNavContainer">
+                <a href="login.html" class="login-btn">
+                    <i class="fa-solid fa-user-lock"></i> Login / Register
+                </a>
+            </div>
+
+            <a href="dashboard.html" class="primary-btn" style="text-decoration: none;">
+                <i class="fa-solid fa-chart-line"></i> View Dashboard
+            </a>
+        </div>
+
+
+        <button class="menu-btn" onclick="toggleMenu()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+    </header>
+
+
+    <!-- ================= PAGE HERO HEADER ================= -->
+
+    <section class="page-hero-header">
+        <div class="page-hero-content">
+            <div class="page-breadcrumb">
+                <a href="index.html"><i class="fa-solid fa-house"></i> Home</a>
+                <span>/</span>
+                <span>AI Scanner</span>
+            </div>
+
+            <p class="section-label">CLINICAL OPTICAL VISION ENGINE</p>
+            <h1>Smart AI Waste Scanner & Segregator</h1>
+            <p class="page-hero-desc">
+                Instant deep classification and hazard segregation for biomedical waste streams. Upload medical photos,
+                test clinical samples, or activate live camera scanning with optical HUD.
+            </p>
+        </div>
+    </section>
+
+
+    <!-- ================= AI SCANNER CORE ================= -->
+
+    <section class="scanner-page-section">
+
+        <div class="classifier-grid">
+
+            <!-- Input / Upload Card -->
+            <div class="classifier-card input-panel">
+
+                <div class="panel-header">
+                    <i class="fa-solid fa-camera-retro"></i>
+                    <div>
+                        <h3>AI Waste Optical Scanner</h3>
+                        <p>Real-time optical segregation & deep neural inference</p>
+                    </div>
+                </div>
+
+                <!-- Scanner Mode Selector: Upload vs Camera -->
+                <div class="scanner-mode-tabs">
+                    <button type="button" class="scanner-mode-btn active" id="modeUploadBtn" onclick="switchScannerMode('upload')">
+                        <i class="fa-solid fa-images"></i> Upload / Samples
+                    </button>
+                    <button type="button" class="scanner-mode-btn" id="modeCameraBtn" onclick="switchScannerMode('camera')">
+                        <i class="fa-solid fa-camera"></i> Live WebCam Scanner
+                    </button>
+                </div>
+
+                <!-- MODE 1: Upload & Clinical Samples -->
+                <div id="uploadModeContainer">
+                    <div class="upload-dropzone" id="uploadDropzone" onclick="handleDropzoneClick(event)">
+                        <input type="file" id="wasteImageInput" accept="image/*" class="sr-only-file-input" onchange="handleImageFileSelect(event)">
+                        
+                        <div class="dropzone-content" id="dropzoneContent">
+                            <div class="dropzone-icon">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                            </div>
+                            <h4>Click to choose or drop waste photo</h4>
+                            <p>or <span class="browse-link">browse medical imagery</span></p>
+                            <small>Supports PNG, JPG, JPEG, WEBP</small>
+                        </div>
+
+                        <div class="dropzone-preview" id="dropzonePreview" style="display:none">
+                            <div class="image-scan-wrapper">
+                                <img id="imagePreviewImg" alt="Waste preview">
+                                <div class="scanner-laser" id="scannerLaser"></div>
+                                <div class="scanning-overlay-badge" id="scanningBadge" style="display:none;">
+                                    <i class="fa-solid fa-circle-notch fa-spin"></i> Neural Net Analyzing...
+                                </div>
+                            </div>
+                            <button type="button" class="preview-remove-btn" onclick="resetClassifier(event)">
+                                <i class="fa-solid fa-xmark"></i> Scan Another Item
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="sample-picker">
+                        <span class="sample-title"><i class="fa-solid fa-wand-magic-sparkles"></i> One-Click Clinical Waste Samples:</span>
+                        <div class="sample-tags">
+                            <button type="button" class="sample-tag station-tag" onclick="selectSampleStation()">
+                                <i class="fa-solid fa-layer-group"></i> 4-Bin Medical Waste Station
+                            </button>
+                            <button type="button" class="sample-tag yellow-tag" onclick="selectSampleWaste('Yellow', 'soiled_cotton_gauze.jpg', 'Soiled Cotton Gauze & Dressing')">
+                                <i class="fa-solid fa-biohazard"></i> Soiled Dressing (Yellow)
+                            </button>
+                            <button type="button" class="sample-tag red-tag" onclick="selectSampleWaste('Red', 'plastic_syringe_tubing.jpg', 'Plastic Syringe & IV Tubing')">
+                                <i class="fa-solid fa-syringe"></i> Plastic Syringe (Red)
+                            </button>
+                            <button type="button" class="sample-tag blue-tag" onclick="selectSampleWaste('Blue', 'glass_medicine_vial.jpg', 'Glass Medicine Ampoule / Vial')">
+                                <i class="fa-solid fa-vial"></i> Glass Vial (Blue)
+                            </button>
+                            <button type="button" class="sample-tag white-tag" onclick="selectSampleWaste('White', 'surgical_needle_scalpel.jpg', 'Surgical Needle & Scalpel Sharp')">
+                                <i class="fa-solid fa-shield-halved"></i> Sharp Needle (White)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODE 2: Live Camera Scanner -->
+                <div id="cameraModeContainer" style="display: none;">
+                    <div class="camera-scanner-view">
+                        <div class="camera-viewport" id="cameraViewport">
+                            <video id="scannerVideo" autoplay playsinline muted></video>
+                            <canvas id="scannerCanvas" style="display:none;"></canvas>
+                            
+                            <div class="scanner-hud">
+                                <div class="hud-corner top-left"></div>
+                                <div class="hud-corner top-right"></div>
+                                <div class="hud-corner bottom-left"></div>
+                                <div class="hud-corner bottom-right"></div>
+                                <div class="hud-laser" id="cameraLaser" style="display:none;"></div>
+                                <div class="hud-status-badge" id="cameraHudStatus">Camera Off</div>
+                            </div>
+                        </div>
+
+                        <div class="camera-controls">
+                            <button type="button" class="primary-btn" id="toggleCamBtn" onclick="toggleCamera()">
+                                <i class="fa-solid fa-video"></i> Start Camera Feed
+                            </button>
+                            <button type="button" class="primary-btn capture-btn" id="captureCamBtn" style="display:none;" onclick="captureAndScan()">
+                                <i class="fa-solid fa-camera"></i> Capture & Classify
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- Result / Output Card -->
+            <div class="classifier-card output-panel" id="classifierOutputPanel">
+
+                <div class="panel-header">
+                    <i class="fa-solid fa-microchip"></i>
+                    <div>
+                        <h3>AI Classification Output</h3>
+                        <p>Real-time inference & segregation routing</p>
+                    </div>
+                </div>
+
+                <div class="result-placeholder" id="classifierPlaceholder">
+                    <div class="placeholder-icon">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <h4>AI Engine Ready</h4>
+                    <p>Upload a waste photo, select a clinical sample, or start the live camera above to trigger instant AI segregation.</p>
+                </div>
+
+
+                <div class="result-content" id="classifierResult" style="display: none;">
+
+                    <!-- Headline Banner -->
+                    <div class="result-headline" id="resultHeadlineBanner">
+                        <div class="result-badge" id="resultCategoryBadge">
+                            <i class="fa-solid fa-biohazard" id="resultCategoryIcon"></i>
+                            <span id="resultCategoryName">Infectious Waste</span>
+                        </div>
+                        <div class="confidence-pill" id="resultConfidencePill">
+                            96% Match
+                        </div>
+                    </div>
+
+                    <!-- DUSTBIN FULFILLMENT TELEMETRY SECTION -->
+                    <div class="fulfillment-section" id="fulfillmentContainer"></div>
+
+                    <!-- SUGGESTED WASTE MANAGEMENT TECHNIQUES SECTION -->
+                    <div class="techniques-section" id="techniquesContainer"></div>
+
+                    <!-- General Metadata Info Grid -->
+                    <div class="result-info-grid" id="classicInfoGrid">
+                        <div class="info-block">
+                            <span class="info-label">Assigned Container</span>
+                            <strong class="info-value" id="resultTargetBin">Yellow Biohazard Bin</strong>
+                        </div>
+
+                        <div class="info-block">
+                            <span class="info-label">Treatment Method</span>
+                            <strong class="info-value" id="resultTreatment">Incineration / Deep Burial</strong>
+                        </div>
+
+                        <div class="info-block full-width">
+                            <span class="info-label">Hazard Scope & Clinical Notes</span>
+                            <p class="info-description" id="resultDescription">
+                                Highly infectious soiled materials. Requires sealed biohazard autoclave containment.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actions Row -->
+                    <div class="result-actions" id="resultActionsContainer">
+                        <button class="primary-btn record-btn" id="recordWasteBtn" onclick="recordClassifiedWasteToDb()">
+                            <i class="fa-solid fa-database"></i> Log Waste & Update Smart Bin
+                        </button>
+                        <button class="outline-btn" onclick="resetClassifier()">
+                            <i class="fa-solid fa-rotate-left"></i> Test Another
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer class="footer">
+
+        <div class="footer-grid">
+
+            <div>
+                <h3>MedWaste AI</h3>
+
+                <p>
+                    Smart Medical Waste Management Platform combining computer vision,
+                    IoT smart containers, and automated logistic dispatching.
+                </p>
+            </div>
+
+            <div>
+                <h4>Navigation</h4>
+                <p><a href="index.html" style="color: inherit; text-decoration:none;">Home</a></p>
+                <p><a href="scanner.html" style="color: inherit; text-decoration:none;">AI Scanner</a></p>
+                <p><a href="dashboard.html" style="color: inherit; text-decoration:none;">Dashboard</a></p>
+                <p><a href="pickup.html" style="color: inherit; text-decoration:none;">Pickup Logistics</a></p>
+                <p><a href="profile.html" style="color: inherit; text-decoration:none;">User Profile</a></p>
+            </div>
+
+            <div>
+                <h4>Support</h4>
+                <p>National Pollution Control Board Guidelines</p>
+                <p>Bio-Medical Waste Management Rules, 2016</p>
+                <p>ISO 14001 Compliant Architecture</p>
+            </div>
+
+            <div>
+                <h4>Emergency Logistics</h4>
+                <p><i class="fa-solid fa-phone"></i> +91 1800 233 4567</p>
+                <p><i class="fa-solid fa-envelope"></i> response@medwaste.ai</p>
+                <p><i class="fa-solid fa-location-dot"></i> New Delhi, India</p>
+            </div>
+
+        </div>
+
+        <p class="copyright">
+            © 2026 MedWaste AI. All rights reserved. Transforming Healthcare Waste Management.
+        </p>
+
+    </footer>
+
+    <!-- Toast Notifications Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

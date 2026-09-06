@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>User Profile | MedWaste AI</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+
+    <header class="navbar">
+
+        <div class="logo" onclick="window.location.href='index.html'" style="cursor: pointer;">
+            <div class="logo-icon">
+                <i class="fa-solid fa-leaf"></i>
+            </div>
+
+            <div>
+                <h2>MedWaste <span>AI</span></h2>
+                <p>Clean Care • Safer Tomorrow</p>
+            </div>
+        </div>
+
+
+        <nav id="navMenu">
+            <a href="index.html">Home</a>
+            <a href="scanner.html">AI Scanner</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="pickup.html">Pickup</a>
+            <a href="index.html#contact">Contact</a>
+        </nav>
+
+
+        <div class="nav-actions">
+            <div id="authNavContainer">
+                <a href="login.html" class="login-btn">
+                    <i class="fa-solid fa-user-lock"></i> Login / Register
+                </a>
+            </div>
+
+            <a href="dashboard.html" class="primary-btn" style="text-decoration: none;">
+                <i class="fa-solid fa-chart-line"></i> Go to Dashboard
+            </a>
+        </div>
+
+
+        <button class="menu-btn" onclick="toggleMenu()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+    </header>
+
+
+    <!-- ================= PROFILE HERO HEADER ================= -->
+
+    <section class="page-hero-header">
+        <div class="page-hero-content">
+            <div class="page-breadcrumb">
+                <a href="index.html"><i class="fa-solid fa-house"></i> Home</a>
+                <span>/</span>
+                <span>User Profile</span>
+            </div>
+
+            <p class="section-label">ACCOUNT & FACILITY CREDENTIALS</p>
+            <h1>Hospital Authority Profile</h1>
+            <p class="page-hero-desc">
+                Manage your personal administrative credentials, facility identification, and security settings.
+            </p>
+        </div>
+    </section>
+
+
+    <!-- ================= PROFILE CONTENT ================= -->
+
+    <section class="profile-page-section">
+        <div class="profile-container">
+
+            <!-- Profile Summary Card -->
+            <div class="profile-summary-card">
+                <div class="profile-avatar-wrapper">
+                    <div class="profile-avatar">
+                        <i class="fa-solid fa-user-doctor"></i>
+                    </div>
+                    <span class="avatar-status-dot" title="Account Active"></span>
+                </div>
+
+                <div class="profile-identity">
+                    <div class="profile-title-row">
+                        <h2 id="profileHeaderName">Healthcare Professional</h2>
+                        <span class="role-pill" id="profileRolePill">Facility Manager</span>
+                    </div>
+                    <p class="profile-email" id="profileHeaderEmail">user@healthcare.org</p>
+                    <p class="profile-hospital">
+                        <i class="fa-solid fa-hospital"></i> <span id="profileHeaderHospital">General Healthcare Facility</span>
+                    </p>
+                </div>
+
+                <div class="profile-facility-stats">
+                    <div class="prof-stat-box">
+                        <span class="prof-stat-val" id="profileStatWaste">0 kg</span>
+                        <span class="prof-stat-lbl">Waste Logged</span>
+                    </div>
+                    <div class="prof-stat-box">
+                        <span class="prof-stat-val" id="profileStatBins">0</span>
+                        <span class="prof-stat-lbl">Active Bins</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Edit Form -->
+            <div class="profile-card">
+                <div class="panel-header" style="margin-bottom: 25px;">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <div>
+                        <h3>Edit Profile Details</h3>
+                        <p>Update your personal info, affiliated facility name, or password</p>
+                    </div>
+                </div>
+
+                <form id="profileForm" onsubmit="handleProfileUpdate(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="profileNameInput">Full Name</label>
+                            <div class="input-with-icon">
+                                <i class="fa-solid fa-user"></i>
+                                <input type="text" id="profileNameInput" placeholder="Full Name" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="profileEmailInput">Email Address</label>
+                            <div class="input-with-icon">
+                                <i class="fa-solid fa-envelope"></i>
+                                <input type="email" id="profileEmailInput" placeholder="Email Address" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="profileHospitalInput">Affiliated Healthcare Facility / Hospital</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-hospital"></i>
+                            <input type="text" id="profileHospitalInput" placeholder="Facility Name" required>
+                        </div>
+                        <small style="color: #64748b; font-size: 12px;">All your telemetry and smart bins are scoped to this facility.</small>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label for="profilePasswordInput">Change Password (leave blank to keep current)</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="profilePasswordInput" placeholder="Enter new password (optional)" minlength="6">
+                        </div>
+                    </div>
+
+                    <div class="profile-btn-row">
+                        <button type="submit" class="primary-btn" id="saveProfileBtn">
+                            <i class="fa-solid fa-check"></i> Save Changes
+                        </button>
+                        <a href="dashboard.html" class="outline-btn" style="text-decoration: none;">
+                            <i class="fa-solid fa-arrow-left"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Danger Zone / Sign Out Card -->
+            <div class="profile-card danger-zone-card">
+                <div class="danger-zone-content">
+                    <div>
+                        <h4 style="color: #0f172a; font-size: 16px; margin-bottom: 4px;">Sign Out of MedWaste AI</h4>
+                        <p style="color: #64748b; font-size: 13px; margin: 0;">End your current session on this device.</p>
+                    </div>
+                    <button type="button" class="logout-btn-large" onclick="logout()">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer class="footer">
+
+        <div class="footer-grid">
+
+            <div>
+                <h3>MedWaste AI</h3>
+
+                <p>
+                    Smart Medical Waste Management Platform combining computer vision,
+                    IoT smart containers, and automated logistic dispatching.
+                </p>
+            </div>
+
+            <div>
+                <h4>Navigation</h4>
+                <p><a href="index.html" style="color: inherit; text-decoration:none;">Home</a></p>
+                <p><a href="scanner.html" style="color: inherit; text-decoration:none;">AI Scanner</a></p>
+                <p><a href="dashboard.html" style="color: inherit; text-decoration:none;">Dashboard</a></p>
+                <p><a href="pickup.html" style="color: inherit; text-decoration:none;">Pickup Logistics</a></p>
+                <p><a href="profile.html" style="color: inherit; text-decoration:none;">User Profile</a></p>
+            </div>
+
+            <div>
+                <h4>Support</h4>
+                <p>National Pollution Control Board Guidelines</p>
+                <p>Bio-Medical Waste Management Rules, 2016</p>
+                <p>ISO 14001 Compliant Architecture</p>
+            </div>
+
+            <div>
+                <h4>Emergency Logistics</h4>
+                <p><i class="fa-solid fa-phone"></i> +91 1800 233 4567</p>
+                <p><i class="fa-solid fa-envelope"></i> response@medwaste.ai</p>
+                <p><i class="fa-solid fa-location-dot"></i> New Delhi, India</p>
+            </div>
+
+        </div>
+
+        <p class="copyright">
+            © 2026 MedWaste AI. All rights reserved. Transforming Healthcare Waste Management.
+        </p>
+
+    </footer>
+
+    <!-- Toast Notifications Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

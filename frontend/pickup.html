@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Pickup Logistics & Fleet Management | MedWaste AI</title>
+    <meta name="description" content="Manage, dispatch, track, complete, or terminate hospital biomedical waste pickup requests and CBWTF collection logistics.">
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+
+    <header class="navbar">
+
+        <div class="logo" onclick="window.location.href='index.html'" style="cursor: pointer;">
+            <div class="logo-icon">
+                <i class="fa-solid fa-leaf"></i>
+            </div>
+
+            <div>
+                <h2>MedWaste <span>AI</span></h2>
+                <p>Clean Care • Safer Tomorrow</p>
+            </div>
+        </div>
+
+        <nav id="navMenu">
+            <a href="index.html">Home</a>
+            <a href="scanner.html">AI Scanner</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="pickup.html" class="active">Pickup</a>
+            <a href="index.html#contact">Contact</a>
+        </nav>
+
+        <div class="nav-actions">
+            <div id="authNavContainer">
+                <a href="login.html" class="login-btn">
+                    <i class="fa-solid fa-user-lock"></i> Login / Register
+                </a>
+            </div>
+
+            <button class="primary-btn" onclick="openNewPickupModal()">
+                <i class="fa-solid fa-truck-ramp-box"></i> Schedule Pickup
+            </button>
+        </div>
+
+        <button class="menu-btn" onclick="toggleMenu()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+    </header>
+
+
+    <!-- ================= HERO HEADER ================= -->
+
+    <section class="page-hero-header">
+        <div class="page-hero-content">
+            <div class="page-breadcrumb">
+                <a href="index.html"><i class="fa-solid fa-house"></i> Home</a>
+                <span>/</span>
+                <span>Pickup Logistics</span>
+            </div>
+
+            <p class="section-label"><i class="fa-solid fa-truck-fast"></i> FLEET & CBWTF LOGISTICS DISPATCH</p>
+            <h1>Biomedical Waste Pickup Management</h1>
+            <p class="page-hero-desc">
+                Real-time collection request tracking, route-optimized vehicle dispatching, and full lifecycle control.
+                Manage scheduled hospital ward pickups, dispatch drivers, mark collections, or terminate requests.
+            </p>
+        </div>
+    </section>
+
+
+    <!-- ================= PICKUP MANAGEMENT MAIN ================= -->
+
+    <main class="pickup-page-main" id="pickupPageContainer">
+
+        <!-- Metrics Overview Cards -->
+        <div class="pickup-metrics-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon-box kpi-blue">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-label">Total Requests</span>
+                    <h3 class="kpi-value" id="kpiTotalPickups">0</h3>
+                    <span class="kpi-subtext">All hospital collection logs</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon-box kpi-amber">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-label">Pending Dispatch</span>
+                    <h3 class="kpi-value" id="kpiPendingPickups">0</h3>
+                    <span class="kpi-subtext">Waiting for vehicle assignment</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon-box kpi-sky">
+                    <i class="fa-solid fa-truck-moving"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-label">In Transit</span>
+                    <h3 class="kpi-value" id="kpiEnRoutePickups">0</h3>
+                    <span class="kpi-subtext">Collection vehicle en route</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon-box kpi-green">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-label">Completed Pickups</span>
+                    <h3 class="kpi-value" id="kpiCompletedPickups">0</h3>
+                    <span class="kpi-subtext">Deposited at CBWTF facility</span>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Active Vehicle Fleet Telemetry Banner -->
+        <div class="fleet-telemetry-banner">
+            <div class="fleet-telemetry-left">
+                <div class="vehicle-icon-ring">
+                    <i class="fa-solid fa-truck-medical"></i>
+                </div>
+                <div>
+                    <div class="telemetry-tag-row">
+                        <span class="status-pulse-dot"></span>
+                        <span class="telemetry-status-text">CBWTF GPS FLEET ACTIVE</span>
+                        <span class="vehicle-badge-pill" id="vehicleFleetNumber">DL-01-MW-4021</span>
+                    </div>
+                    <h3 id="vehicleFleetDriver">Assigned Driver: Ramesh Kumar</h3>
+                    <p class="telemetry-route-desc">
+                        <i class="fa-solid fa-route"></i> Route: Central Hospital Corridor • Speed: 32 km/h • ETA to Ward: 14 mins
+                    </p>
+                </div>
+            </div>
+
+            <div class="fleet-telemetry-right">
+                <div class="fleet-load-block">
+                    <div class="load-labels">
+                        <span>Fleet Payload Utilization</span>
+                        <strong id="vehicleFleetLoad">42.5 / 100 kg</strong>
+                    </div>
+                    <div class="load-bar-track">
+                        <div class="load-bar-fill" id="vehicleFleetLoadBar" style="width: 42.5%;"></div>
+                    </div>
+                </div>
+                <button class="outline-btn fleet-refresh-btn" onclick="loadPickupPageData()">
+                    <i class="fa-solid fa-arrows-rotate"></i> Refresh Telemetry
+                </button>
+            </div>
+        </div>
+
+
+        <!-- Pickup Management Card & Table -->
+        <div class="pickup-manager-card">
+
+            <div class="manager-header-bar">
+                <div class="manager-title-group">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                    <div>
+                        <h2>Dispatched Collection Requests</h2>
+                        <p>Manage, dispatch, terminate, or cancel hospital waste pickup requests in real time</p>
+                    </div>
+                </div>
+
+                <div class="manager-actions-group">
+                    <button class="primary-btn new-pickup-btn" onclick="openNewPickupModal()">
+                        <i class="fa-solid fa-plus"></i> Request New Pickup
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter & Search Controls -->
+            <div class="pickup-filter-bar">
+                <div class="filter-tabs">
+                    <button type="button" class="filter-tab-btn active" id="tabAllPickups" onclick="filterPickups('all')">
+                        All Requests <span class="tab-badge" id="badgeCountAll">0</span>
+                    </button>
+                    <button type="button" class="filter-tab-btn" id="tabPendingPickups" onclick="filterPickups('Pending')">
+                        <i class="fa-solid fa-clock"></i> Pending <span class="tab-badge badge-pending" id="badgeCountPending">0</span>
+                    </button>
+                    <button type="button" class="filter-tab-btn" id="tabEnRoutePickups" onclick="filterPickups('En Route')">
+                        <i class="fa-solid fa-truck-fast"></i> In Transit <span class="tab-badge badge-enroute" id="badgeCountEnRoute">0</span>
+                    </button>
+                    <button type="button" class="filter-tab-btn" id="tabCompletedPickups" onclick="filterPickups('Collected')">
+                        <i class="fa-solid fa-check"></i> Completed <span class="tab-badge badge-completed" id="badgeCountCompleted">0</span>
+                    </button>
+                </div>
+
+                <div class="pickup-search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="pickupSearchInput" placeholder="Search by bin code, ward, category..." oninput="handlePickupSearch(event)">
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="pickup-table-wrapper">
+                <table class="pickup-table" id="pickupDataTable">
+                    <thead>
+                        <tr>
+                            <th>Request ID</th>
+                            <th>Target Smart Bin</th>
+                            <th>Stream / Category</th>
+                            <th>Weight / Fill</th>
+                            <th>Hospital Ward</th>
+                            <th>Requested At</th>
+                            <th>Status</th>
+                            <th style="text-align: right;">Manage / Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pickupTableBody">
+                        <tr>
+                            <td colspan="8" class="table-loading-row">
+                                <i class="fa-solid fa-circle-notch fa-spin"></i> Loading pickup logistics records...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- ================= SCHEDULE NEW PICKUP MODAL ================= -->
+
+    <div class="modal" id="newPickupModal">
+        <div class="modal-content custom-data-modal-content">
+            <button class="modal-close" onclick="closeNewPickupModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="modal-header-badge">
+                <div class="modal-icon-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+                    <i class="fa-solid fa-truck-ramp-box"></i>
+                </div>
+                <div>
+                    <h2>Schedule Waste Pickup Dispatch</h2>
+                    <p>Trigger automated CBWTF vehicle collection for a smart container</p>
+                </div>
+            </div>
+
+            <form id="newPickupForm" onsubmit="handleSchedulePickupSubmit(event)" style="margin-top: 20px;">
+                <div class="custom-form-grid">
+                    <div class="form-group full-width">
+                        <label for="pickupTargetBinSelect"><i class="fa-solid fa-trash-can"></i> Select Target Smart Bin *</label>
+                        <select id="pickupTargetBinSelect" required class="modal-select">
+                            <option value="">-- Choose Container --</option>
+                        </select>
+                        <small style="color: #64748b; font-size: 12px; margin-top: 4px; display: block;">
+                            Bins exceeding 75% capacity are prioritized automatically.
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pickupWardInput"><i class="fa-solid fa-hospital"></i> Hospital Ward / Section</label>
+                        <input type="text" id="pickupWardInput" placeholder="e.g. ICU Ward 3, Pathology Lab" value="Central Clinical Block">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pickupPrioritySelect"><i class="fa-solid fa-gauge-high"></i> Urgency Priority</label>
+                        <select id="pickupPrioritySelect" class="modal-select">
+                            <option value="Urgent">🚨 Urgent (Overflowing / 48-Hr Rule)</option>
+                            <option value="High" selected>⚡ High Priority</option>
+                            <option value="Normal">Routine Scheduled Pickup</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="pickupNotesInput"><i class="fa-solid fa-clipboard"></i> Handling Directives & Clinical Notes</label>
+                        <input type="text" id="pickupNotesInput" placeholder="e.g. Double-bagged biohazard sharps containment, non-chlorinated">
+                    </div>
+                </div>
+
+                <div class="modal-actions-row" style="margin-top: 24px;">
+                    <button type="button" class="outline-btn" onclick="closeNewPickupModal()">Cancel</button>
+                    <button type="submit" class="primary-btn" id="submitScheduleBtn">
+                        <i class="fa-solid fa-paper-plane"></i> Dispatch Pickup Request
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer class="footer">
+        <div class="footer-grid">
+            <div>
+                <h3>MedWaste AI</h3>
+                <p>
+                    Smart Medical Waste Management Platform combining computer vision,
+                    IoT smart containers, and automated logistic dispatching.
+                </p>
+            </div>
+
+            <div>
+                <h4>Navigation</h4>
+                <p><a href="index.html" style="color: inherit; text-decoration:none;">Home</a></p>
+                <p><a href="scanner.html" style="color: inherit; text-decoration:none;">AI Scanner</a></p>
+                <p><a href="dashboard.html" style="color: inherit; text-decoration:none;">Dashboard</a></p>
+                <p><a href="pickup.html" style="color: inherit; text-decoration:none;">Pickup Logistics</a></p>
+                <p><a href="profile.html" style="color: inherit; text-decoration:none;">User Profile</a></p>
+            </div>
+
+            <div>
+                <h4>Support</h4>
+                <p>National Pollution Control Board Guidelines</p>
+                <p>Bio-Medical Waste Management Rules, 2016</p>
+                <p>ISO 14001 Compliant Architecture</p>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2026 MedWaste AI — Autonomous Biomedical Waste Intelligence System.</p>
+        </div>
+    </footer>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

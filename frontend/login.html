@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Portal | MedWaste AI</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #f0fdf9 0%, #f8fafc 50%, #ecfdf5 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
+        }
+
+        .auth-navbar {
+            padding: 20px 4.5%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-home-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #075c52;
+            font-weight: 600;
+            font-size: 14px;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: 1px solid #d1fae5;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            transition: all 0.2s ease;
+        }
+
+        .back-home-btn:hover {
+            background: #e6f7f2;
+            transform: translateX(-2px);
+        }
+
+        .auth-container {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px 60px;
+        }
+
+        .auth-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 480px;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 45px rgba(8, 127, 96, 0.08), 0 4px 15px rgba(0,0,0,0.04);
+            border: 1px solid #e2e8f0;
+            position: relative;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .auth-icon {
+            width: 58px;
+            height: 58px;
+            background: #e6f7f2;
+            color: #087f60;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 16px;
+        }
+
+        .auth-header h1 {
+            font-size: 24px;
+            color: #0f172a;
+            margin: 0 0 6px 0;
+            font-weight: 800;
+        }
+
+        .auth-header p {
+            font-size: 14px;
+            color: #64748b;
+            margin: 0;
+        }
+
+        /* Option Switcher (Login vs Register) */
+        .auth-tabs {
+            display: flex;
+            background: #f1f5f9;
+            padding: 5px;
+            border-radius: 14px;
+            margin-bottom: 24px;
+            gap: 6px;
+        }
+
+        .auth-tab-btn {
+            flex: 1;
+            padding: 11px 16px;
+            border: none;
+            border-radius: 10px;
+            background: transparent;
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .auth-tab-btn:hover {
+            color: #1e293b;
+        }
+
+        .auth-tab-btn.active {
+            background: #ffffff;
+            color: #087f60;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
+        .auth-alert {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .auth-alert.error {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .auth-alert.success {
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .input-with-icon {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 14px;
+            color: #94a3b8;
+            font-size: 15px;
+        }
+
+        .input-with-icon input, .input-with-icon select {
+            width: 100%;
+            padding: 12px 14px 12px 42px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            font-family: inherit;
+            font-size: 14px;
+            background: white;
+            outline: none;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .input-with-icon input:focus, .input-with-icon select:focus {
+            border-color: #087f60;
+            box-shadow: 0 0 0 3px rgba(8, 127, 96, 0.12);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .auth-submit-btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            background: #087f60;
+            color: white;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .auth-submit-btn:hover {
+            background: #075c52;
+            transform: translateY(-1px);
+        }
+
+        .auth-submit-btn:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Demo helper box */
+        .demo-box {
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .demo-box span {
+            color: #475569;
+        }
+
+        .demo-box button {
+            background: #087f60;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 5px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .already-logged-box {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .already-logged-box h3 {
+            margin: 0 0 8px 0;
+            color: #075c52;
+        }
+
+        .auth-footer-text {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .auth-footer-text a {
+            color: #087f60;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media(max-width: 500px) {
+            .auth-card {
+                padding: 28px 20px;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header Navigation -->
+    <header class="auth-navbar">
+        <a href="index.html" class="back-home-btn">
+            <i class="fa-solid fa-arrow-left"></i> Back to Homepage
+        </a>
+
+        <div class="logo">
+            <div class="logo-icon" style="width: 38px; height: 38px; font-size: 18px;">
+                <i class="fa-solid fa-leaf"></i>
+            </div>
+            <div>
+                <h2 style="font-size: 18px; margin: 0;">MedWaste <span>AI</span></h2>
+                <p style="margin: 0; font-size: 11px;">Clean Care • Safer Tomorrow</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Auth Card -->
+    <main class="auth-container">
+        <div class="auth-card">
+
+            <div class="auth-header">
+                <div class="auth-icon">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <h1 id="authTitle">Welcome to MedWaste AI</h1>
+                <p id="authSubtitle">Select an option below to access clinical waste telemetry</p>
+            </div>
+
+            <!-- Two Options: Sign In or Register -->
+            <div class="auth-tabs" id="authTabsContainer">
+                <button type="button" class="auth-tab-btn active" id="tabBtnLogin" onclick="switchAuthMode('login')">
+                    <i class="fa-solid fa-right-to-bracket"></i> Sign In
+                </button>
+                <button type="button" class="auth-tab-btn" id="tabBtnRegister" onclick="switchAuthMode('register')">
+                    <i class="fa-solid fa-user-plus"></i> Register
+                </button>
+            </div>
+
+            <!-- Notification Alert Box -->
+            <div id="authAlert" class="auth-alert"></div>
+
+            <!-- Existing Session Banner (shown if already logged in) -->
+            <div id="existingSessionBox" class="already-logged-box" style="display: none;">
+                <i class="fa-solid fa-circle-check" style="font-size: 40px; color: #10b981; margin-bottom: 12px;"></i>
+                <h3>Currently Signed In</h3>
+                <p id="existingUserText" style="color: #64748b; font-size: 14px; margin-bottom: 20px;">You are already logged in as Dr. Rajesh Sharma.</p>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <a href="dashboard.html" class="auth-submit-btn" style="text-decoration: none; padding: 10px 20px; font-size: 14px;">
+                        Go to Dashboard <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                    <button type="button" class="auth-submit-btn" style="background: #fee2e2; color: #b91c1c; padding: 10px 18px; font-size: 14px;" onclick="handleLogoutOnPage()">
+                        Sign Out
+                    </button>
+                </div>
+            </div>
+
+            <!-- OPTION 1: LOGIN FORM -->
+            <form id="loginForm" onsubmit="submitLogin(event)">
+                <div class="demo-box">
+                    <span><i class="fa-solid fa-key" style="color: #087f60; margin-right: 4px;"></i> Demo: <strong>admin@medwaste.ai</strong> / <strong>admin123</strong></span>
+                    <button type="button" onclick="autofillDemo()">Autofill</button>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginEmail">Email Address</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" id="loginEmail" placeholder="e.g. admin@medwaste.ai" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-submit-btn" id="loginSubmitBtn">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In to Dashboard
+                </button>
+
+                <p class="auth-footer-text">
+                    Don't have an account? <a href="#" onclick="switchAuthMode('register'); return false;">Register here</a>
+                </p>
+            </form>
+
+            <!-- OPTION 2: REGISTER FORM -->
+            <form id="registerForm" style="display: none;" onsubmit="submitRegister(event)">
+                <div class="form-group">
+                    <label for="regName">Full Name</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="regName" placeholder="e.g. Dr. Priya Patel" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="regEmail">Email Address</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" id="regEmail" placeholder="e.g. priya.patel@cityhospital.org" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="regHospital">Facility / Hospital Name</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-hospital"></i>
+                            <input type="text" id="regHospital" placeholder="e.g. City Care Hospital" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regRole">Role</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-id-badge"></i>
+                            <select id="regRole">
+                                <option value="hospital">Hospital Authority</option>
+                                <option value="collector">Waste Collector / Fleet</option>
+                                <option value="admin">System Administrator</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="regPassword">Password</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="regPassword" placeholder="Create a secure password" minlength="6" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-submit-btn" id="regSubmitBtn">
+                    <i class="fa-solid fa-user-plus"></i> Create Account & Proceed
+                </button>
+
+                <p class="auth-footer-text">
+                    Already have an account? <a href="#" onclick="switchAuthMode('login'); return false;">Sign in here</a>
+                </p>
+            </form>
+
+        </div>
+    </main>
+
+    <script>
+        const API_BASE = "http://127.0.0.1:5000/api";
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // Check URL query param ?mode=register
+            const params = new URLSearchParams(window.location.search);
+            const mode = params.get("mode") || "login";
+            switchAuthMode(mode);
+
+            // Check if already authenticated
+            const savedUser = JSON.parse(localStorage.getItem("medwaste_user") || "null");
+            if (savedUser && savedUser.name) {
+                const sessionBox = document.getElementById("existingSessionBox");
+                const loginForm = document.getElementById("loginForm");
+                const regForm = document.getElementById("registerForm");
+                const tabs = document.getElementById("authTabsContainer");
+                const text = document.getElementById("existingUserText");
+
+                if (sessionBox && text) {
+                    text.innerText = `You are currently signed in as ${savedUser.name} (${savedUser.email}).`;
+                    sessionBox.style.display = "block";
+                    if (loginForm) loginForm.style.display = "none";
+                    if (regForm) regForm.style.display = "none";
+                    if (tabs) tabs.style.display = "none";
+                }
+            }
+        });
+
+        function switchAuthMode(mode) {
+            const loginForm = document.getElementById("loginForm");
+            const regForm = document.getElementById("registerForm");
+            const btnLogin = document.getElementById("tabBtnLogin");
+            const btnReg = document.getElementById("tabBtnRegister");
+            const alertBox = document.getElementById("authAlert");
+            const title = document.getElementById("authTitle");
+
+            if (alertBox) alertBox.style.display = "none";
+
+            if (mode === "register") {
+                if (loginForm) loginForm.style.display = "none";
+                if (regForm) regForm.style.display = "block";
+                if (btnLogin) btnLogin.classList.remove("active");
+                if (btnReg) btnReg.classList.add("active");
+                if (title) title.innerText = "Register New Account";
+            } else {
+                if (loginForm) loginForm.style.display = "block";
+                if (regForm) regForm.style.display = "none";
+                if (btnLogin) btnLogin.classList.add("active");
+                if (btnReg) btnReg.classList.remove("active");
+                if (title) title.innerText = "Welcome Back";
+            }
+        }
+
+        function autofillDemo() {
+            document.getElementById("loginEmail").value = "admin@medwaste.ai";
+            document.getElementById("loginPassword").value = "admin123";
+            showAlert("Demo credentials filled!", "success");
+        }
+
+        function showAlert(msg, type = "error") {
+            const alertBox = document.getElementById("authAlert");
+            if (!alertBox) return;
+            alertBox.className = `auth-alert ${type}`;
+            alertBox.innerText = msg;
+            alertBox.style.display = "block";
+        }
+
+        async function submitLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById("loginEmail").value.trim();
+            const password = document.getElementById("loginPassword").value;
+            const btn = document.getElementById("loginSubmitBtn");
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...`;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    localStorage.setItem("medwaste_user", JSON.stringify(data.user));
+                    localStorage.setItem("medwaste_token", data.token || "token");
+                    showAlert(`Login successful! Redirecting...`, "success");
+                    setTimeout(() => {
+                        window.location.href = "dashboard.html";
+                    }, 800);
+                } else {
+                    showAlert(data.message || "Invalid email or password", "error");
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = `<i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In to Dashboard`;
+                    }
+                }
+            } catch (err) {
+                showAlert("Could not connect to backend server. Make sure port 5000 is active.", "error");
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In to Dashboard`;
+                }
+            }
+        }
+
+        async function submitRegister(event) {
+            event.preventDefault();
+            const name = document.getElementById("regName").value.trim();
+            const email = document.getElementById("regEmail").value.trim();
+            const hospital = document.getElementById("regHospital").value.trim();
+            const role = document.getElementById("regRole").value;
+            const password = document.getElementById("regPassword").value;
+            const btn = document.getElementById("regSubmitBtn");
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Creating account...`;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/register`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        hospital_name: hospital,
+                        role,
+                        password
+                    })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    localStorage.setItem("medwaste_user", JSON.stringify(data.user));
+                    localStorage.setItem("medwaste_token", data.token || "token");
+                    showAlert(`Account created successfully! Redirecting to your facility dashboard...`, "success");
+                    setTimeout(() => {
+                        window.location.href = "dashboard.html";
+                    }, 800);
+                } else {
+                    showAlert(data.message || "Registration failed", "error");
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = `<i class="fa-solid fa-user-plus"></i> Create Account & Proceed`;
+                    }
+                }
+            } catch (err) {
+                showAlert("Could not connect to backend server. Make sure port 5000 is active.", "error");
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-user-plus"></i> Create Account & Proceed`;
+                }
+            }
+        }
+
+        function handleLogoutOnPage() {
+            localStorage.removeItem("medwaste_user");
+            localStorage.removeItem("medwaste_token");
+            window.location.reload();
+        }
+    </script>
+</body>
+
+</html>

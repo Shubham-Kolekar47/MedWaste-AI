@@ -1,0 +1,2457 @@
+/* =========================================================
+   MEDWASTE AI - CONNECTED FRONTEND ENGINE
+   Full REST API Integration with Flask Backend (:5000)
+========================================================= */
+
+const API_PORT = "5000";
+const API_BASE = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    ? `${window.location.protocol}//${window.location.hostname}:${API_PORT}/api`
+    : "http://127.0.0.1:5000/api";
+
+// Global Application State
+let currentUser = JSON.parse(localStorage.getItem("medwaste_user") || "null");
+let allBins = [];
+let allCollections = [];
+let currentPickupFilter = "all";
+let currentPickupSearch = "";
+let lastClassifiedResult = null;
+let isBackendOnline = false;
+
+
+/* =========================
+   INITIALIZATION
+========================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+    checkAuthStatus();
+    checkHealth();
+
+    // Auto-refresh heartbeat every 8 seconds
+    setInterval(() => {
+        checkHealth();
+    }, 8000);
+
+    // If on Dashboard page:
+    if (document.getElementById("totalWasteDisplay") || document.getElementById("binStatusContainer")) {
+        fetchLiveDashboardData();
+        setInterval(() => {
+            if (isBackendOnline) {
+                fetchLiveDashboardData(true);
+            }
+        }, 15000);
+    }
+
+    // If on Pickup page:
+    if (document.getElementById("pickupTableBody") || document.getElementById("pickupPageContainer")) {
+        loadPickupPageData();
+        setInterval(() => {
+            if (isBackendOnline) {
+                loadPickupPageData(true);
+            }
+        }, 10000);
+    }
+
+    // If on Scanner page:
+    if (document.getElementById("uploadDropzone")) {
+        setupDropzone();
+    }
+
+    // If on Profile page:
+    if (document.getElementById("profileForm")) {
+        loadUserProfile();
+    }
+});
+
+
+/* =========================
+   API CLIENT HELPER
+========================= */
+
+async function apiCall(endpoint, method = "GET", body = null, isFormData = false) {
+    const url = `${API_BASE}${endpoint}`;
+    const options = {
+        method: method
+    };
+
+    if (!isFormData) {
+        options.headers = {
+            "Content-Type": "application/json"
+        };
+    }
+
+    if (body) {
+        if (isFormData) {
+            // FormData automatically sets multipart/form-data with boundary
+            options.body = body;
+        } else {
+            options.body = JSON.stringify(body);
+        }
+    }
+
+    try {
+        const response = await fetch(url, options);
+        const data = await response.json().catch(() => ({}));
+        return { ok: response.ok, status: response.status, data };
+    } catch (err) {
+        return { ok: false, status: 0, error: err.message };
+    }
+}
+
+
+/* =========================
+   BACKEND HEALTH CHECK
+========================= */
+
+async function checkHealth() {
+    const res = await apiCall("/health");
+    const badge = document.getElementById("backendStatusBadge");
+    const dot = document.getElementById("statusDot");
+    const text = document.getElementById("backendStatusText");
+
+    if (res.ok && res.data.status === "online") {
+        isBackendOnline = true;
+        if (dot) {
+            dot.className = "status-pulse-dot";
+        }
+        if (text) {
+            text.innerText = "Backend Online (Flask :5000)";
+        }
+        if (badge) {
+            badge.style.borderColor = "#a7f3d0";
+        }
+    } else {
+        isBackendOnline = false;
+        if (dot) {
+            dot.className = "status-pulse-dot offline";
+        }
+        if (text) {
+            text.innerText = "Backend Offline (Port 5000)";
+        }
+        if (badge) {
+            badge.style.borderColor = "#fca5a5";
+        }
+    }
+}
+
+
+/* =========================
+   LIVE DASHBOARD SYNC
+========================= */
+
+async function fetchLiveDashboardData(silent = false) {
+    let endpoint = "/dashboard";
+    if (currentUser && currentUser.hospital_id) {
+        endpoint += `?hospital_id=${currentUser.hospital_id}`;
+    }
+
+    const res = await apiCall(endpoint);
+
+    if (res.ok && res.data.success) {
+        const d = res.data.data;
+        const wasteEl = document.getElementById("totalWasteDisplay");
+        const binsEl = document.getElementById("activeBinsDisplay");
+        const collectionsEl = document.getElementById("collectionsDisplay");
+        const alertsEl = document.getElementById("alertsDisplay");
+        const facilityTitleEl = document.getElementById("facilityTitleDisplay");
+
+        if (wasteEl) wasteEl.innerText = `${d.total_waste.toLocaleString()} kg`;
+        if (binsEl) binsEl.innerText = d.active_bins;
+        if (collectionsEl) collectionsEl.innerText = d.collections;
+        if (alertsEl) alertsEl.innerText = d.alerts < 10 ? `0${d.alerts}` : d.alerts;
+        if (facilityTitleEl && currentUser && currentUser.hospital_name) {
+            facilityTitleEl.innerText = currentUser.hospital_name;
+        }
+
+        if (!silent) {
+            showToast("Live telemetry synced from database", "info");
+        }
+    }
+
+    // Also reload bins and fleet
+    await loadBinsData();
+    await loadFleetData();
+}
+
+function syncBackendData() {
+    fetchLiveDashboardData(false);
+}
+
+
+/* =========================
+   SMART BINS TELEMETRY
+========================= */
+
+async function loadBinsData() {
+    const container = document.getElementById("binStatusContainer");
+    if (!container) return;
+
+    let endpoint = "/bins";
+    if (currentUser && currentUser.hospital_id) {
+        endpoint += `?hospital_id=${currentUser.hospital_id}`;
+    }
+
+    const res = await apiCall(endpoint);
+
+    if (res.ok && res.data.success) {
+        allBins = res.data.bins || [];
+        renderBins(allBins);
+    } else {
+        if (allBins.length === 0) {
+            container.innerHTML = `
+                <div class="bins-loading-placeholder">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Unable to fetch bin telemetry. Ensure Flask backend is running on port 5000.
+                </div>
+            `;
+        }
+    }
+}
+
+function renderBins(bins) {
+    const container = document.getElementById("binStatusContainer");
+    if (!container) return;
+
+    if (!bins || bins.length === 0) {
+        container.innerHTML = `
+            <div style="grid-column: 1/-1; text-align:center; padding: 48px 24px; background: white; border-radius: 16px; border: 2px dashed #cbd5e1; box-shadow: 0 4px 18px rgba(0,0,0,0.02);">
+                <i class="fa-solid fa-box-open" style="font-size: 44px; color: #94a3b8; margin-bottom: 14px; display:inline-block;"></i>
+                <h4 style="font-size: 18px; color: #1e293b; margin-bottom: 8px;">No Smart Bins Registered Yet</h4>
+                <p style="color: #64748b; font-size: 14px; max-width: 480px; margin: 0 auto 20px; line-height: 1.5;">
+                    Your healthcare facility starts with zero telemetry by default. Click below to register your first smart bin or enter custom waste levels to begin live tracking.
+                </p>
+                <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                    <button class="primary-btn" style="background:#087f60;" onclick="initStandardHospitalBins()">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Initialize Standard 4 Bins (0 kg)
+                    </button>
+                    <button class="primary-btn" onclick="openCustomDataModal('newbin')">
+                        <i class="fa-solid fa-plus"></i> Add Custom Bin
+                    </button>
+                    <button class="outline-btn" onclick="openCustomDataModal('log')">
+                        <i class="fa-solid fa-pen-to-square"></i> Put Your Data
+                    </button>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    const typeConfig = {
+        Yellow: {
+            name: "Infectious Waste",
+            icon: "fa-biohazard",
+            color: "#eab308",
+            class: "bin-yellow"
+        },
+        Red: {
+            name: "Contaminated Plastics",
+            icon: "fa-syringe",
+            color: "#ef4444",
+            class: "bin-red"
+        },
+        Blue: {
+            name: "Glass & Metals",
+            icon: "fa-vial",
+            color: "#3b82f6",
+            class: "bin-blue"
+        },
+        White: {
+            name: "Sharps & Blades",
+            icon: "fa-shield-halved",
+            color: "#64748b",
+            class: "bin-white"
+        }
+    };
+
+    container.innerHTML = bins.map(bin => {
+        const conf = typeConfig[bin.waste_type] || {
+            name: `${bin.waste_type} Waste`,
+            icon: "fa-trash",
+            color: "#087f60",
+            class: "bin-yellow"
+        };
+
+        const level = Math.min(Math.round(bin.current_level), 100);
+        const weight = (bin.weight || 0).toFixed(1);
+
+        // Status badge styling
+        let statusClass = "status-normal";
+        if (level >= 90) statusClass = "status-urgent";
+        else if (level >= 80) statusClass = "status-collection-required";
+        else if (level >= 60) statusClass = "status-warning";
+
+        return `
+            <div class="bin-card ${conf.class}" id="binCard-${bin.id}">
+                <div class="bin-card-header">
+                    <div class="bin-type-title">
+                        <i class="fa-solid ${conf.icon}" style="color:${conf.color}"></i>
+                        <span>${conf.name}</span>
+                    </div>
+                    <span class="bin-code-pill">${bin.bin_code}</span>
+                </div>
+
+                <div class="bin-meter">
+                    <div class="bin-meter-info">
+                        <span>Fill Level</span>
+                        <strong>${level}%</strong>
+                    </div>
+                    <div class="bin-progress-bg">
+                        <div class="bin-progress-fill" style="width: ${level}%; background: ${conf.color};"></div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="bin-status-pill ${statusClass}">${bin.status || "Normal"}</span>
+                    <span style="font-size: 12px; color: #475569; font-weight: 600;">
+                        <i class="fa-solid fa-weight-hanging"></i> ${weight} kg
+                    </span>
+                </div>
+
+                <div class="bin-controls">
+                    <button class="bin-btn-pickup" onclick="triggerCollectionRequest(${bin.id}, '${bin.bin_code}')">
+                        <i class="fa-solid fa-truck"></i> Request Pickup
+                    </button>
+                    <button class="bin-btn-adjust" title="Put custom level or weight" onclick="openAdjustBinForId(${bin.id})">
+                        <i class="fa-solid fa-sliders"></i> Adjust
+                    </button>
+                    <button class="bin-btn-add" title="Simulate +1.5kg waste deposit" onclick="depositWasteToBin(${bin.id}, '${bin.waste_type}', 1.5)">
+                        +1.5 kg
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join("");
+}
+
+
+/* =========================
+   SIMULATE / ADD WASTE TO BIN
+========================= */
+
+async function depositWasteToBin(binId, wasteType, weight = 1.5) {
+    const payload = {
+        bin_id: binId,
+        waste_type: wasteType,
+        weight: weight,
+        confidence: 0.97,
+        image_path: "iot_sensor_inflow.jpg"
+    };
+
+    const res = await apiCall("/waste", "POST", payload);
+
+    if (res.ok && res.data.success) {
+        showToast(`Deposited ${weight} kg into ${wasteType} Bin!`, "success");
+        fetchLiveDashboardData(true);
+    } else {
+        showToast(res.data.message || "Failed to record waste deposit", "error");
+    }
+}
+
+async function simulateWasteDeposit() {
+    if (!allBins || allBins.length === 0) {
+        showToast("No active bins found. Loading...", "info");
+        await loadBinsData();
+    }
+
+    if (allBins.length === 0) {
+        showToast("Database connection needed to simulate waste", "error");
+        return;
+    }
+
+    // Pick a random bin
+    const randomBin = allBins[Math.floor(Math.random() * allBins.length)];
+    await depositWasteToBin(randomBin.id, randomBin.waste_type, 2.0);
+}
+
+
+/* =========================
+   COLLECTION & FLEET TRACKER
+========================= */
+
+async function loadFleetData() {
+    // 1. Fetch vehicles
+    const vRes = await apiCall("/vehicles");
+    if (vRes.ok && vRes.data.success && vRes.data.vehicles.length > 0) {
+        const v = vRes.data.vehicles[0];
+        const numEl = document.getElementById("vehicleNumberDisplay");
+        const driverEl = document.getElementById("vehicleDriverDisplay");
+        const loadEl = document.getElementById("vehicleLoadDisplay");
+        const tagEl = document.getElementById("vehicleStatusTag");
+
+        if (numEl) numEl.innerText = v.vehicle_number;
+        if (driverEl) driverEl.innerText = `Driver: ${v.driver_name || "Demo Collector"}`;
+        if (loadEl) loadEl.innerText = `${v.current_load} / ${v.capacity} kg`;
+        if (tagEl) tagEl.innerText = v.status;
+    }
+
+    // 2. Fetch collection requests
+    let cEndpoint = "/collections";
+    if (currentUser && currentUser.hospital_id) {
+        cEndpoint += `?hospital_id=${currentUser.hospital_id}`;
+    }
+    const cRes = await apiCall(cEndpoint);
+    const listEl = document.getElementById("collectionRequestsList");
+    if (!listEl) return;
+
+    if (cRes.ok && cRes.data.success && cRes.data.collections.length > 0) {
+        const recent = cRes.data.collections.slice(0, 4);
+        listEl.innerHTML = recent.map(req => {
+            const time = req.requested_at ? new Date(req.requested_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now";
+            const statusClass = req.status === "Collected" ? "status-normal" : "status-warning";
+            return `
+                <div class="request-item">
+                    <div>
+                        <strong>${req.bin_code || `Bin #${req.bin_id}`}</strong>
+                        <span style="color:#64748b; margin-left:6px;">(${req.waste_type || "Waste"})</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:11px; color:#94a3b8;">${time}</span>
+                        <span class="bin-status-pill ${statusClass}">${req.status}</span>
+                    </div>
+                </div>
+            `;
+        }).join("");
+    } else {
+        listEl.innerHTML = `<p class="empty-requests">No pending pickups for this facility. Click "Request Pickup" on any bin above!</p>`;
+    }
+}
+
+async function triggerCollectionRequest(binId, binCode) {
+    const res = await apiCall("/collections", "POST", { bin_id: binId });
+
+    if (res.ok && res.data.success) {
+        showToast(`Pickup request dispatched for ${binCode}!`, "success");
+        await loadFleetData();
+        fetchLiveDashboardData(true);
+    } else {
+        showToast(res.data.message || "Failed to dispatch collection request", "error");
+    }
+}
+
+
+/* =========================================================
+   DEDICATED PICKUP & FLEET MANAGEMENT ENGINE (pickup.html)
+========================================================= */
+
+async function loadPickupPageData(isSilent = false) {
+    if (!isSilent) {
+        const tbody = document.getElementById("pickupTableBody");
+        if (tbody && allCollections.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="table-loading-row">
+                        <i class="fa-solid fa-circle-notch fa-spin"></i> Loading pickup logistics records...
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    // 1. Fetch Fleet Vehicles
+    const vRes = await apiCall("/vehicles");
+    if (vRes.ok && vRes.data.success && vRes.data.vehicles.length > 0) {
+        const v = vRes.data.vehicles[0];
+        const numEl = document.getElementById("vehicleFleetNumber");
+        const driverEl = document.getElementById("vehicleFleetDriver");
+        const loadEl = document.getElementById("vehicleFleetLoad");
+        const loadBarEl = document.getElementById("vehicleFleetLoadBar");
+
+        if (numEl) numEl.innerText = v.vehicle_number;
+        if (driverEl) driverEl.innerText = `Assigned Driver: ${v.driver_name || "Ramesh Kumar"}`;
+        if (loadEl) loadEl.innerText = `${v.current_load} / ${v.capacity} kg`;
+        if (loadBarEl) {
+            const pct = Math.min(100, Math.round((v.current_load / v.capacity) * 100));
+            loadBarEl.style.width = `${pct}%`;
+        }
+    }
+
+    // 2. Fetch Collections
+    let cEndpoint = "/collections";
+    if (currentUser && currentUser.hospital_id) {
+        cEndpoint += `?hospital_id=${currentUser.hospital_id}`;
+    }
+    const cRes = await apiCall(cEndpoint);
+
+    if (cRes.ok && cRes.data.success) {
+        allCollections = cRes.data.collections || [];
+        updatePickupKpis(allCollections);
+        renderPickupTable();
+    } else {
+        const tbody = document.getElementById("pickupTableBody");
+        if (tbody) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="table-empty-row" style="color: #ef4444;">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Unable to load pickup records from server.
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    // 3. Populate bins for modal if needed
+    if (allBins.length === 0) {
+        const bRes = await apiCall(currentUser && currentUser.hospital_id ? `/bins?hospital_id=${currentUser.hospital_id}` : "/bins");
+        if (bRes.ok && bRes.data.success) {
+            allBins = bRes.data.bins || [];
+        }
+    }
+}
+
+function updatePickupKpis(collections) {
+    const total = collections.length;
+    const pending = collections.filter(c => c.status === "Pending").length;
+    const enRoute = collections.filter(c => c.status === "En Route" || c.status === "In Transit").length;
+    const completed = collections.filter(c => c.status === "Collected" || c.status === "Completed").length;
+
+    const totalEl = document.getElementById("kpiTotalPickups");
+    const pendingEl = document.getElementById("kpiPendingPickups");
+    const enRouteEl = document.getElementById("kpiEnRoutePickups");
+    const compEl = document.getElementById("kpiCompletedPickups");
+
+    const badgeAll = document.getElementById("badgeCountAll");
+    const badgePending = document.getElementById("badgeCountPending");
+    const badgeEnRoute = document.getElementById("badgeCountEnRoute");
+    const badgeComp = document.getElementById("badgeCountCompleted");
+
+    if (totalEl) totalEl.innerText = total;
+    if (pendingEl) pendingEl.innerText = pending;
+    if (enRouteEl) enRouteEl.innerText = enRoute;
+    if (compEl) compEl.innerText = completed;
+
+    if (badgeAll) badgeAll.innerText = total;
+    if (badgePending) badgePending.innerText = pending;
+    if (badgeEnRoute) badgeEnRoute.innerText = enRoute;
+    if (badgeComp) badgeComp.innerText = completed;
+}
+
+function filterPickups(status) {
+    currentPickupFilter = status;
+    const tabs = document.querySelectorAll(".filter-tab-btn");
+    tabs.forEach(t => t.classList.remove("active"));
+
+    if (status === "all") {
+        document.getElementById("tabAllPickups")?.classList.add("active");
+    } else if (status === "Pending") {
+        document.getElementById("tabPendingPickups")?.classList.add("active");
+    } else if (status === "En Route") {
+        document.getElementById("tabEnRoutePickups")?.classList.add("active");
+    } else if (status === "Collected") {
+        document.getElementById("tabCompletedPickups")?.classList.add("active");
+    }
+
+    renderPickupTable();
+}
+
+function handlePickupSearch(event) {
+    currentPickupSearch = (event.target.value || "").trim().toLowerCase();
+    renderPickupTable();
+}
+
+function renderPickupTable() {
+    const tbody = document.getElementById("pickupTableBody");
+    if (!tbody) return;
+
+    let filtered = allCollections;
+
+    // Filter by status tab
+    if (currentPickupFilter !== "all") {
+        if (currentPickupFilter === "En Route") {
+            filtered = filtered.filter(c => c.status === "En Route" || c.status === "In Transit");
+        } else if (currentPickupFilter === "Collected") {
+            filtered = filtered.filter(c => c.status === "Collected" || c.status === "Completed");
+        } else {
+            filtered = filtered.filter(c => c.status === currentPickupFilter);
+        }
+    }
+
+    // Filter by search query
+    if (currentPickupSearch) {
+        filtered = filtered.filter(c => {
+            const code = (c.bin_code || "").toLowerCase();
+            const wtype = (c.waste_type || "").toLowerCase();
+            const status = (c.status || "").toLowerCase();
+            const idStr = String(c.id);
+            const ward = "central clinical block";
+            return code.includes(currentPickupSearch) ||
+                   wtype.includes(currentPickupSearch) ||
+                   status.includes(currentPickupSearch) ||
+                   idStr.includes(currentPickupSearch) ||
+                   ward.includes(currentPickupSearch);
+        });
+    }
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="table-empty-row">
+                    <i class="fa-solid fa-clipboard-check" style="font-size:24px; color:#cbd5e1; display:block; margin-bottom:8px;"></i>
+                    No collection requests found matching current filter.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(req => {
+        const stream = (req.waste_type || "Yellow").toLowerCase();
+        const binCode = req.bin_code || `BIN-${req.bin_id || '001'}`;
+        const timeStr = req.requested_at 
+            ? new Date(req.requested_at).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) 
+            : "Just now";
+        
+        let statusClass = "status-pill-pending";
+        let statusLabel = req.status;
+        if (req.status === "En Route" || req.status === "In Transit") {
+            statusClass = "status-pill-enroute";
+        } else if (req.status === "Collected" || req.status === "Completed") {
+            statusClass = "status-pill-collected";
+        } else if (req.status === "Cancelled" || req.status === "Terminated") {
+            statusClass = "status-pill-cancelled";
+        }
+
+        const isCompleted = (req.status === "Collected" || req.status === "Completed");
+        const isPending = req.status === "Pending";
+
+        return `
+            <tr id="pickupRow-${req.id}">
+                <td>
+                    <strong style="color: #0f172a;">#REQ-${req.id}</strong>
+                </td>
+                <td>
+                    <span class="bin-stream-tag tag-stream-${stream}">
+                        <i class="fa-solid fa-trash-can"></i> ${binCode}
+                    </span>
+                </td>
+                <td>
+                    <strong>${req.waste_type || "Biohazard"} Stream</strong>
+                    <div style="font-size: 11px; color: #64748b;">Clinical Segregated Waste</div>
+                </td>
+                <td>
+                    <span style="font-weight: 600;">${req.weight ? req.weight + ' kg' : (req.current_level ? req.current_level + '%' : 'Standard')}</span>
+                </td>
+                <td>
+                    <span class="ward-pill"><i class="fa-solid fa-hospital-user"></i> Central Clinical Block</span>
+                </td>
+                <td>
+                    <span style="color: #64748b; font-size: 12px;">${timeStr}</span>
+                </td>
+                <td>
+                    <span class="req-status-pill ${statusClass}">${statusLabel}</span>
+                </td>
+                <td>
+                    <div class="action-btns-cell">
+                        ${isPending ? `
+                            <button class="pickup-act-btn dispatch-action-btn" title="Dispatch Driver" onclick="dispatchPickupRequest(${req.id})">
+                                <i class="fa-solid fa-truck-fast"></i> Dispatch
+                            </button>
+                        ` : ''}
+
+                        ${!isCompleted ? `
+                            <button class="pickup-act-btn complete-btn" title="Mark as Collected" onclick="completePickupRequest(${req.id}, '${binCode}')">
+                                <i class="fa-solid fa-check"></i> Complete
+                            </button>
+                        ` : ''}
+
+                        <button class="pickup-act-btn terminate-btn" title="Terminate / Cancel Pickup" onclick="terminatePickupRequest(${req.id}, '${binCode}')">
+                            <i class="fa-solid fa-ban"></i> Terminate
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+async function terminatePickupRequest(collectionId, binCode) {
+    if (!confirm(`Are you sure you want to terminate/cancel pickup request #REQ-${collectionId} for ${binCode}?`)) {
+        return;
+    }
+
+    showToast(`Terminating pickup #REQ-${collectionId}...`, "info");
+    const res = await apiCall(`/collections/${collectionId}`, "DELETE");
+
+    if (res.ok && res.data.success) {
+        showToast(`Pickup request #REQ-${collectionId} for ${binCode} terminated successfully.`, "success");
+        allCollections = allCollections.filter(c => c.id !== collectionId);
+        updatePickupKpis(allCollections);
+        renderPickupTable();
+    } else {
+        showToast(res.data.message || "Failed to terminate pickup request", "error");
+    }
+}
+
+async function completePickupRequest(collectionId, binCode) {
+    showToast(`Marking pickup #REQ-${collectionId} as Collected...`, "info");
+    const res = await apiCall(`/collections/${collectionId}`, "PUT", { status: "Collected" });
+
+    if (res.ok && res.data.success) {
+        showToast(`Pickup #REQ-${collectionId} marked as Collected and completed!`, "success");
+        const idx = allCollections.findIndex(c => c.id === collectionId);
+        if (idx !== -1) {
+            allCollections[idx].status = "Collected";
+        }
+        updatePickupKpis(allCollections);
+        renderPickupTable();
+    } else {
+        showToast(res.data.message || "Failed to update pickup status", "error");
+    }
+}
+
+async function dispatchPickupRequest(collectionId) {
+    showToast(`Dispatching vehicle for #REQ-${collectionId}...`, "info");
+    const res = await apiCall(`/collections/${collectionId}`, "PUT", { status: "En Route" });
+
+    if (res.ok && res.data.success) {
+        showToast(`Vehicle en route for pickup #REQ-${collectionId}!`, "success");
+        const idx = allCollections.findIndex(c => c.id === collectionId);
+        if (idx !== -1) {
+            allCollections[idx].status = "En Route";
+        }
+        updatePickupKpis(allCollections);
+        renderPickupTable();
+    } else {
+        showToast(res.data.message || "Failed to dispatch vehicle", "error");
+    }
+}
+
+function openNewPickupModal() {
+    const modal = document.getElementById("newPickupModal");
+    const select = document.getElementById("pickupTargetBinSelect");
+    if (!modal) return;
+
+    if (select) {
+        select.innerHTML = `<option value="">-- Choose Container --</option>`;
+        if (allBins.length > 0) {
+            allBins.forEach(b => {
+                const opt = document.createElement("option");
+                opt.value = b.id;
+                opt.innerText = `${b.bin_code} (${b.waste_type} Stream - ${b.current_level}% Full, ${b.weight} kg)`;
+                select.appendChild(opt);
+            });
+        } else {
+            // Fallback options
+            select.innerHTML += `
+                <option value="1">BIN-YEL-001 (Yellow Biohazard - 78% Full)</option>
+                <option value="2">BIN-RED-001 (Red Contaminated Plastics - 88% Full)</option>
+                <option value="3">BIN-BLU-001 (Blue Glassware - 84% Full)</option>
+                <option value="4">BIN-WHT-001 (White Sharps - 72% Full)</option>
+            `;
+        }
+    }
+
+    modal.style.display = "flex";
+}
+
+function closeNewPickupModal() {
+    const modal = document.getElementById("newPickupModal");
+    if (modal) modal.style.display = "none";
+}
+
+async function handleSchedulePickupSubmit(event) {
+    event.preventDefault();
+    const select = document.getElementById("pickupTargetBinSelect");
+    const binId = select ? select.value : null;
+
+    if (!binId) {
+        showToast("Please select a target smart container", "warning");
+        return;
+    }
+
+    const submitBtn = document.getElementById("submitScheduleBtn");
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Dispatching...`;
+    }
+
+    const res = await apiCall("/collections", "POST", { bin_id: parseInt(binId, 10) });
+
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Dispatch Pickup Request`;
+    }
+
+    if (res.ok && res.data.success) {
+        showToast("Collection request dispatched successfully!", "success");
+        closeNewPickupModal();
+        await loadPickupPageData(true);
+    } else {
+        showToast(res.data.message || "Failed to dispatch pickup", "error");
+    }
+}
+
+
+/* =========================
+   AI WASTE CLASSIFIER & SCANNER
+========================= */
+
+let cameraStream = null;
+let simulatedCamInterval = null;
+
+function setupDropzone() {
+    const dropzone = document.getElementById("uploadDropzone");
+    const input = document.getElementById("wasteImageInput");
+    if (!dropzone) return;
+
+    if (input) {
+        input.addEventListener("click", (e) => {
+            e.stopPropagation();
+        });
+    }
+
+    // Restore any active scan from sessionStorage (resists Live Server or accidental reloads)
+    restoreLastScanIfAvailable();
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.add("dragover");
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.remove("dragover");
+        }, false);
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const dt = e.dataTransfer;
+        const files = dt ? dt.files : null;
+        if (files && files.length > 0) {
+            handleImageFile(files[0]);
+        }
+    });
+}
+
+function restoreLastScanIfAvailable() {
+    try {
+        const raw = sessionStorage.getItem("medwaste_active_scan");
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (!data || !data.classification) return;
+
+        // Retain scan for up to 4 hours
+        if (data.time && (Date.now() - data.time < 4 * 3600 * 1000)) {
+            const previewEl = document.getElementById("dropzonePreview");
+            const contentEl = document.getElementById("dropzoneContent");
+            const img = document.getElementById("imagePreviewImg");
+
+            if (data.previewSrc && img) {
+                img.src = data.previewSrc;
+                if (previewEl) previewEl.style.display = "flex";
+                if (contentEl) contentEl.style.display = "none";
+            }
+            renderClassificationResult(data.classification, data.imageUrl, false);
+        } else {
+            sessionStorage.removeItem("medwaste_active_scan");
+        }
+    } catch (e) {
+        console.warn("Could not restore previous scan:", e);
+    }
+}
+
+function handleDropzoneClick(event) {
+    if (!event) return;
+    if (event.target.closest(".preview-remove-btn") || event.target.closest(".dropzone-preview")) {
+        return;
+    }
+    const input = document.getElementById("wasteImageInput");
+    if (input) {
+        input.value = "";
+        input.click();
+    }
+}
+
+function handleImageFileSelect(event) {
+    if (!event || !event.target || !event.target.files) return;
+    const files = event.target.files;
+    if (files && files.length > 0) {
+        handleImageFile(files[0]);
+    }
+}
+
+async function handleImageFile(file, hint = "") {
+    if (!file) return;
+
+    // Show image preview
+    const previewEl = document.getElementById("dropzonePreview");
+    const contentEl = document.getElementById("dropzoneContent");
+    const img = document.getElementById("imagePreviewImg");
+    const laser = document.getElementById("scannerLaser");
+    const badge = document.getElementById("scanningBadge");
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        if (img) img.src = e.target.result;
+        if (previewEl) previewEl.style.display = "flex";
+        if (contentEl) contentEl.style.display = "none";
+    };
+    reader.readAsDataURL(file);
+
+    // Show scanner laser and neural badge
+    if (laser) laser.style.display = "block";
+    if (badge) badge.style.display = "inline-flex";
+
+    // Call backend API /api/classify
+    showToast("AI analyzing biomedical waste image...", "info");
+
+    const formData = new FormData();
+    formData.append("image", file);
+    if (hint) {
+        formData.append("hint", hint);
+    }
+
+    try {
+        const res = await apiCall("/classify", "POST", formData, true);
+
+        // Turn off scanning animations
+        if (laser) laser.style.display = "none";
+        if (badge) badge.style.display = "none";
+
+        if (res.ok && res.data && res.data.success) {
+            renderClassificationResult(res.data.classification, res.data.image_url);
+        } else {
+            console.error("Classification error:", res);
+            showToast((res.data && res.data.message) || "Classification failed. Ensure Flask backend is running on :5000.", "error");
+        }
+    } catch (err) {
+        console.error("Classification exception:", err);
+        if (laser) laser.style.display = "none";
+        if (badge) badge.style.display = "none";
+        showToast("Error connecting to AI classification engine: " + err.message, "error");
+    }
+}
+
+// Quick Sample Waste Selector
+async function selectSampleWaste(category, filename, displayName) {
+    const canvas = document.createElement("canvas");
+    canvas.width = 500;
+    canvas.height = 360;
+    const ctx = canvas.getContext("2d");
+
+    const configs = {
+        Yellow: {
+            bg: "#fef9c3",
+            header: "#ca8a04",
+            accent: "#854d0e",
+            label: "INFECTIOUS BIOHAZARD",
+            symbol: "☣",
+            details: "Soiled Gauze, Cotton Bandage, Blood Dressing"
+        },
+        Red: {
+            bg: "#fee2e2",
+            header: "#dc2626",
+            accent: "#b91c1c",
+            label: "CONTAMINATED PLASTICS",
+            symbol: "♳",
+            details: "Disposable Syringe, Catheter, IV Tubing"
+        },
+        Blue: {
+            bg: "#dbeafe",
+            header: "#2563eb",
+            accent: "#1d4ed8",
+            label: "GLASSWARE & METALS",
+            symbol: "⚗",
+            details: "Medicine Ampoule, Glass Vial, Test Tubes"
+        },
+        White: {
+            bg: "#f1f5f9",
+            header: "#475569",
+            accent: "#334155",
+            label: "SHARPS & SURGICAL BLADES",
+            symbol: "⚔",
+            details: "Scalpel Blade, Surgical Needle, Lancet"
+        }
+    };
+
+    const cfg = configs[category] || configs.Yellow;
+
+    // Gradient background
+    const grad = ctx.createLinearGradient(0, 0, 500, 360);
+    grad.addColorStop(0, "#ffffff");
+    grad.addColorStop(1, cfg.bg);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 500, 360);
+
+    // Clinical border
+    ctx.strokeStyle = cfg.header;
+    ctx.lineWidth = 6;
+    ctx.strokeRect(8, 8, 484, 344);
+
+    // Top banner
+    ctx.fillStyle = cfg.header;
+    ctx.fillRect(12, 12, 476, 48);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 16px Inter, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(`CLINICAL INSPECTION SPECIMEN: ${cfg.label}`, 250, 42);
+
+    // Center symbol
+    ctx.font = "bold 80px Inter, sans-serif";
+    ctx.fillStyle = cfg.accent;
+    ctx.fillText(cfg.symbol, 250, 160);
+
+    // Display Name
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "bold 20px Inter, sans-serif";
+    ctx.fillText(displayName, 250, 215);
+
+    // Description
+    ctx.fillStyle = "#475569";
+    ctx.font = "14px Inter, sans-serif";
+    ctx.fillText(cfg.details, 250, 248);
+
+    // Telemetry stamp
+    ctx.fillStyle = "#64748b";
+    ctx.font = "11px monospace";
+    ctx.fillText(`MEDWASTE_CV_FEED // PROTOCOL_ISO_14001 // ${category.toUpperCase()}_CHANNEL`, 250, 310);
+
+    canvas.toBlob(async (blob) => {
+        const file = new File([blob], filename, { type: "image/jpeg" });
+        await handleImageFile(file, displayName);
+    }, "image/jpeg");
+}
+
+// Quick Sample 4-Stream Station Selector
+async function selectSampleStation() {
+    showToast("Loading 4-Stream Bio-Medical Waste Station...", "info");
+
+    try {
+        const res = await fetch("sample_station.jpg");
+        if (res.ok) {
+            const blob = await res.blob();
+            const file = new File([blob], "hospital_waste_station.jpg", { type: "image/jpeg" });
+            await handleImageFile(file, "4-Stream Bio-Medical Waste Station (Yellow, Red, White, Blue)");
+            return;
+        }
+    } catch (e) {
+        console.warn("Could not fetch sample_station.jpg directly, falling back to canvas:", e);
+    }
+
+    // Fallback: draw 4 vertical columns representing Yellow, Red, White, Blue streams
+    const canvas = document.createElement("canvas");
+    canvas.width = 600;
+    canvas.height = 400;
+    const ctx = canvas.getContext("2d");
+
+    const streams = [
+        { color: "#ca8a04", bg: "#fef08a", label: "YELLOW STREAM (78%)" },
+        { color: "#dc2626", bg: "#fecaca", label: "RED STREAM (88%)" },
+        { color: "#475569", bg: "#f1f5f9", label: "WHITE STREAM (72%)" },
+        { color: "#2563eb", bg: "#bfdbfe", label: "BLUE STREAM (84%)" }
+    ];
+
+    streams.forEach((s, idx) => {
+        const x = idx * 150;
+        ctx.fillStyle = s.bg;
+        ctx.fillRect(x, 0, 150, 400);
+        ctx.fillStyle = s.color;
+        ctx.fillRect(x + 15, 60, 120, 280);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 13px Inter, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(s.label, x + 75, 200);
+    });
+
+    canvas.toBlob(async (blob) => {
+        const file = new File([blob], "hospital_waste_station.jpg", { type: "image/jpeg" });
+        await handleImageFile(file, "4-Stream Bio-Medical Waste Station (Yellow, Red, White, Blue)");
+    }, "image/jpeg");
+}
+
+/* =========================
+   LIVE WEBCAM SCANNER
+========================= */
+
+function switchScannerMode(mode) {
+    const uploadBtn = document.getElementById("modeUploadBtn");
+    const cameraBtn = document.getElementById("modeCameraBtn");
+    const uploadContainer = document.getElementById("uploadModeContainer");
+    const cameraContainer = document.getElementById("cameraModeContainer");
+
+    if (mode === "camera") {
+        if (uploadBtn) uploadBtn.classList.remove("active");
+        if (cameraBtn) cameraBtn.classList.add("active");
+        if (uploadContainer) uploadContainer.style.display = "none";
+        if (cameraContainer) cameraContainer.style.display = "block";
+
+        if (!cameraStream) {
+            toggleCamera();
+        }
+    } else {
+        if (cameraBtn) cameraBtn.classList.remove("active");
+        if (uploadBtn) uploadBtn.classList.add("active");
+        if (cameraContainer) cameraContainer.style.display = "none";
+        if (uploadContainer) uploadContainer.style.display = "block";
+
+        stopCamera();
+    }
+}
+
+async function toggleCamera() {
+    if (cameraStream) {
+        stopCamera();
+        return;
+    }
+
+    const video = document.getElementById("scannerVideo");
+    const hudStatus = document.getElementById("cameraHudStatus");
+
+    if (hudStatus) {
+        hudStatus.innerText = "INITIALIZING SENSOR...";
+    }
+
+    try {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: "environment",
+                    width: { ideal: 640 },
+                    height: { ideal: 480 }
+                },
+                audio: false
+            });
+            cameraStream = stream;
+            if (video) {
+                video.srcObject = stream;
+                video.play().catch(() => {});
+            }
+            onCameraStarted("LIVE OPTICAL FEED (ONLINE)");
+        } else {
+            throw new Error("Camera API not supported");
+        }
+    } catch (err) {
+        console.warn("Hardware camera unavailable, starting simulated clinical optical feed:", err.message);
+        showToast("Physical camera unavailable. Starting Simulated Clinical Sensor Feed.", "info");
+        startSimulatedCameraFeed();
+    }
+}
+
+function onCameraStarted(statusText) {
+    const toggleBtn = document.getElementById("toggleCamBtn");
+    const captureBtn = document.getElementById("captureCamBtn");
+    const hudStatus = document.getElementById("cameraHudStatus");
+    const laser = document.getElementById("cameraLaser");
+
+    if (toggleBtn) {
+        toggleBtn.innerHTML = `<i class="fa-solid fa-video-slash"></i> Stop Camera Feed`;
+        toggleBtn.style.background = "#e11d48";
+    }
+    if (captureBtn) captureBtn.style.display = "inline-flex";
+    if (hudStatus) {
+        hudStatus.innerText = statusText;
+        hudStatus.className = "hud-status-badge live";
+    }
+    if (laser) laser.style.display = "block";
+}
+
+function stopCamera() {
+    if (simulatedCamInterval) {
+        clearInterval(simulatedCamInterval);
+        simulatedCamInterval = null;
+    }
+
+    if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+    }
+
+    const video = document.getElementById("scannerVideo");
+    if (video) video.srcObject = null;
+
+    const toggleBtn = document.getElementById("toggleCamBtn");
+    const captureBtn = document.getElementById("captureCamBtn");
+    const hudStatus = document.getElementById("cameraHudStatus");
+    const laser = document.getElementById("cameraLaser");
+
+    if (toggleBtn) {
+        toggleBtn.innerHTML = `<i class="fa-solid fa-video"></i> Start Camera Feed`;
+        toggleBtn.style.background = "";
+    }
+    if (captureBtn) captureBtn.style.display = "none";
+    if (hudStatus) {
+        hudStatus.innerText = "Camera Off";
+        hudStatus.className = "hud-status-badge";
+    }
+    if (laser) laser.style.display = "none";
+}
+
+function startSimulatedCameraFeed() {
+    const video = document.getElementById("scannerVideo");
+    const canvas = document.getElementById("scannerCanvas");
+    if (!canvas) return;
+
+    canvas.width = 640;
+    canvas.height = 480;
+    const ctx = canvas.getContext("2d");
+
+    let angle = 0;
+    simulatedCamInterval = setInterval(() => {
+        angle += 0.05;
+
+        // Dark medical tech viewport background
+        ctx.fillStyle = "#090d16";
+        ctx.fillRect(0, 0, 640, 480);
+
+        // Technical Grid
+        ctx.strokeStyle = "rgba(16, 185, 129, 0.12)";
+        ctx.lineWidth = 1;
+        for (let x = 40; x < 640; x += 40) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, 480);
+            ctx.stroke();
+        }
+        for (let y = 40; y < 480; y += 40) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(640, y);
+            ctx.stroke();
+        }
+
+        // Circular reticle
+        const cx = 320;
+        const cy = 240;
+        ctx.strokeStyle = "#10b981";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 95, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, 45 + Math.sin(angle * 2) * 4, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Simulated Waste item on examination plate
+        ctx.fillStyle = "#fee2e2";
+        ctx.beginPath();
+        ctx.roundRect(cx - 55, cy - 35, 110, 70, 8);
+        ctx.fill();
+        ctx.strokeStyle = "#ef4444";
+        ctx.stroke();
+
+        ctx.fillStyle = "#b91c1c";
+        ctx.font = "bold 13px Inter, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("CLINICAL PLASTIC", cx, cy + 5);
+
+        // HUD Telemetry
+        ctx.fillStyle = "#34d399";
+        ctx.font = "12px monospace";
+        ctx.textAlign = "left";
+        ctx.fillText("AI SENSOR [CHANNEL-01]", 20, 30);
+        ctx.fillText(`CONF: ${(95.2 + Math.sin(angle) * 2).toFixed(1)}%`, 20, 460);
+
+        ctx.textAlign = "right";
+        ctx.fillText(new Date().toLocaleTimeString(), 620, 30);
+        ctx.fillText("TARGET: LOCKED", 620, 460);
+    }, 60);
+
+    if (canvas.captureStream && video) {
+        try {
+            cameraStream = canvas.captureStream(20);
+            video.srcObject = cameraStream;
+            video.play().catch(() => {});
+        } catch (e) {
+            console.warn("captureStream error:", e);
+        }
+    }
+
+    onCameraStarted("SIMULATED CLINICAL SENSOR");
+}
+
+async function captureAndScan() {
+    const video = document.getElementById("scannerVideo");
+    const canvas = document.getElementById("scannerCanvas");
+    const hudStatus = document.getElementById("cameraHudStatus");
+    if (!canvas) return;
+
+    const w = (video && video.videoWidth) ? video.videoWidth : 640;
+    const h = (video && video.videoHeight) ? video.videoHeight : 480;
+    canvas.width = w;
+    canvas.height = h;
+
+    const ctx = canvas.getContext("2d");
+    if (video && video.srcObject && video.videoWidth) {
+        ctx.drawImage(video, 0, 0, w, h);
+    }
+
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+
+    if (hudStatus) {
+        hudStatus.innerText = "ANALYZING NEURAL FRAME...";
+    }
+
+    showToast("AI analyzing camera frame...", "info");
+
+    const res = await apiCall("/classify", "POST", {
+        image_base64: dataUrl,
+        hint: "live clinical camera capture plastic syringe"
+    });
+
+    if (hudStatus) {
+        hudStatus.innerText = "LIVE OPTICAL FEED (ONLINE)";
+    }
+
+    if (res.ok && res.data.success) {
+        const img = document.getElementById("imagePreviewImg");
+        if (img) img.src = dataUrl;
+        renderClassificationResult(res.data.classification, res.data.image_url);
+    } else {
+        showToast(res.data.message || "Camera classification failed.", "error");
+    }
+}
+
+function renderClassificationResult(classification, imageUrl, shouldSave = true) {
+    lastClassifiedResult = classification;
+
+    if (shouldSave) {
+        try {
+            const previewImg = document.getElementById("imagePreviewImg");
+            sessionStorage.setItem("medwaste_active_scan", JSON.stringify({
+                classification: classification,
+                imageUrl: imageUrl,
+                previewSrc: previewImg ? previewImg.src : null,
+                time: Date.now()
+            }));
+        } catch (e) {
+            console.warn("Could not save scan to sessionStorage:", e);
+        }
+    }
+
+    const placeholder = document.getElementById("classifierPlaceholder");
+    const resultBox = document.getElementById("classifierResult");
+    const gridEl = document.querySelector(".classifier-grid");
+
+    if (placeholder) placeholder.style.display = "none";
+    if (resultBox) {
+        resultBox.style.display = "block";
+        resultBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    if (gridEl) {
+        if (classification.is_multi_bin) {
+            gridEl.classList.add("multi-stream-active");
+        } else {
+            gridEl.classList.remove("multi-stream-active");
+        }
+    }
+
+    // Set badges and texts
+    const catName = document.getElementById("resultCategoryName");
+    const catIcon = document.getElementById("resultCategoryIcon");
+    const badge = document.getElementById("resultCategoryBadge");
+    const confPill = document.getElementById("resultConfidencePill");
+    const targetBin = document.getElementById("resultTargetBin");
+    const treatment = document.getElementById("resultTreatment");
+    const desc = document.getElementById("resultDescription");
+
+    if (catName) catName.innerText = classification.category_name;
+    if (catIcon) catIcon.className = `fa-solid ${classification.icon}`;
+    if (badge) badge.style.color = classification.color_code;
+    if (confPill) {
+        confPill.innerText = `${Math.round(classification.confidence * 100)}% Match`;
+        confPill.style.background = classification.color_code;
+    }
+    if (targetBin) targetBin.innerText = classification.target_bin;
+    if (treatment) treatment.innerText = classification.treatment_method;
+    if (desc) desc.innerText = classification.description;
+
+    const fulfillmentEl = document.getElementById("fulfillmentContainer");
+    const techniquesEl = document.getElementById("techniquesContainer");
+    const actionsEl = document.getElementById("resultActionsContainer");
+    const classicGrid = document.getElementById("classicInfoGrid");
+
+    if (classification.is_multi_bin) {
+        // Multi-stream station audit mode
+        if (classicGrid) classicGrid.style.display = "none";
+
+        // 1. Render Multi-Stream Fulfillment Telemetry
+        if (fulfillmentEl) {
+            const overallPct = classification.overall_fulfillment_pct || 80.5;
+            const isCritical = overallPct >= 80;
+            const meterGradient = isCritical 
+                ? "linear-gradient(90deg, #10b981 0%, #f59e0b 60%, #ef4444 100%)" 
+                : "linear-gradient(90deg, #10b981 0%, #34d399 100%)";
+
+            const binsCardsHtml = (classification.bins_breakdown || []).map(b => {
+                const isOver = b.fulfillment_pct >= 80;
+                const badgeClass = isOver ? "fill-badge-critical" : "fill-badge-warning";
+                const chipsHtml = (b.detected_items || []).map(item => `<span class="item-chip">${item}</span>`).join("");
+
+                return `
+                    <div class="station-bin-card border-${b.waste_type.toLowerCase()}">
+                        <div class="station-bin-header">
+                            <div class="station-bin-title">
+                                <span class="bin-color-dot dot-${b.waste_type.toLowerCase()}"></span>
+                                <h4>${b.waste_type} Stream</h4>
+                            </div>
+                            <span class="bin-fill-badge ${badgeClass}">${b.fulfillment_pct}% Full</span>
+                        </div>
+                        <div class="bin-name-sub">${b.category_name}</div>
+                        
+                        <div class="fulfillment-meter-wrapper">
+                            <div class="fulfillment-meter-bar">
+                                <div class="fulfillment-meter-fill fill-${b.waste_type.toLowerCase()}" style="width: ${b.fulfillment_pct}%"></div>
+                            </div>
+                            <div class="fulfillment-meter-labels">
+                                <span>Capacity: <strong>${b.fulfillment_pct}%</strong></span>
+                                <span>${b.remaining_kg} kg left</span>
+                            </div>
+                        </div>
+
+                        <div class="bin-detected-items">
+                            <span class="items-label"><i class="fa-solid fa-magnifying-glass"></i> Items Detected:</span>
+                            <div class="items-chips-container">${chipsHtml}</div>
+                        </div>
+
+                        <div class="bin-quick-rule">
+                            <i class="fa-solid fa-circle-check"></i> ${b.target_bin}
+                        </div>
+                    </div>
+                `;
+            }).join("");
+
+            fulfillmentEl.innerHTML = `
+                <div class="station-audit-panel">
+                    <div class="station-audit-header">
+                        <div class="station-title-block">
+                            <span class="station-pre-title"><i class="fa-solid fa-microchip"></i> OPTICAL TELEMETRY AUDIT</span>
+                            <h3>Dustbin Capacity & Fulfillment Status</h3>
+                        </div>
+                        <div class="station-overall-badge ${isCritical ? 'badge-critical' : 'badge-normal'}">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Overall: ${overallPct}% Station Capacity
+                        </div>
+                    </div>
+
+                    <div class="station-overall-meter">
+                        <div class="overall-meter-bar">
+                            <div class="overall-meter-fill" style="width: ${overallPct}%; background: ${meterGradient};"></div>
+                        </div>
+                        <div class="overall-meter-telemetry">
+                            <span>Station Capacity Utilization: <strong>${overallPct}%</strong></span>
+                            <span class="telemetry-alert-text ${isCritical ? 'text-critical' : ''}">
+                                ${isCritical ? '⚠️ Capacity Alert: CPCB 48-Hour Threshold Exceeded. Collection required.' : 'Safe Operational Limits'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="station-bins-grid">
+                        ${binsCardsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        // 2. Render Waste Management Techniques
+        if (techniquesEl) {
+            const techniquesHtml = (classification.bins_breakdown || []).map(b => {
+                const tech = b.management_technique || {};
+                const stepsHtml = (tech.steps || []).map((s, idx) => `
+                    <div class="technique-step-item">
+                        <span class="step-num">${idx + 1}</span>
+                        <p>${s}</p>
+                    </div>
+                `).join("");
+
+                return `
+                    <div class="technique-card card-${b.waste_type.toLowerCase()}">
+                        <div class="technique-card-header">
+                            <div class="technique-header-left">
+                                <span class="technique-color-chip chip-${b.waste_type.toLowerCase()}">${b.waste_type} Stream</span>
+                                <h4>${tech.title || b.treatment_method}</h4>
+                            </div>
+                            <span class="technique-cpcb-tag"><i class="fa-solid fa-scale-balanced"></i> ${tech.regulatory_standard || 'CPCB Rules 2016'}</span>
+                        </div>
+
+                        <div class="technique-steps-list">
+                            ${stepsHtml}
+                        </div>
+
+                        <div class="technique-precaution-box">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <div>
+                                <strong>Safety Directive:</strong> ${tech.precautions || 'Strictly follow non-chlorinated containment and maximum 48-hour storage limits.'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+
+            const directivesHtml = (classification.station_protocols || []).map(p => `
+                <div class="station-directive-card">
+                    <div class="directive-icon"><i class="fa-solid ${p.icon}"></i></div>
+                    <div class="directive-content">
+                        <h5>${p.title}</h5>
+                        <p>${p.description}</p>
+                    </div>
+                </div>
+            `).join("");
+
+            techniquesEl.innerHTML = `
+                <div class="techniques-master-wrapper">
+                    <div class="techniques-master-header">
+                        <div class="tech-head-left">
+                            <span class="station-pre-title"><i class="fa-solid fa-recycle"></i> STATUTORY DISPOSAL PROTOCOLS</span>
+                            <h3>Suggested Biomedical Waste Management Techniques</h3>
+                            <p class="tech-subtitle">Comprehensive treatment workflows per Ministry of Environment & CPCB Bio-Medical Waste Management Rules, 2016</p>
+                        </div>
+                    </div>
+
+                    <div class="techniques-grid">
+                        ${techniquesHtml}
+                    </div>
+
+                    <div class="station-directives-section">
+                        <h4 class="directives-title"><i class="fa-solid fa-clipboard-check"></i> Mandatory Hospital Facility Protocols</h4>
+                        <div class="directives-grid">
+                            ${directivesHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 3. Station Actions
+        if (actionsEl) {
+            actionsEl.innerHTML = `
+                <button class="primary-btn sync-btn" id="syncStationBtn" onclick="syncStationTelemetryToBins()">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Sync All 4 Smart Bins to Database
+                </button>
+                <button class="primary-btn dispatch-btn" id="stationDispatchBtn" onclick="requestStationPickup()">
+                    <i class="fa-solid fa-truck-fast"></i> Dispatch Automated CBWTF Pickup
+                </button>
+                <button class="outline-btn" onclick="resetClassifier()">
+                    <i class="fa-solid fa-rotate-left"></i> Test Another
+                </button>
+            `;
+        }
+
+        showToast("AI Station Audit: 4-Stream Waste Segregation & Fulfillment Telemetry Analyzed!", "success");
+
+    } else {
+        // Single Item Mode
+        if (classicGrid) classicGrid.style.display = "grid";
+
+        // 1. Single Item Fulfillment Telemetry
+        if (fulfillmentEl && classification.fulfillment) {
+            const f = classification.fulfillment;
+            fulfillmentEl.innerHTML = `
+                <div class="single-fulfillment-card">
+                    <div class="single-fill-header">
+                        <div class="single-fill-title">
+                            <span class="station-pre-title"><i class="fa-solid fa-chart-simple"></i> DUSTBIN FULFILLMENT TELEMETRY</span>
+                            <h4>${classification.target_bin} Capacity Impact</h4>
+                        </div>
+                        <span class="bin-fill-badge ${f.current_level_pct >= 80 ? 'fill-badge-critical' : 'fill-badge-warning'}">
+                            ${f.status}
+                        </span>
+                    </div>
+
+                    <div class="fulfillment-dual-meter">
+                        <div class="fulfillment-meter-bar">
+                            <div class="fulfillment-meter-fill fill-${classification.waste_type.toLowerCase()}" style="width: ${f.projected_level_pct}%"></div>
+                        </div>
+                        <div class="fulfillment-meter-labels">
+                            <span>Current: <strong>${f.current_level_pct}%</strong> + Impact: <strong>+${f.deposit_impact_pct}%</strong></span>
+                            <span>Projected: <strong>${f.projected_level_pct}%</strong> (${f.remaining_kg} kg left)</span>
+                        </div>
+                    </div>
+
+                    <div class="single-detected-items">
+                        <span class="items-label"><i class="fa-solid fa-tags"></i> Clinically Associated Items:</span>
+                        <div class="items-chips-container">
+                            ${(classification.detected_items || []).map(item => `<span class="item-chip">${item}</span>`).join("")}
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else if (fulfillmentEl) {
+            fulfillmentEl.innerHTML = "";
+        }
+
+        // 2. Single Item Waste Management Technique
+        if (techniquesEl && classification.management_technique) {
+            const tech = classification.management_technique;
+            const stepsHtml = (tech.steps || []).map((s, idx) => `
+                <div class="technique-step-item">
+                    <span class="step-num">${idx + 1}</span>
+                    <p>${s}</p>
+                </div>
+            `).join("");
+
+            techniquesEl.innerHTML = `
+                <div class="technique-card card-${classification.waste_type.toLowerCase()}" style="margin-top: 18px;">
+                    <div class="technique-card-header">
+                        <div class="technique-header-left">
+                            <span class="station-pre-title"><i class="fa-solid fa-recycle"></i> STATUTORY TECHNIQUE</span>
+                            <h4>${tech.title}</h4>
+                        </div>
+                        <span class="technique-cpcb-tag"><i class="fa-solid fa-scale-balanced"></i> ${tech.regulatory_standard}</span>
+                    </div>
+
+                    <div class="technique-steps-list">
+                        ${stepsHtml}
+                    </div>
+
+                    <div class="technique-precaution-box">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <div>
+                            <strong>Handling Precautions:</strong> ${tech.precautions}
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else if (techniquesEl) {
+            techniquesEl.innerHTML = "";
+        }
+
+        // 3. Single Item Actions
+        if (actionsEl) {
+            actionsEl.innerHTML = `
+                <button class="primary-btn record-btn" id="recordWasteBtn" onclick="recordClassifiedWasteToDb()">
+                    <i class="fa-solid fa-database"></i> Log Waste & Update Smart Bin
+                </button>
+                <button class="outline-btn" onclick="resetClassifier()">
+                    <i class="fa-solid fa-rotate-left"></i> Test Another
+                </button>
+            `;
+        }
+
+        showToast(`AI Detected: ${classification.category_name} (${classification.waste_type} Bin)`, "success");
+    }
+}
+
+async function syncStationTelemetryToBins() {
+    if (!lastClassifiedResult || !lastClassifiedResult.is_multi_bin) {
+        showToast("No active multi-stream station data to sync", "error");
+        return;
+    }
+
+    const btn = document.getElementById("syncStationBtn");
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Synchronizing Database...`;
+    }
+
+    const payload = {
+        hospital_id: currentUser ? currentUser.hospital_id : 1,
+        bins_breakdown: lastClassifiedResult.bins_breakdown || []
+    };
+
+    const res = await apiCall("/bins/sync-station", "POST", payload);
+
+    if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Synchronized with Database!`;
+        btn.style.background = "#059669";
+    }
+
+    if (res.ok && res.data.success) {
+        try { sessionStorage.removeItem("medwaste_active_scan"); } catch (e) {}
+        showToast("Synchronized 4 Smart Bins with live optical telemetry in database!", "success");
+        if (res.data.collections_created && res.data.collections_created.length > 0) {
+            showToast(`Auto-dispatched pickup requests for high-fill bins: ${res.data.collections_created.join(", ")}`, "info");
+        }
+        if (btn) {
+            btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Synchronized with Database!`;
+            btn.style.background = "#059669";
+            btn.disabled = true;
+        }
+    } else {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> Sync All 4 Smart Bins to Database`;
+        }
+        showToast(res.data.message || "Failed to sync station telemetry", "error");
+    }
+}
+
+async function requestStationPickup() {
+    if (!lastClassifiedResult) return;
+
+    const btn = document.getElementById("stationDispatchBtn");
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Dispatching Vehicle...`;
+    }
+
+    // Trigger collections for high fill bins
+    const binsToPick = (lastClassifiedResult.bins_breakdown || []).filter(b => b.fulfillment_pct >= 75);
+    let dispatched = 0;
+
+    for (const b of binsToPick) {
+        const targetBin = allBins.find(bin => bin.waste_type.toLowerCase() === b.waste_type.toLowerCase());
+        if (targetBin) {
+            await apiCall("/collections", "POST", { bin_id: targetBin.id });
+            dispatched++;
+        }
+    }
+
+    if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-truck-ramp-box"></i> Fleet Dispatched!`;
+        btn.style.background = "#2563eb";
+    }
+
+    showToast(`Dispatched CBWTF collection fleet for ${dispatched > 0 ? dispatched : 'overflowing'} bins!`, "success");
+}
+
+async function recordClassifiedWasteToDb() {
+    if (!lastClassifiedResult) {
+        showToast("Please classify an image first", "error");
+        return;
+    }
+
+    const btn = document.getElementById("recordWasteBtn");
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Logging Waste...`;
+    }
+
+    // Match with corresponding bin
+    const wasteType = lastClassifiedResult.waste_type;
+    const targetBin = allBins.find(b => b.waste_type.toLowerCase() === wasteType.toLowerCase()) || allBins[0];
+
+    const payload = {
+        bin_id: targetBin ? targetBin.id : 1,
+        hospital_id: currentUser ? currentUser.hospital_id : 1,
+        waste_type: wasteType,
+        weight: parseFloat((Math.random() * 1.5 + 1.2).toFixed(1)),
+        confidence: lastClassifiedResult.confidence,
+        image_path: "classified_upload.jpg"
+    };
+
+    const res = await apiCall("/waste", "POST", payload);
+
+    if (res.ok && res.data.success) {
+        try { sessionStorage.removeItem("medwaste_active_scan"); } catch (e) {}
+        showToast(`Waste record logged into ${targetBin ? targetBin.bin_code : 'Smart Bin'}!`, "success");
+        if (btn) {
+            btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Logged to ${targetBin ? targetBin.bin_code : 'Smart Bin'}`;
+            btn.style.background = "#059669";
+            btn.disabled = true;
+        }
+        const actionsContainer = document.getElementById("resultActionsContainer");
+        if (actionsContainer && !document.getElementById("viewDashboardLinkBtn")) {
+            const dashLink = document.createElement("button");
+            dashLink.id = "viewDashboardLinkBtn";
+            dashLink.className = "outline-btn";
+            dashLink.style.marginLeft = "8px";
+            dashLink.innerHTML = `<i class="fa-solid fa-chart-line"></i> View in Dashboard`;
+            dashLink.onclick = () => window.location.href = "dashboard.html";
+            actionsContainer.appendChild(dashLink);
+        }
+    } else {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fa-solid fa-database"></i> Log Waste & Update Smart Bin`;
+        }
+        showToast(res.data.message || "Failed to record waste to database", "error");
+    }
+}
+
+function resetClassifier(event) {
+    if (event) {
+        if (typeof event.preventDefault === "function") event.preventDefault();
+        if (typeof event.stopPropagation === "function") event.stopPropagation();
+    }
+
+    try {
+        sessionStorage.removeItem("medwaste_active_scan");
+    } catch (e) {}
+
+    lastClassifiedResult = null;
+    const input = document.getElementById("wasteImageInput");
+    if (input) input.value = "";
+
+    const previewEl = document.getElementById("dropzonePreview");
+    const contentEl = document.getElementById("dropzoneContent");
+    const placeholder = document.getElementById("classifierPlaceholder");
+    const resultBox = document.getElementById("classifierResult");
+    const laser = document.getElementById("scannerLaser");
+    const badge = document.getElementById("scanningBadge");
+    const gridEl = document.querySelector(".classifier-grid");
+
+    if (gridEl) gridEl.classList.remove("multi-stream-active");
+    if (previewEl) previewEl.style.display = "none";
+    if (contentEl) contentEl.style.display = "block";
+    if (placeholder) placeholder.style.display = "flex";
+    if (resultBox) resultBox.style.display = "none";
+    if (laser) laser.style.display = "none";
+    if (badge) badge.style.display = "none";
+}
+
+
+/* =========================
+   AUTHENTICATION & SESSION
+========================= */
+
+function checkAuthStatus() {
+    const container = document.getElementById("authNavContainer");
+    if (!container) return;
+
+    if (currentUser && currentUser.name) {
+        container.innerHTML = `
+            <div class="user-nav-chip-wrapper" style="display:inline-flex; align-items:center; gap:6px;">
+                <a href="profile.html" class="user-nav-chip" style="text-decoration:none; cursor:pointer;" title="View & Edit Profile (${currentUser.email})">
+                    <i class="fa-solid fa-user-doctor"></i>
+                    <span>${currentUser.name.split(" ")[0]}</span>
+                </a>
+                <button class="logout-icon-btn" onclick="logout()" title="Logout (${currentUser.email})">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                </button>
+            </div>
+        `;
+    } else {
+        container.innerHTML = `
+            <a href="login.html" class="login-btn">
+                <i class="fa-solid fa-user-lock"></i> Login / Register
+            </a>
+        `;
+    }
+}
+
+async function handleLogin(event) {
+    event.preventDefault();
+
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
+    const alertBox = document.getElementById("loginAlertBox");
+    const submitBtn = document.getElementById("loginSubmitBtn");
+
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...`;
+    }
+
+    const res = await apiCall("/auth/login", "POST", { email, password });
+
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `Login`;
+    }
+
+    if (res.ok && res.data.success) {
+        currentUser = res.data.user;
+        localStorage.setItem("medwaste_user", JSON.stringify(currentUser));
+        localStorage.setItem("medwaste_token", res.data.token || "token");
+
+        if (alertBox) {
+            alertBox.className = "login-alert success";
+            alertBox.innerText = `Welcome, ${currentUser.name}!`;
+            alertBox.style.display = "block";
+        }
+
+        showToast(`Logged in as ${currentUser.name}`, "success");
+        checkAuthStatus();
+
+        setTimeout(() => {
+            closeLogin();
+            if (alertBox) alertBox.style.display = "none";
+            window.location.href = "dashboard.html";
+        }, 800);
+    } else {
+        if (alertBox) {
+            alertBox.className = "login-alert error";
+            alertBox.innerText = res.data.message || "Invalid email or password";
+            alertBox.style.display = "block";
+        }
+        showToast(res.data.message || "Login failed", "error");
+    }
+}
+
+function fillDemoCredentials() {
+    const emailInput = document.getElementById("loginEmail");
+    const passInput = document.getElementById("loginPassword");
+    if (emailInput) emailInput.value = "admin@medwaste.ai";
+    if (passInput) passInput.value = "admin123";
+    showToast("Demo credentials filled!", "info");
+}
+
+function logout() {
+    currentUser = null;
+    localStorage.removeItem("medwaste_user");
+    localStorage.removeItem("medwaste_token");
+    checkAuthStatus();
+    showToast("Logged out of MedWaste AI session", "info");
+    setTimeout(() => {
+        window.location.href = "index.html";
+    }, 400);
+}
+
+
+/* =========================
+   USER PROFILE MANAGEMENT
+========================= */
+
+async function loadUserProfile() {
+    const form = document.getElementById("profileForm");
+    if (!form) return;
+
+    if (!currentUser) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    const nameInput = document.getElementById("profileNameInput");
+    const emailInput = document.getElementById("profileEmailInput");
+    const hospitalInput = document.getElementById("profileHospitalInput");
+    const rolePill = document.getElementById("profileRolePill");
+    const headerName = document.getElementById("profileHeaderName");
+    const headerEmail = document.getElementById("profileHeaderEmail");
+    const headerHospital = document.getElementById("profileHeaderHospital");
+
+    if (nameInput) nameInput.value = currentUser.name || "";
+    if (emailInput) emailInput.value = currentUser.email || "";
+    if (hospitalInput) hospitalInput.value = currentUser.hospital_name || "";
+    if (rolePill) rolePill.innerText = currentUser.role === "admin" ? "System Administrator" : "Hospital Facility Manager";
+    if (headerName) headerName.innerText = currentUser.name || "Healthcare User";
+    if (headerEmail) headerEmail.innerText = currentUser.email || "";
+    if (headerHospital) headerHospital.innerText = currentUser.hospital_name || "General Facility";
+
+    // Fetch latest profile & facility stats from server
+    const res = await apiCall(`/auth/profile?user_id=${currentUser.id}`);
+    if (res.ok && res.data.success) {
+        const u = res.data.user;
+        const stats = res.data.facility_stats || {};
+
+        if (nameInput) nameInput.value = u.name;
+        if (emailInput) emailInput.value = u.email;
+        if (hospitalInput) hospitalInput.value = u.hospital_name || "";
+        if (headerName) headerName.innerText = u.name;
+        if (headerEmail) headerEmail.innerText = u.email;
+        if (headerHospital) headerHospital.innerText = u.hospital_name || "General Facility";
+
+        const statWaste = document.getElementById("profileStatWaste");
+        const statBins = document.getElementById("profileStatBins");
+        if (statWaste) statWaste.innerText = `${stats.total_waste || 0} kg`;
+        if (statBins) statBins.innerText = stats.bins_count || 0;
+
+        currentUser = { ...currentUser, ...u };
+        localStorage.setItem("medwaste_user", JSON.stringify(currentUser));
+        checkAuthStatus();
+    }
+}
+
+async function handleProfileUpdate(event) {
+    event.preventDefault();
+    if (!currentUser) return;
+
+    const name = document.getElementById("profileNameInput").value.trim();
+    const email = document.getElementById("profileEmailInput").value.trim();
+    const hospital_name = document.getElementById("profileHospitalInput").value.trim();
+    const password = document.getElementById("profilePasswordInput") ? document.getElementById("profilePasswordInput").value : "";
+    const saveBtn = document.getElementById("saveProfileBtn");
+
+    if (!name || !email) {
+        showToast("Name and email are required", "error");
+        return;
+    }
+
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
+    }
+
+    const payload = {
+        user_id: currentUser.id,
+        name,
+        email,
+        hospital_name
+    };
+    if (password) {
+        payload.password = password;
+    }
+
+    const res = await apiCall("/auth/profile", "PUT", payload);
+
+    if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = `<i class="fa-solid fa-check"></i> Save Changes`;
+    }
+
+    if (res.ok && res.data.success) {
+        currentUser = { ...currentUser, ...res.data.user };
+        localStorage.setItem("medwaste_user", JSON.stringify(currentUser));
+        checkAuthStatus();
+        showToast("Profile and facility details updated successfully!", "success");
+
+        const passInput = document.getElementById("profilePasswordInput");
+        if (passInput) passInput.value = "";
+
+        loadUserProfile();
+    } else {
+        showToast(res.data.message || "Failed to update profile", "error");
+    }
+}
+
+
+/* =========================
+   CONTACT & DEMO REQUEST
+========================= */
+
+async function handleContactSubmit(event) {
+    event.preventDefault();
+
+    const name = document.getElementById("contactName").value.trim();
+    const email = document.getElementById("contactEmail").value.trim();
+    const phone = document.getElementById("contactPhone").value.trim();
+    const hospital = document.getElementById("contactHospital").value.trim();
+    const message = document.getElementById("contactMessage").value.trim();
+    const btn = document.getElementById("contactSubmitBtn");
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting...`;
+    }
+
+    const payload = {
+        name,
+        email,
+        phone,
+        hospital_name: hospital,
+        message
+    };
+
+    const res = await apiCall("/contact", "POST", payload);
+
+    if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `Submit Demo Request <i class="fa-solid fa-paper-plane"></i>`;
+    }
+
+    if (res.ok && res.data.success) {
+        showToast("Demo request received! Our deployment team will reach out shortly.", "success");
+        document.getElementById("contactForm").reset();
+    } else {
+        showToast(res.data.message || "Failed to submit demo request", "error");
+    }
+}
+
+
+/* =========================
+   MODAL & NAVIGATION UTILS
+========================= */
+
+function toggleMenu() {
+    const nav = document.getElementById("navMenu");
+    if (nav) nav.classList.toggle("open");
+}
+
+function scrollToSection(id) {
+    const section = document.getElementById(id);
+    if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+    }
+    const nav = document.getElementById("navMenu");
+    if (nav && nav.classList.contains("open")) {
+        nav.classList.remove("open");
+    }
+}
+
+function openLogin() {
+    window.location.href = "login.html";
+}
+
+function closeLogin() {
+    // legacy helper
+}
+
+window.addEventListener("click", function (event) {
+    const modal = document.getElementById("loginModal");
+    if (event.target === modal) {
+        closeLogin();
+    }
+    const customModal = document.getElementById("customDataModal");
+    if (event.target === customModal) {
+        closeCustomDataModal();
+    }
+});
+
+
+/* =========================================================
+   CUSTOM DATA & TELEMETRY INPUT MODAL HANDLERS
+========================================================= */
+
+function openCustomDataModal(tab = 'log') {
+    const modal = document.getElementById("customDataModal");
+    if (!modal) return;
+
+    // Populate bin select options
+    populateBinSelectOptions();
+
+    // Switch to requested tab
+    switchCustomTab(tab);
+
+    modal.classList.add("show");
+}
+
+function closeCustomDataModal() {
+    const modal = document.getElementById("customDataModal");
+    if (modal) modal.classList.remove("show");
+}
+
+function openAdjustBinForId(binId) {
+    openCustomDataModal('adjust');
+    const select = document.getElementById("adjustBinSelect");
+    if (select) {
+        select.value = binId;
+        onAdjustBinSelectChange();
+    }
+}
+
+function switchCustomTab(tabName) {
+    const btnLog = document.getElementById("tabBtnLog");
+    const btnAdjust = document.getElementById("tabBtnAdjust");
+    const btnNewBin = document.getElementById("tabBtnNewBin");
+
+    const formLog = document.getElementById("customWasteLogForm");
+    const formAdjust = document.getElementById("adjustBinForm");
+    const formNew = document.getElementById("newBinForm");
+
+    const titleEl = document.getElementById("customModalTitle");
+
+    if (btnLog) btnLog.classList.toggle("active", tabName === 'log');
+    if (btnAdjust) btnAdjust.classList.toggle("active", tabName === 'adjust');
+    if (btnNewBin) btnNewBin.classList.toggle("active", tabName === 'newbin');
+
+    if (formLog) formLog.style.display = (tabName === 'log') ? "block" : "none";
+    if (formAdjust) formAdjust.style.display = (tabName === 'adjust') ? "block" : "none";
+    if (formNew) formNew.style.display = (tabName === 'newbin') ? "block" : "none";
+
+    if (titleEl) {
+        if (tabName === 'log') titleEl.innerText = "Log Custom Waste Entry";
+        else if (tabName === 'adjust') titleEl.innerText = "Calibrate Smart Bin Sensors";
+        else if (tabName === 'newbin') titleEl.innerText = "Register New Smart Bin";
+    }
+
+    if (tabName === 'adjust') {
+        onAdjustBinSelectChange();
+    }
+}
+
+function switchCustomDataTab(tabName) {
+    switchCustomTab(tabName);
+}
+
+function populateBinSelectOptions() {
+    const targetSelect = document.getElementById("customTargetBin") || document.getElementById("customWasteBinSelect");
+    const adjustSelect = document.getElementById("adjustBinSelect");
+    const categorySelect = document.getElementById("customWasteType");
+
+    if (targetSelect) {
+        let html = '<option value="auto">✨ Auto-Assign Smart Bin (Based on Category)</option>';
+        if (allBins && allBins.length > 0) {
+            html += allBins.map(b => `
+                <option value="${b.id}" data-type="${b.waste_type}">
+                    ${b.bin_code} - ${b.waste_type} Bin (Level: ${Math.round(b.current_level)}%, ${b.weight}kg)
+                </option>
+            `).join("");
+        }
+        targetSelect.innerHTML = html;
+
+        // Auto-match based on category
+        if (categorySelect) {
+            onCustomWasteTypeChange();
+        } else {
+            targetSelect.value = "auto";
+        }
+    }
+
+    if (adjustSelect) {
+        if (allBins && allBins.length > 0) {
+            adjustSelect.innerHTML = allBins.map(b => `
+                <option value="${b.id}" data-type="${b.waste_type}">
+                    ${b.bin_code} (${b.waste_type}) - Fill: ${Math.round(b.current_level)}% | ${b.weight} kg
+                </option>
+            `).join("");
+            onAdjustBinSelectChange();
+        } else {
+            adjustSelect.innerHTML = '<option value="">-- No Smart Bins Registered Yet --</option>';
+        }
+    }
+}
+
+function onCustomWasteTypeChange() {
+    const categorySelect = document.getElementById("customWasteType");
+    const targetSelect = document.getElementById("customTargetBin") || document.getElementById("customWasteBinSelect");
+    if (!categorySelect || !targetSelect) return;
+
+    const selectedCategory = categorySelect.value;
+    const matchingBin = allBins.find(b => b.waste_type.toLowerCase() === selectedCategory.toLowerCase());
+    if (matchingBin) {
+        targetSelect.value = matchingBin.id;
+    } else {
+        targetSelect.value = "auto";
+    }
+}
+
+function onAdjustBinSelectChange() {
+    const select = document.getElementById("adjustBinSelect");
+    if (!select || !select.value) return;
+
+    const binId = parseInt(select.value);
+    const bin = allBins.find(b => b.id === binId);
+    if (!bin) return;
+
+    const levelInput = document.getElementById("adjustBinLevel");
+    const levelDisplay = document.getElementById("adjustLevelDisplay");
+    const weightInput = document.getElementById("adjustBinWeight");
+
+    if (levelInput) levelInput.value = Math.round(bin.current_level || 0);
+    if (levelDisplay) levelDisplay.innerText = `${Math.round(bin.current_level || 0)}%`;
+    if (weightInput) weightInput.value = (bin.weight || 0).toFixed(1);
+
+    updateAdjustStatusPreview();
+}
+
+function updateAdjustStatusPreview() {
+    const levelInput = document.getElementById("adjustBinLevel");
+    const statusPill = document.getElementById("adjustPreviewStatus");
+    if (!levelInput || !statusPill) return;
+
+    const level = parseFloat(levelInput.value) || 0;
+    let status = "Normal";
+    let statusClass = "status-normal";
+
+    if (level >= 90) {
+        status = "Urgent";
+        statusClass = "status-urgent";
+    } else if (level >= 80) {
+        status = "Collection Required";
+        statusClass = "status-warning";
+    } else if (level >= 60) {
+        status = "Warning";
+        statusClass = "status-warning";
+    }
+
+    statusPill.innerText = status;
+    statusPill.className = `bin-status-pill ${statusClass}`;
+}
+
+// Handler for Submitting Custom Waste Record (Tab 1)
+async function handleCustomWasteSubmit(event) {
+    event.preventDefault();
+    const targetSelect = document.getElementById("customTargetBin") || document.getElementById("customWasteBinSelect");
+    const wasteTypeSelect = document.getElementById("customWasteType");
+    const weightInput = document.getElementById("customWasteWeight");
+    const confidenceInput = document.getElementById("customConfidence");
+    const notesInput = document.getElementById("customNotes");
+    const btn = document.getElementById("customLogSubmitBtn");
+
+    const wasteType = wasteTypeSelect ? wasteTypeSelect.value : "Red";
+    const weight = parseFloat(weightInput ? weightInput.value : 2.5) || 1.0;
+    const confidence = parseFloat(confidenceInput ? confidenceInput.value : 96) / 100.0;
+    const notes = notesInput ? notesInput.value.trim() : "Routine Clinical Disposal";
+
+    let binId = targetSelect ? targetSelect.value : "auto";
+    if (!binId || binId === "" || binId === "auto") {
+        const match = allBins.find(b => b.waste_type.toLowerCase() === wasteType.toLowerCase());
+        binId = match ? match.id : "auto";
+    }
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving Waste Entry...`;
+    }
+
+    const payload = {
+        bin_id: binId,
+        waste_type: wasteType,
+        weight: weight,
+        confidence: confidence,
+        image_path: notes ? `entry_${notes.replace(/\s+/g, '_').toLowerCase()}.jpg` : "manual_input.jpg",
+        hospital_id: (currentUser && currentUser.hospital_id) ? currentUser.hospital_id : 1
+    };
+
+    const res = await apiCall("/waste", "POST", payload);
+
+    if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> Save Waste Entry to Database`;
+    }
+
+    if (res.ok && res.data.success) {
+        showToast(`Successfully logged ${weight} kg to ${wasteType} Smart Bin!`, "success");
+        closeCustomDataModal();
+        const form = document.getElementById("customWasteLogForm");
+        if (form) form.reset();
+        await fetchLiveDashboardData(true);
+    } else {
+        showToast(res.data.message || "Failed to log waste record", "error");
+    }
+}
+
+// Handler for Adjusting Bin Telemetry (Tab 2)
+async function handleAdjustBinSubmit(event) {
+    event.preventDefault();
+    const select = document.getElementById("adjustBinSelect");
+    const levelInput = document.getElementById("adjustBinLevel");
+    const weightInput = document.getElementById("adjustBinWeight");
+    const btn = document.getElementById("adjustBinSubmitBtn");
+
+    if (!select || !select.value) {
+        showToast("Please select a smart bin or register a bin first", "error");
+        return;
+    }
+
+    const binId = parseInt(select.value);
+    const level = parseFloat(levelInput ? levelInput.value : 50) || 0;
+    const weight = parseFloat(weightInput ? weightInput.value : 10) || 0;
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Updating Sensor...`;
+    }
+
+    const res = await apiCall(`/bins/${binId}`, "PUT", {
+        current_level: level,
+        weight: weight
+    });
+
+    if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-check-double"></i> Save Telemetry to Smart Bin`;
+    }
+
+    if (res.ok && res.data.success) {
+        showToast(`Smart Bin telemetry updated: ${level}% Fill | ${weight} kg`, "success");
+        closeCustomDataModal();
+        await fetchLiveDashboardData(true);
+    } else {
+        showToast(res.data.message || "Failed to update bin telemetry", "error");
+    }
+}
+
+// Handler for Registering New Bin (Tab 3)
+async function handleNewBinSubmit(event) {
+    event.preventDefault();
+    const codeInput = document.getElementById("newBinCode");
+    const typeSelect = document.getElementById("newBinType");
+    const capInput = document.getElementById("newBinCapacity");
+    const levelInput = document.getElementById("newBinStartLevel");
+    const btn = document.getElementById("newBinSubmitBtn");
+
+    const code = codeInput ? codeInput.value.trim().toUpperCase() : "";
+    const type = typeSelect ? typeSelect.value : "Yellow";
+    const cap = parseFloat(capInput ? capInput.value : 50) || 50;
+    const startLevel = parseFloat(levelInput ? levelInput.value : 0) || 0;
+    const startWeight = parseFloat((startLevel / 100 * cap).toFixed(1)) || 0;
+
+    if (!code) {
+        showToast("Please enter a unique bin code (e.g. BIN-ICU-01)", "error");
+        return;
+    }
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Registering Smart Bin...`;
+    }
+
+    const payload = {
+        bin_code: code,
+        waste_type: type,
+        capacity: cap,
+        current_level: startLevel,
+        weight: startWeight,
+        hospital_id: (currentUser && currentUser.hospital_id) ? currentUser.hospital_id : 1
+    };
+
+    const res = await apiCall("/bins", "POST", payload);
+
+    if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-plus-circle"></i> Register New Smart Bin`;
+    }
+
+    if (res.ok && res.data.success) {
+        showToast(`Smart Bin ${code} registered successfully!`, "success");
+        closeCustomDataModal();
+        const form = document.getElementById("newBinForm");
+        if (form) form.reset();
+        await fetchLiveDashboardData(true);
+    } else {
+        showToast(res.data.message || "Failed to register new bin", "error");
+    }
+}
+
+// Helper: Initialize Standard 4 Clinical Bins (0 kg)
+async function initStandardHospitalBins() {
+    const payload = {
+        hospital_id: (currentUser && currentUser.hospital_id) ? currentUser.hospital_id : 1
+    };
+    showToast("Initializing standard 4 clinical bins...", "info");
+    const res = await apiCall("/bins/init-standard", "POST", payload);
+    if (res.ok && res.data.success) {
+        showToast("Initialized standard 4 smart bins at 0 kg!", "success");
+        await fetchLiveDashboardData(true);
+    } else {
+        showToast(res.data.message || "Failed to initialize bins", "error");
+    }
+}
+
+
+function showVideo() {
+    showToast("MedWaste AI System Demo Video is loaded in the interactive demo sections below!", "info");
+    scrollToSection("classifier");
+}
+
+
+/* Active Navigation Spy */
+const sections = document.querySelectorAll("section");
+const navLinks = document.querySelectorAll("nav a");
+
+window.addEventListener("scroll", () => {
+    let current = "";
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop - 140;
+        if (window.scrollY >= sectionTop) {
+            current = section.getAttribute("id");
+        }
+    });
+
+    navLinks.forEach(link => {
+        link.classList.remove("active");
+        if (link.getAttribute("href") === "#" + current) {
+            link.classList.add("active");
+        }
+    });
+});
+
+
+/* =========================
+   TOAST NOTIFICATIONS
+========================= */
+
+function showToast(message, type = "info") {
+    const container = document.getElementById("toastContainer");
+    if (!container) return;
+
+    const icons = {
+        success: "fa-circle-check",
+        error: "fa-circle-exclamation",
+        info: "fa-circle-info"
+    };
+
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+        <i class="fa-solid ${icons[type] || icons.info}"></i>
+        <span>${message}</span>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(10px)";
+        toast.style.transition = "all 0.3s ease";
+        setTimeout(() => toast.remove(), 300);
+    }, 3800);
+}

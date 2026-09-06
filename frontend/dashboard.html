@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard | MedWaste AI</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+
+    <header class="navbar">
+
+        <div class="logo" onclick="window.location.href='index.html'" style="cursor: pointer;">
+            <div class="logo-icon">
+                <i class="fa-solid fa-leaf"></i>
+            </div>
+
+            <div>
+                <h2>MedWaste <span>AI</span></h2>
+                <p>Clean Care • Safer Tomorrow</p>
+            </div>
+        </div>
+
+
+        <nav id="navMenu">
+            <a href="index.html">Home</a>
+            <a href="scanner.html">AI Scanner</a>
+            <a href="dashboard.html" class="active">Dashboard</a>
+            <a href="pickup.html">Pickup</a>
+            <a href="index.html#contact">Contact</a>
+        </nav>
+
+
+        <div class="nav-actions">
+            <div id="authNavContainer">
+                <a href="login.html" class="login-btn">
+                    <i class="fa-solid fa-user-lock"></i> Login / Register
+                </a>
+            </div>
+
+            <a href="scanner.html" class="primary-btn" style="text-decoration: none;">
+                <i class="fa-solid fa-camera"></i> Launch AI Scanner
+            </a>
+        </div>
+
+
+        <button class="menu-btn" onclick="toggleMenu()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+    </header>
+
+
+    <!-- ================= PAGE HERO HEADER ================= -->
+
+    <section class="page-hero-header">
+        <div class="page-hero-content">
+            <div class="page-breadcrumb">
+                <a href="index.html"><i class="fa-solid fa-house"></i> Home</a>
+                <span>/</span>
+                <span>Dashboard</span>
+            </div>
+
+            <p class="section-label">SMART IOT MONITORING CONSOLE</p>
+            <h1>Real-Time Facility Telemetry</h1>
+            <p class="page-hero-desc">
+                Centralized biomedical waste intelligence, container fill sensors, collection requests, and logistics tracking for
+                <strong id="facilityTitleDisplay" style="color: #087f60;">Healthcare Facility</strong>.
+            </p>
+        </div>
+    </section>
+
+
+    <!-- ================= DASHBOARD MAIN ================= -->
+
+    <section class="dashboard-page-section">
+
+        <div class="dashboard">
+
+            <div class="dashboard-header">
+
+                <div>
+                    <h3>Waste Management Overview</h3>
+                    <p id="facilitySubtitleDisplay">Live system telemetry from SQLite database</p>
+                </div>
+
+                <div class="dashboard-header-right">
+
+                    <div class="live-status" id="backendStatusBadge">
+                        <span class="status-pulse-dot" id="statusDot"></span>
+                        <span id="backendStatusText">Connecting...</span>
+                    </div>
+
+                    <div class="dash-quick-actions">
+                        <button class="dash-btn" onclick="syncBackendData()" title="Sync live stats from Flask">
+                            <i class="fa-solid fa-rotate"></i> Sync Live Data
+                        </button>
+                        <button class="dash-btn dash-btn-custom" onclick="openCustomDataModal('log')" title="Put your own waste data or adjust sensor levels">
+                            <i class="fa-solid fa-pen-to-square"></i> Put Your Data
+                        </button>
+                        <button class="dash-btn dash-btn-new-bin" onclick="openCustomDataModal('newbin')" title="Add a new smart bin to system">
+                            <i class="fa-solid fa-plus"></i> Add Bin
+                        </button>
+                        <button class="dash-btn dash-btn-sim" onclick="simulateWasteDeposit()"
+                            title="Simulate smart waste sensor deposit">
+                            <i class="fa-solid fa-bolt"></i> Sim +2kg
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-cards">
+
+                <div class="dashboard-card">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <div>
+                        <span>Total Waste Logged</span>
+                        <strong id="totalWasteDisplay">0 kg</strong>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <i class="fa-solid fa-box"></i>
+                    <div>
+                        <span>Active Smart Bins</span>
+                        <strong id="activeBinsDisplay">0</strong>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <i class="fa-solid fa-truck"></i>
+                    <div>
+                        <span>Collections Completed</span>
+                        <strong id="collectionsDisplay">0</strong>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <div>
+                        <span>Critical Alerts</span>
+                        <strong id="alertsDisplay">00</strong>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- Smart Bins Dynamic Telemetry Grid -->
+            <div class="bin-status-section" style="margin-top: 35px;">
+                <div class="bin-status-header">
+                    <div>
+                        <h3>Facility Smart Bins Telemetry</h3>
+                        <p>Real-time fill level, weight, and automated disposal triggers</p>
+                    </div>
+                    <div class="bin-header-actions">
+                        <button class="ghost-btn" onclick="loadBinsData()" title="Refresh Bin Telemetry">
+                            <i class="fa-solid fa-rotate"></i> Refresh Bins
+                        </button>
+                        <button class="dash-btn dash-btn-new-bin" onclick="openCustomDataModal('newbin')">
+                            <i class="fa-solid fa-plus"></i> Add New Bin
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bins-dynamic-grid" id="binStatusContainer">
+                    <div class="bins-loading-placeholder">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Loading smart bin sensors...
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Dedicated Pickup Logistics Link Banner -->
+            <div class="pickup-redirect-banner">
+                <div class="redirect-banner-content">
+                    <div class="redirect-icon-box">
+                        <i class="fa-solid fa-truck-ramp-box"></i>
+                    </div>
+                    <div>
+                        <h4>Biomedical Waste Pickup & Fleet Logistics</h4>
+                        <p>Track GPS vehicles, review pending hospital dispatches, complete, or terminate pickups on the dedicated Logistics Portal.</p>
+                    </div>
+                </div>
+                <a href="pickup.html" class="primary-btn redirect-btn">
+                    <i class="fa-solid fa-arrow-right"></i> Open Pickup Manager
+                </a>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= CUSTOM DATA MODAL ================= -->
+
+    <div class="modal" id="customDataModal">
+        <div class="modal-content custom-data-modal-content">
+            <button class="modal-close" onclick="closeCustomDataModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="modal-header-badge">
+                <div class="modal-icon-badge">
+                    <i class="fa-solid fa-sliders"></i>
+                </div>
+                <div>
+                    <h2 id="customModalTitle">Custom Waste & Sensor Data</h2>
+                    <p>Enter your hospital's custom data or calibrate smart sensors</p>
+                </div>
+            </div>
+
+            <!-- Tab Switcher -->
+            <div class="modal-tabs">
+                <button type="button" class="tab-btn active" id="tabBtnLog" onclick="switchCustomTab('log')">
+                    <i class="fa-solid fa-pen-to-square"></i> Log Custom Waste
+                </button>
+                <button type="button" class="tab-btn" id="tabBtnAdjust" onclick="switchCustomTab('adjust')">
+                    <i class="fa-solid fa-sliders"></i> Adjust Bin Levels
+                </button>
+                <button type="button" class="tab-btn" id="tabBtnNewBin" onclick="switchCustomTab('newbin')">
+                    <i class="fa-solid fa-plus-circle"></i> Register New Bin
+                </button>
+            </div>
+
+            <!-- TAB 1: Log Custom Waste Entry -->
+            <form id="customWasteLogForm" onsubmit="handleCustomWasteSubmit(event)">
+                <div class="form-group">
+                    <label for="customTargetBin">Select Target Smart Bin</label>
+                    <select id="customTargetBin">
+                        <option value="auto">✨ Auto-Assign Smart Bin (Based on Category)</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="customWasteType">Waste Category</label>
+                        <select id="customWasteType" onchange="onCustomWasteTypeChange()" required>
+                            <option value="Yellow">Yellow (Infectious & Anatomical)</option>
+                            <option value="Red" selected>Red (Contaminated Plastics)</option>
+                            <option value="Blue">Blue (Glassware & Metals)</option>
+                            <option value="White">White (Sharps & Blades)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customWasteWeight">Weight to Add (kg)</label>
+                        <input type="number" id="customWasteWeight" step="0.1" min="0.1" max="50" value="2.5" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="customConfidence">Optical AI Confidence (%)</label>
+                    <input type="range" id="customConfidence" min="80" max="99" value="96" oninput="document.getElementById('confValDisplay').innerText = this.value + '%'">
+                    <span style="font-size: 12px; color: #64748b;">Confidence Level: <strong id="confValDisplay" class="level-indicator-val">96%</strong></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="customNotes">Item Description / Clinical Notes</label>
+                    <input type="text" id="customNotes" placeholder="e.g. ICU Dialysis Tubing & Disposable Gloves" value="Routine Clinical Disposal">
+                </div>
+
+                <button type="submit" class="primary-btn modal-action-btn" id="customLogSubmitBtn">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Save Waste Entry to Database
+                </button>
+            </form>
+
+            <!-- TAB 2: Direct Sensor Level / Weight Calibration -->
+            <form id="adjustBinForm" style="display: none;" onsubmit="handleAdjustBinSubmit(event)">
+                <div class="form-group">
+                    <label for="adjustBinSelect">Choose Smart Bin to Adjust</label>
+                    <select id="adjustBinSelect" onchange="onAdjustBinSelectChange()" required>
+                        <option value="">-- Choose Bin --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="adjustBinLevel">Calibrate Fill Level (%)</label>
+                    <input type="range" id="adjustBinLevel" min="0" max="100" value="50" oninput="document.getElementById('adjustLevelDisplay').innerText = this.value + '%'; updateAdjustStatusPreview();">
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; color: #64748b; margin-top: 4px;">
+                        <span>Empty (0%)</span>
+                        <span>Current: <strong id="adjustLevelDisplay" class="level-indicator-val">50%</strong></span>
+                        <span>Full (100%)</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="adjustBinWeight">Calibrate Current Weight (kg)</label>
+                    <input type="number" id="adjustBinWeight" step="0.1" min="0" max="100" value="12.5" required oninput="updateAdjustStatusPreview()">
+                </div>
+
+                <div class="preview-status-box">
+                    <span>Calculated Sensor Status:</span>
+                    <strong id="adjustPreviewStatus" class="bin-status-pill status-normal">Normal</strong>
+                </div>
+
+                <button type="submit" class="primary-btn modal-action-btn" id="adjustBinSubmitBtn">
+                    <i class="fa-solid fa-check-double"></i> Save Telemetry to Smart Bin
+                </button>
+            </form>
+
+            <!-- TAB 3: Register New Smart Bin -->
+            <form id="newBinForm" style="display: none;" onsubmit="handleNewBinSubmit(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newBinCode">Unique Bin Code / Tag</label>
+                        <input type="text" id="newBinCode" placeholder="e.g. BIN-OT-05" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newBinType">Waste Category</label>
+                        <select id="newBinType" required>
+                            <option value="Yellow">Yellow (Infectious Waste)</option>
+                            <option value="Red">Red (Contaminated Plastics)</option>
+                            <option value="Blue">Blue (Glass & Metals)</option>
+                            <option value="White">White (Sharps & Blades)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newBinCapacity">Capacity (kg)</label>
+                        <input type="number" id="newBinCapacity" value="50" min="10" max="200" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newBinStartLevel">Starting Fill (%)</label>
+                        <input type="number" id="newBinStartLevel" value="0" min="0" max="100" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="newBinStartWeight">Initial Weight (kg)</label>
+                    <input type="number" id="newBinStartWeight" step="0.1" value="0" min="0" max="200" required>
+                </div>
+
+                <button type="submit" class="primary-btn modal-action-btn" id="newBinSubmitBtn">
+                    <i class="fa-solid fa-plus-circle"></i> Register New Smart Bin
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer class="footer">
+
+        <div class="footer-grid">
+
+            <div>
+                <h3>MedWaste AI</h3>
+
+                <p>
+                    Smart Medical Waste Management Platform combining computer vision,
+                    IoT smart containers, and automated logistic dispatching.
+                </p>
+            </div>
+
+            <div>
+                <h4>Navigation</h4>
+                <p><a href="index.html" style="color: inherit; text-decoration:none;">Home</a></p>
+                <p><a href="scanner.html" style="color: inherit; text-decoration:none;">AI Scanner</a></p>
+                <p><a href="dashboard.html" style="color: inherit; text-decoration:none;">Dashboard</a></p>
+                <p><a href="profile.html" style="color: inherit; text-decoration:none;">User Profile</a></p>
+            </div>
+
+            <div>
+                <h4>Support</h4>
+                <p>National Pollution Control Board Guidelines</p>
+                <p>Bio-Medical Waste Management Rules, 2016</p>
+                <p>ISO 14001 Compliant Architecture</p>
+            </div>
+
+            <div>
+                <h4>Emergency Logistics</h4>
+                <p><i class="fa-solid fa-phone"></i> +91 1800 233 4567</p>
+                <p><i class="fa-solid fa-envelope"></i> response@medwaste.ai</p>
+                <p><i class="fa-solid fa-location-dot"></i> New Delhi, India</p>
+            </div>
+
+        </div>
+
+        <p class="copyright">
+            © 2026 MedWaste AI. All rights reserved. Transforming Healthcare Waste Management.
+        </p>
+
+    </footer>
+
+    <!-- Toast Notifications Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
