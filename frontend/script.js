@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 8000);
 
     // If on Dashboard page:
-    if (document.getElementById("totalWasteDisplay") || document.getElementById("binStatusContainer")) {
+    if (document.getElementById("totalWasteDisplay")) {
         fetchLiveDashboardData();
         setInterval(() => {
             if (isBackendOnline) {
@@ -44,6 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // If on Pickup page:
     if (document.getElementById("pickupTableBody") || document.getElementById("pickupPageContainer")) {
         loadPickupPageData();
+        initPickupMap();
         setInterval(() => {
             if (isBackendOnline) {
                 loadPickupPageData(true);
@@ -340,7 +341,11 @@ async function depositWasteToBin(binId, wasteType, weight = 1.5) {
 
     if (res.ok && res.data.success) {
         showToast(`Deposited ${weight} kg into ${wasteType} Bin!`, "success");
-        fetchLiveDashboardData(true);
+        if (document.getElementById("pickupPageContainer")) {
+            loadPickupPageData(true);
+        } else {
+            fetchLiveDashboardData(true);
+        }
     } else {
         showToast(res.data.message || "Failed to record waste deposit", "error");
     }
@@ -420,8 +425,12 @@ async function triggerCollectionRequest(binId, binCode) {
 
     if (res.ok && res.data.success) {
         showToast(`Pickup request dispatched for ${binCode}!`, "success");
-        await loadFleetData();
-        fetchLiveDashboardData(true);
+        if (document.getElementById("pickupPageContainer")) {
+            await loadPickupPageData(true);
+        } else {
+            await loadFleetData();
+            fetchLiveDashboardData(true);
+        }
     } else {
         showToast(res.data.message || "Failed to dispatch collection request", "error");
     }
@@ -462,6 +471,10 @@ async function loadPickupPageData(isSilent = false) {
             const pct = Math.min(100, Math.round((v.current_load / v.capacity) * 100));
             loadBarEl.style.width = `${pct}%`;
         }
+
+        if (typeof updateVehicleMarkerFromData === "function") {
+            updateVehicleMarkerFromData(v);
+        }
     }
 
     // 2. Fetch Collections
@@ -488,12 +501,11 @@ async function loadPickupPageData(isSilent = false) {
         }
     }
 
-    // 3. Populate bins for modal if needed
-    if (allBins.length === 0) {
-        const bRes = await apiCall(currentUser && currentUser.hospital_id ? `/bins?hospital_id=${currentUser.hospital_id}` : "/bins");
-        if (bRes.ok && bRes.data.success) {
-            allBins = bRes.data.bins || [];
-        }
+    // 3. Populate bins and render All Bins section
+    const bRes = await apiCall(currentUser && currentUser.hospital_id ? `/bins?hospital_id=${currentUser.hospital_id}` : "/bins");
+    if (bRes.ok && bRes.data.success) {
+        allBins = bRes.data.bins || [];
+        renderBins(allBins);
     }
 }
 
@@ -640,6 +652,10 @@ function renderPickupTable() {
                 </td>
                 <td>
                     <div class="action-btns-cell">
+                        <button class="pickup-act-btn btn-track-map" title="Locate & Track Ward on Map" onclick="locateWardOnMap('${req.waste_type || 'Yellow'}', '${binCode}')">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </button>
+
                         ${isPending ? `
                             <button class="pickup-act-btn dispatch-action-btn" title="Dispatch Driver" onclick="dispatchPickupRequest(${req.id})">
                                 <i class="fa-solid fa-truck-fast"></i> Dispatch
@@ -2454,4 +2470,412 @@ function showToast(message, type = "info") {
         toast.style.transition = "all 0.3s ease";
         setTimeout(() => toast.remove(), 300);
     }, 3800);
+}
+
+
+/* =========================================================
+   LIVE GPS VEHICLE TRACKING & ROUTE MAP (LEAFLET)
+   ========================================================= */
+
+let pickupMap = null;
+let vehicleMarker = null;
+let routePolyline = null;
+let traveledPolyline = null;
+let wardMarkers = [];
+let isSimulating = false;
+let simulationInterval = null;
+let simProgress = 0.0;
+let activeVehicleId = 1;
+
+// Coordinated Corridor in Pune (Transport Hub to Central Hospital Wards & CBWTF Treatment Plant)
+const FLEET_ROUTE_COORDS = [
+    [18.5204, 73.8567], // Base Station: Central Transport Hub
+    [18.5228, 73.8542],
+    [18.5255, 73.8525], // Stop 1: ICU Block B (Yellow Infectious Stream)
+    [18.5274, 73.8538],
+    [18.5298, 73.8559],
+    [18.5310, 73.8580], // Stop 2: Trauma & Surgery (Red Plastics Stream)
+    [18.5302, 73.8612],
+    [18.5285, 73.8645], // Stop 3: Pathology & Diagnostics (Blue Glass Stream)
+    [18.5256, 73.8632],
+    [18.5220, 73.8610], // Stop 4: Minor OT & Dental (White Sharps Stream)
+    [18.5245, 73.8665],
+    [18.5290, 73.8700],
+    [18.5360, 73.8720]  // Stop 5 / Final Destination: CBWTF Bio-Disposal Plant
+];
+
+const HOSPITAL_WARDS = [
+    {
+        name: "ICU Block B (Infectious)",
+        category: "Yellow",
+        binCode: "BIN-Y001",
+        coords: [18.5255, 73.8525],
+        pinClass: "pin-yellow",
+        icon: "fa-biohazard",
+        loadEst: "18.5 kg",
+        fill: "76%"
+    },
+    {
+        name: "Surgical Trauma Unit",
+        category: "Red",
+        binCode: "BIN-R001",
+        coords: [18.5310, 73.8580],
+        pinClass: "pin-red",
+        icon: "fa-syringe",
+        loadEst: "13.2 kg",
+        fill: "54%"
+    },
+    {
+        name: "Pathology Diagnostic Lab",
+        category: "Blue",
+        binCode: "BIN-B001",
+        coords: [18.5285, 73.8645],
+        pinClass: "pin-blue",
+        icon: "fa-vial",
+        loadEst: "9.7 kg",
+        fill: "38%"
+    },
+    {
+        name: "Minor OT & Dental",
+        category: "White",
+        binCode: "BIN-W001",
+        coords: [18.5220, 73.8610],
+        pinClass: "pin-white",
+        icon: "fa-shield-halved",
+        loadEst: "21.4 kg",
+        fill: "82%"
+    },
+    {
+        name: "CBWTF Central Disposal Facility",
+        category: "Facility",
+        binCode: "CBWTF-PUNE",
+        coords: [18.5360, 73.8720],
+        pinClass: "pin-cbwtf",
+        icon: "fa-recycle",
+        loadEst: "High-Temp Incinerator",
+        fill: "Online"
+    }
+];
+
+function initPickupMap() {
+    const container = document.getElementById("pickupMapContainer");
+    if (!container) return;
+    if (typeof L === "undefined") {
+        console.warn("Leaflet library not ready. Retrying in 400ms...");
+        setTimeout(initPickupMap, 400);
+        return;
+    }
+    if (pickupMap) {
+        setTimeout(() => pickupMap.invalidateSize(), 150);
+        return;
+    }
+    if (container._leaflet_id) {
+        container._leaflet_id = null;
+    }
+
+    try {
+        // Initialize map
+        pickupMap = L.map("pickupMapContainer", {
+            zoomControl: true,
+            scrollWheelZoom: true
+        }).setView([18.527, 73.860], 14);
+
+        // Standard OpenStreetMap Tiles with multi-subdomain fallback
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            subdomains: ['a', 'b', 'c'],
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(pickupMap);
+
+    // Active Route Polyline (dashed emerald green)
+    routePolyline = L.polyline(FLEET_ROUTE_COORDS, {
+        color: '#0c8c66',
+        weight: 5,
+        opacity: 0.85,
+        dashArray: '8, 8',
+        lineCap: 'round'
+    }).addTo(pickupMap);
+
+    // Traveled path (solid gray trail)
+    traveledPolyline = L.polyline([], {
+        color: '#94a3b8',
+        weight: 4,
+        opacity: 0.7
+    }).addTo(pickupMap);
+
+    // Ward Waypoints
+    wardMarkers = [];
+    HOSPITAL_WARDS.forEach(ward => {
+        const isFacility = ward.category === "Facility";
+        const wardIcon = L.divIcon({
+            className: 'ward-marker-icon',
+            html: `
+                <div class="ward-marker-pin ${ward.pinClass}" title="${ward.name}">
+                    <i class="fa-solid ${ward.icon}"></i>
+                </div>
+            `,
+            iconSize: [36, 36],
+            iconAnchor: [18, 18]
+        });
+
+        const marker = L.marker(ward.coords, { icon: wardIcon }).addTo(pickupMap);
+        marker.bindPopup(`
+            <div class="map-popup-card">
+                <div class="map-popup-header">
+                    <span class="map-popup-badge ${ward.pinClass}">${ward.category} Stream</span>
+                    <strong style="font-size:12px; color:#475569;">${ward.binCode}</strong>
+                </div>
+                <div class="map-popup-title">${ward.name}</div>
+                <div class="map-popup-desc">
+                    ${isFacility ? 'Authorized Common Bio-medical Waste Treatment Plant (Incineration & Autoclave facility).' : 'Hospital ward biomedical waste segregation point.'}
+                </div>
+                <div class="map-popup-meta-row">
+                    <span>Est. Load: <strong>${ward.loadEst}</strong></span>
+                    <span>Fill Level: <strong>${ward.fill}</strong></span>
+                </div>
+                ${!isFacility ? `
+                    <button class="map-popup-btn" onclick="dispatchDirectToWard('${ward.binCode}', '${ward.name}')">
+                        <i class="fa-solid fa-truck-fast"></i> Dispatch Vehicle Here
+                    </button>
+                ` : ''}
+            </div>
+        `);
+        ward.marker = marker;
+        wardMarkers.push(ward);
+    });
+
+    // Custom Animated Vehicle Marker
+    const initialPos = FLEET_ROUTE_COORDS[0];
+    const vehicleIcon = L.divIcon({
+        className: 'vehicle-marker-icon',
+        html: `
+            <div class="vehicle-marker-bubble" id="vehicleMapMarkerBubble" title="Biomedical Collection Vehicle">
+                <div class="vehicle-marker-halo"></div>
+                <i class="fa-solid fa-truck-medical"></i>
+            </div>
+        `,
+        iconSize: [48, 48],
+        iconAnchor: [24, 24]
+    });
+
+    vehicleMarker = L.marker(initialPos, { icon: vehicleIcon, zIndexOffset: 1000 }).addTo(pickupMap);
+    vehicleMarker.bindPopup(`
+        <div class="map-popup-card">
+            <div class="map-popup-header">
+                <span class="map-popup-badge" style="background:#dcfce7; color:#166534;">Active Transport</span>
+                <strong style="font-size:12px; color:#0c8c66;">MH12-MW-001</strong>
+            </div>
+            <div class="map-popup-title">Biomedical Electric Hauler</div>
+            <div class="map-popup-desc">Driver: <strong>Ramesh Kumar</strong> • GPS Telemetry Active</div>
+            <div class="map-popup-meta-row">
+                <span>Speed: <strong id="popupSpeed">32 km/h</strong></span>
+                <span>Payload: <strong>120 / 500 kg</strong></span>
+            </div>
+            <button class="map-popup-btn" onclick="toggleVehicleSimulation()">
+                <i class="fa-solid fa-play"></i> Toggle Movement Simulation
+            </button>
+        </div>
+    `);
+
+    // Fit map bounds safely
+    try {
+        if (routePolyline && routePolyline.getBounds && routePolyline.getBounds().isValid()) {
+            pickupMap.fitBounds(routePolyline.getBounds(), { padding: [40, 40] });
+        } else {
+            pickupMap.setView([18.527, 73.860], 14);
+        }
+    } catch (e) {
+        pickupMap.setView([18.527, 73.860], 14);
+    }
+
+    // Invalidate size after layout paint
+    setTimeout(() => { if (pickupMap) pickupMap.invalidateSize(); }, 150);
+    setTimeout(() => { if (pickupMap) pickupMap.invalidateSize(); }, 500);
+    setTimeout(() => { if (pickupMap) pickupMap.invalidateSize(); }, 1200);
+
+    window.addEventListener("resize", () => {
+        if (pickupMap) pickupMap.invalidateSize();
+    });
+
+    // Initial Telemetry Update
+    updateTelemetryDisplay(initialPos[0], initialPos[1], 32, "ICU Block B (BIN-Y001)", "1.4 km", "8 mins");
+} catch (err) {
+    console.error("Error initializing Leaflet pickup map:", err);
+}
+}
+
+function centerMapOnVehicle() {
+    if (!pickupMap || !vehicleMarker) return;
+    pickupMap.panTo(vehicleMarker.getLatLng(), { animate: true, duration: 0.8 });
+    vehicleMarker.openPopup();
+}
+
+function fitMapRoute() {
+    if (!pickupMap || !routePolyline) return;
+    pickupMap.fitBounds(routePolyline.getBounds(), { padding: [40, 40], animate: true });
+}
+
+function locateWardOnMap(category, binCode) {
+    const mapCard = document.getElementById("pickupMapCard");
+    if (mapCard) {
+        mapCard.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    if (!pickupMap) return;
+    const ward = wardMarkers.find(w => 
+        (w.category && w.category.toLowerCase() === category.toLowerCase()) || 
+        (w.binCode && w.binCode.toLowerCase() === binCode.toLowerCase())
+    );
+
+    if (ward && ward.marker) {
+        pickupMap.flyTo(ward.coords, 16, { duration: 1.2 });
+        setTimeout(() => {
+            ward.marker.openPopup();
+        }, 1300);
+        showToast(`Focusing on ${ward.name}...`, "info");
+    } else {
+        pickupMap.panTo(vehicleMarker.getLatLng());
+        vehicleMarker.openPopup();
+    }
+}
+
+function dispatchDirectToWard(binCode, wardName) {
+    showToast(`Vehicle re-routed to ${wardName} (${binCode})`, "success");
+    const nextStopEl = document.getElementById("hudNextStop");
+    if (nextStopEl) nextStopEl.innerText = `${wardName} (${binCode})`;
+    if (pickupMap) pickupMap.closePopup();
+    if (!isSimulating) {
+        toggleVehicleSimulation();
+    }
+}
+
+function updateVehicleMarkerFromData(vehicleData) {
+    if (!vehicleMarker || !vehicleData) return;
+    if (vehicleData.id) activeVehicleId = vehicleData.id;
+    if (vehicleData.latitude && vehicleData.longitude && !isSimulating) {
+        vehicleMarker.setLatLng([vehicleData.latitude, vehicleData.longitude]);
+        updateTelemetryDisplay(
+            vehicleData.latitude,
+            vehicleData.longitude,
+            30,
+            "ICU Block B (BIN-Y001)",
+            "1.2 km",
+            "7 mins"
+        );
+    }
+    const hudPayload = document.getElementById("hudPayload");
+    if (hudPayload) {
+        hudPayload.innerText = `${vehicleData.current_load || 120} / ${vehicleData.capacity || 500} kg`;
+    }
+}
+
+function updateTelemetryDisplay(lat, lng, speed, nextStop, distance, eta) {
+    const hudSpeed = document.getElementById("hudSpeed");
+    const hudNext = document.getElementById("hudNextStop");
+    const hudDistance = document.getElementById("hudDistance");
+    const hudEta = document.getElementById("hudEta");
+    const hudCoords = document.getElementById("hudCoords");
+    const popupSpeed = document.getElementById("popupSpeed");
+
+    if (hudSpeed) hudSpeed.innerText = `${Math.round(speed)} km/h`;
+    if (popupSpeed) popupSpeed.innerText = `${Math.round(speed)} km/h`;
+    if (hudNext) hudNext.innerText = nextStop;
+    if (hudDistance) hudDistance.innerText = distance;
+    if (hudEta) hudEta.innerText = eta;
+    if (hudCoords) hudCoords.innerText = `${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`;
+}
+
+// Route interpolation helpers
+function getPositionOnRoute(progress) {
+    const totalSegments = FLEET_ROUTE_COORDS.length - 1;
+    const floatIdx = progress * totalSegments;
+    const segIdx = Math.min(Math.floor(floatIdx), totalSegments - 1);
+    const segT = floatIdx - segIdx;
+
+    const p0 = FLEET_ROUTE_COORDS[segIdx];
+    const p1 = FLEET_ROUTE_COORDS[segIdx + 1];
+
+    const lat = p0[0] + (p1[0] - p0[0]) * segT;
+    const lng = p0[1] + (p1[1] - p0[1]) * segT;
+
+    return { lat, lng, segIdx };
+}
+
+function toggleVehicleSimulation() {
+    const btn = document.getElementById("toggleSimBtn");
+
+    if (isSimulating) {
+        clearInterval(simulationInterval);
+        isSimulating = false;
+        if (btn) {
+            btn.innerHTML = `<i class="fa-solid fa-play"></i> Simulate Movement`;
+            btn.classList.remove("is-simulating");
+        }
+        showToast("GPS vehicle tracking simulation paused", "info");
+    } else {
+        isSimulating = true;
+        if (btn) {
+            btn.innerHTML = `<i class="fa-solid fa-pause"></i> Pause Simulation`;
+            btn.classList.add("is-simulating");
+        }
+        showToast("Live vehicle movement simulation started", "success");
+
+        let stepCounter = 0;
+        simulationInterval = setInterval(() => {
+            simProgress += 0.0035;
+            if (simProgress >= 1.0) {
+                simProgress = 0.0;
+                traveledPolyline.setLatLngs([]);
+                showToast("Collection vehicle completed route cycle to CBWTF Facility!", "success");
+            }
+
+            const currentPos = getPositionOnRoute(simProgress);
+            vehicleMarker.setLatLng([currentPos.lat, currentPos.lng]);
+
+            // Update traveled trail
+            const pastCoords = FLEET_ROUTE_COORDS.slice(0, currentPos.segIdx + 1);
+            pastCoords.push([currentPos.lat, currentPos.lng]);
+            traveledPolyline.setLatLngs(pastCoords);
+
+            // Dynamic realistic speed fluctuation
+            const speed = 28 + Math.sin(simProgress * 25) * 8 + (Math.random() * 4 - 2);
+
+            // Calculate which stop is next
+            let nextStop = "ICU Block B (BIN-Y001)";
+            let distEst = "1.8 km";
+            let etaEst = "9 mins";
+
+            if (simProgress > 0.8) {
+                nextStop = "CBWTF Central Bio-Disposal Plant";
+                distEst = `${((1.0 - simProgress) * 5.2).toFixed(1)} km`;
+                etaEst = `${Math.max(1, Math.round((1.0 - simProgress) * 16))} mins`;
+            } else if (simProgress > 0.55) {
+                nextStop = "Minor OT & Dental (BIN-W001)";
+                distEst = `${((0.8 - simProgress) * 4.5).toFixed(1)} km`;
+                etaEst = `${Math.max(1, Math.round((0.8 - simProgress) * 14))} mins`;
+            } else if (simProgress > 0.35) {
+                nextStop = "Pathology Diagnostic Lab (BIN-B001)";
+                distEst = `${((0.55 - simProgress) * 3.8).toFixed(1)} km`;
+                etaEst = `${Math.max(1, Math.round((0.55 - simProgress) * 11))} mins`;
+            } else if (simProgress > 0.15) {
+                nextStop = "Surgical Trauma Unit (BIN-R001)";
+                distEst = `${((0.35 - simProgress) * 3.2).toFixed(1)} km`;
+                etaEst = `${Math.max(1, Math.round((0.35 - simProgress) * 8))} mins`;
+            } else {
+                nextStop = "ICU Block B (BIN-Y001)";
+                distEst = `${((0.15 - simProgress) * 2.5).toFixed(1)} km`;
+                etaEst = `${Math.max(1, Math.round((0.15 - simProgress) * 6))} mins`;
+            }
+
+            updateTelemetryDisplay(currentPos.lat, currentPos.lng, speed, nextStop, distEst, etaEst);
+
+            // Periodically sync GPS coordinates to backend
+            stepCounter++;
+            if (stepCounter % 35 === 0 && isBackendOnline) {
+                apiCall(`/vehicles/${activeVehicleId}/location`, "PUT", {
+                    latitude: currentPos.lat,
+                    longitude: currentPos.lng
+                });
+            }
+        }, 120);
+    }
 }

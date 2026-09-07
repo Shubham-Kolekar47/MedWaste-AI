@@ -1,0 +1,470 @@
+/* =========================================================
+   MEDWASTE AI - PICKUP FLEET GPS MAP & TELEMETRY STYLES
+   ========================================================= */
+
+/* Map Card Container */
+.pickup-map-card {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    margin-bottom: 34px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Map Header Bar */
+.map-header-bar {
+    padding: 18px 24px;
+    background: #ffffff;
+    border-bottom: 1px solid #edf2f7;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.map-title-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.map-title-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(12, 140, 102, 0.12);
+    color: #0c8c66;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.map-title-text h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.map-title-text p {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0;
+}
+
+/* Live Telemetry Status Pill */
+.live-gps-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.live-gps-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #16a34a;
+    position: relative;
+}
+
+.live-gps-dot::after {
+    content: "";
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid #16a34a;
+    animation: radarPulse 1.6s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
+@keyframes radarPulse {
+    0% { transform: scale(0.6); opacity: 1; }
+    100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* Controls Toolbar */
+.map-actions-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.map-control-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+}
+
+.map-control-btn:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #0f172a;
+    transform: translateY(-1px);
+}
+
+.map-control-btn.btn-simulate {
+    background: #0c8c66;
+    color: #ffffff;
+    border-color: #0c8c66;
+    box-shadow: 0 4px 12px rgba(12, 140, 102, 0.25);
+}
+
+.map-control-btn.btn-simulate:hover {
+    background: #0a7555;
+    box-shadow: 0 6px 16px rgba(12, 140, 102, 0.35);
+}
+
+.map-control-btn.btn-simulate.is-simulating {
+    background: #ea580c;
+    border-color: #ea580c;
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+}
+
+/* Map Viewport Wrapper */
+.pickup-map-viewport-wrapper {
+    position: relative;
+    width: 100%;
+    height: 480px;
+    min-height: 480px;
+    overflow: hidden;
+    background: #0f172a;
+}
+
+/* Map Canvas Container */
+.pickup-map-container {
+    height: 100% !important;
+    min-height: 480px !important;
+    width: 100% !important;
+    position: relative;
+    z-index: 1;
+    background: #0d1527 radial-gradient(circle, rgba(16, 185, 129, 0.1) 1px, transparent 1px);
+    background-size: 24px 24px;
+}
+
+/* Map Overlay Quick Legend */
+.map-floating-legend {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    pointer-events: auto;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #334155;
+    font-weight: 500;
+}
+
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.dot-truck { background: #0c8c66; }
+.dot-yellow-ward { background: #eab308; }
+.dot-red-ward { background: #ef4444; }
+.dot-cbwtf { background: #2563eb; }
+
+/* Telemetry HUD Strip below Map */
+.map-telemetry-hud {
+    background: #0f172a;
+    color: #ffffff;
+    padding: 18px 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.telemetry-cell {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 10px 16px;
+    border-radius: 12px;
+}
+
+.telemetry-cell-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+}
+
+.icon-speed { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+.icon-eta { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+.icon-destination { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+.icon-payload { background: rgba(52, 211, 153, 0.15); color: #34d399; }
+.icon-coords { background: rgba(251, 113, 133, 0.15); color: #fb7185; }
+
+.telemetry-cell-data {
+    display: flex;
+    flex-direction: column;
+}
+
+.telemetry-cell-label {
+    font-size: 11px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.telemetry-cell-val {
+    font-size: 15px;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-top: 2px;
+}
+
+/* =========================================================
+   CUSTOM LEAFLET MARKERS & POPUPS
+   ========================================================= */
+
+/* Vehicle Marker with radar halo */
+.vehicle-marker-icon {
+    background: transparent;
+    border: none;
+}
+
+.vehicle-marker-bubble {
+    width: 48px;
+    height: 48px;
+    background: #0c8c66;
+    color: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 4px 16px rgba(12, 140, 102, 0.5);
+    border: 3px solid #ffffff;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.vehicle-marker-bubble:hover {
+    transform: scale(1.12);
+}
+
+.vehicle-marker-halo {
+    position: absolute;
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    border: 2px solid #0c8c66;
+    top: -17px;
+    left: -17px;
+    pointer-events: none;
+    animation: vehiclePulse 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
+@keyframes vehiclePulse {
+    0% { transform: scale(0.6); opacity: 0.9; }
+    50% { opacity: 0.5; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* Hospital Ward Waypoint Marker */
+.ward-marker-icon {
+    background: transparent;
+    border: none;
+}
+
+.ward-marker-pin {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.25);
+    border: 2.5px solid #ffffff;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.ward-marker-pin:hover {
+    transform: scale(1.15);
+}
+
+.pin-yellow { background: #eab308; }
+.pin-red { background: #ef4444; }
+.pin-blue { background: #2563eb; }
+.pin-white { background: #475569; }
+.pin-cbwtf { background: #1e293b; border-color: #38bdf8; }
+
+/* Leaflet Popup Styling */
+.leaflet-popup-content-wrapper {
+    background: #ffffff !important;
+    border-radius: 14px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+    padding: 6px !important;
+    border: 1px solid #e2e8f0;
+}
+
+.leaflet-popup-content {
+    margin: 8px 12px !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+.map-popup-card {
+    min-width: 220px;
+}
+
+.map-popup-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.map-popup-badge {
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.map-popup-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.map-popup-desc {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.map-popup-meta-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #475569;
+    background: #f8fafc;
+    padding: 4px 8px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+.map-popup-btn {
+    width: 100%;
+    padding: 6px 10px;
+    background: #0c8c66;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background 0.2s ease;
+}
+
+.map-popup-btn:hover {
+    background: #0a7354;
+}
+
+/* Table Map Pin Action Button */
+.btn-track-map {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #0c8c66;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-right: 4px;
+}
+
+.btn-track-map:hover {
+    background: #0c8c66;
+    color: #ffffff;
+    border-color: #0c8c66;
+    transform: scale(1.05);
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .pickup-map-container {
+        height: 360px;
+    }
+    .map-header-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .map-actions-group {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .map-telemetry-hud {
+        grid-template-columns: 1fr 1fr;
+    }
+}

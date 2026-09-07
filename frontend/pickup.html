@@ -9,6 +9,10 @@
     <meta name="description" content="Manage, dispatch, track, complete, or terminate hospital biomedical waste pickup requests and CBWTF collection logistics.">
 
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="pickup-map.css">
+
+    <!-- Leaflet CSS for GPS Map (Local Reliable Asset) -->
+    <link rel="stylesheet" href="leaflet.css">
 
     <!-- Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -168,6 +172,143 @@
                 <button class="outline-btn fleet-refresh-btn" onclick="loadPickupPageData()">
                     <i class="fa-solid fa-arrows-rotate"></i> Refresh Telemetry
                 </button>
+            </div>
+        </div>
+
+
+        <!-- ================= ALL BINS INFORMATION ================= -->
+        <div class="bin-status-section" style="margin-bottom: 35px;">
+            <div class="bin-status-header">
+                <div>
+                    <h3 style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fa-solid fa-trash-can-arrow-up" style="color: #0c8c66;"></i> Facility Smart Bins Telemetry
+                    </h3>
+                    <p style="color: #64748b; font-size: 13px; margin: 4px 0 0;">
+                        Real-time fill levels, weights, and automated pickup dispatch triggers for all hospital wards
+                    </p>
+                </div>
+                <div class="bin-header-actions">
+                    <button class="ghost-btn" onclick="loadPickupPageData()" title="Refresh Bin Telemetry">
+                        <i class="fa-solid fa-rotate"></i> Refresh Bins
+                    </button>
+                </div>
+            </div>
+
+            <div class="bins-dynamic-grid" id="binStatusContainer">
+                <div class="bins-loading-placeholder">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Loading smart bin sensors...
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ================= LIVE VEHICLE FLEET GPS MAP ================= -->
+        <div class="pickup-map-card" id="pickupMapCard">
+            <!-- Map Header -->
+            <div class="map-header-bar">
+                <div class="map-title-group">
+                    <div class="map-title-icon">
+                        <i class="fa-solid fa-satellite-dish"></i>
+                    </div>
+                    <div class="map-title-text">
+                        <h2>
+                            Live Fleet GPS & Route Tracker
+                            <span class="live-gps-pill">
+                                <span class="live-gps-dot"></span> Active Telemetry
+                            </span>
+                        </h2>
+                        <p>Real-time biomedical transport tracking between hospital wards and the CBWTF disposal facility</p>
+                    </div>
+                </div>
+
+                <div class="map-actions-group">
+                    <button type="button" class="map-control-btn btn-simulate" id="toggleSimBtn" onclick="toggleVehicleSimulation()">
+                        <i class="fa-solid fa-play"></i> Simulate Movement
+                    </button>
+                    <button type="button" class="map-control-btn" onclick="centerMapOnVehicle()" title="Center map on vehicle location">
+                        <i class="fa-solid fa-location-crosshairs"></i> Center Vehicle
+                    </button>
+                    <button type="button" class="map-control-btn" onclick="fitMapRoute()" title="Zoom to fit complete collection route">
+                        <i class="fa-solid fa-expand"></i> Fit Route
+                    </button>
+                </div>
+            </div>
+
+            <!-- Map Viewport Wrapper with Sibling Legend -->
+            <div class="pickup-map-viewport-wrapper" style="position: relative; width: 100%; height: 460px;">
+                <div id="pickupMapContainer" class="pickup-map-container" style="height: 100%; width: 100%;"></div>
+                <!-- Floating Map Legend -->
+                <div class="map-floating-legend">
+                    <div class="legend-item">
+                        <span class="legend-dot dot-truck"></span>
+                        <span>Vehicle (MH12-MW-001)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot dot-yellow-ward"></span>
+                        <span>ICU / Infectious Ward</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot dot-red-ward"></span>
+                        <span>Trauma / Plastics Ward</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot dot-cbwtf"></span>
+                        <span>CBWTF Plant (Disposal)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Telemetry HUD Bottom Bar -->
+            <div class="map-telemetry-hud">
+                <div class="telemetry-cell">
+                    <div class="telemetry-cell-icon icon-speed">
+                        <i class="fa-solid fa-gauge-high"></i>
+                    </div>
+                    <div class="telemetry-cell-data">
+                        <span class="telemetry-cell-label">Current Speed</span>
+                        <strong class="telemetry-cell-val" id="hudSpeed">32 km/h</strong>
+                    </div>
+                </div>
+
+                <div class="telemetry-cell">
+                    <div class="telemetry-cell-icon icon-destination">
+                        <i class="fa-solid fa-map-pin"></i>
+                    </div>
+                    <div class="telemetry-cell-data">
+                        <span class="telemetry-cell-label">Next Destination</span>
+                        <strong class="telemetry-cell-val" id="hudNextStop">ICU Block B (BIN-Y001)</strong>
+                    </div>
+                </div>
+
+                <div class="telemetry-cell">
+                    <div class="telemetry-cell-icon icon-eta">
+                        <i class="fa-solid fa-hourglass-half"></i>
+                    </div>
+                    <div class="telemetry-cell-data">
+                        <span class="telemetry-cell-label">ETA to Destination</span>
+                        <strong class="telemetry-cell-val" id="hudEta">12 mins</strong>
+                    </div>
+                </div>
+
+                <div class="telemetry-cell">
+                    <div class="telemetry-cell-icon icon-payload">
+                        <i class="fa-solid fa-weight-hanging"></i>
+                    </div>
+                    <div class="telemetry-cell-data">
+                        <span class="telemetry-cell-label">Payload Capacity</span>
+                        <strong class="telemetry-cell-val" id="hudPayload">120 / 500 kg</strong>
+                    </div>
+                </div>
+
+                <div class="telemetry-cell">
+                    <div class="telemetry-cell-icon icon-coords">
+                        <i class="fa-solid fa-crosshairs"></i>
+                    </div>
+                    <div class="telemetry-cell-data">
+                        <span class="telemetry-cell-label">GPS Coordinates</span>
+                        <strong class="telemetry-cell-val" id="hudCoords">18.5204° N, 73.8567° E</strong>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -340,10 +481,20 @@
         </div>
     </footer>
 
-    <!-- Toast Notification Container -->
-    <div id="toastContainer" class="toast-container"></div>
-
+    <!-- Leaflet JS for GPS Fleet Map (Local Reliable Asset) -->
+    <script src="leaflet.js"></script>
     <script src="script.js"></script>
+    <script>
+        // Ensure map is initialized and container size is invalidated once all styles and fonts load
+        window.addEventListener("load", () => {
+            if (typeof initPickupMap === "function") {
+                initPickupMap();
+            }
+            if (typeof pickupMap !== "undefined" && pickupMap) {
+                setTimeout(() => pickupMap.invalidateSize(), 200);
+            }
+        });
+    </script>
 </body>
 
 </html>
