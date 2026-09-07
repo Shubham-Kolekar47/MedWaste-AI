@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Chatbot & Knowledge Assistant | MedWaste AI</title>
+    <meta name="description" content="Ask doubts and get instant biomedical waste segregation guidance, collection logistics protocols, and clinical precautions grounded in Bio-Medical Waste Management Rules.">
+
+    <!-- Global & Page Styles -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="chatbot.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+    <header class="navbar">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fa-solid fa-leaf"></i>
+            </div>
+            <div>
+                <h2>MedWaste <span>AI</span></h2>
+                <p>Clean Care • Safer Tomorrow</p>
+            </div>
+        </div>
+
+        <nav id="navMenu">
+            <a href="index.html">Home</a>
+            <a href="scanner.html">AI Scanner</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="pickup.html">Pickup</a>
+            <a href="precautions.html">Precautions</a>
+            <a href="chatbot.html" class="active">AI Chatbot</a>
+            <a href="index.html#contact">Contact</a>
+        </nav>
+
+        <div class="nav-actions">
+            <button class="search-btn" title="Focus Chat Input" onclick="document.getElementById('chatInput').focus()">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+
+            <div id="authNavContainer">
+                <a href="login.html" class="login-btn">
+                    <i class="fa-solid fa-user-lock"></i> Login / Register
+                </a>
+            </div>
+
+            <button class="primary-btn" onclick="window.location.href='scanner.html'">
+                Try AI Scanner
+            </button>
+        </div>
+
+        <button class="menu-btn" onclick="toggleMenu()" aria-label="Toggle navigation menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+
+    <!-- ================= MAIN CHATBOT PAGE ================= -->
+    <main class="chatbot-page">
+
+        <!-- Hero Header -->
+        <section class="chatbot-hero">
+            <div class="chatbot-badge">
+                <i class="fa-solid fa-robot"></i>
+                CPCB 2016 Compliant Clinical Knowledge AI
+            </div>
+
+            <h1>
+                Biomedical Waste <span>Assistant & Q&amp;A Hub</span>
+            </h1>
+
+            <p>
+                Have questions about color-coded waste streams, collection deadlines, barcode tracking, 
+                or emergency needle-stick protocols? Ask below for instant, regulatory-grade guidance.
+            </p>
+
+            <!-- Topic Quick Filter Chips -->
+            <div class="topic-chips">
+                <button type="button" class="topic-chip" onclick="askQuickPrompt('Which biomedical waste items belong in the Yellow, Red, White, and Blue bins?')">
+                    <i class="fa-solid fa-layer-group" style="color: #ca8a04;"></i> Waste Segregation
+                </button>
+                <button type="button" class="topic-chip" onclick="askQuickPrompt('What is the 48-hour waste storage rule and how are barcoded bags tracked?')">
+                    <i class="fa-solid fa-truck-fast" style="color: #0284c7;"></i> Collection Logistics
+                </button>
+                <button type="button" class="topic-chip" onclick="askQuickPrompt('What Personal Protective Equipment (PPE) is mandatory for waste handlers?')">
+                    <i class="fa-solid fa-shield-virus" style="color: #10b981;"></i> Safety &amp; PPE
+                </button>
+                <button type="button" class="topic-chip" onclick="askQuickPrompt('What is the emergency first-aid protocol for an accidental needle-stick injury?')">
+                    <i class="fa-solid fa-triangle-exclamation" style="color: #dc2626;"></i> Emergency SOPs
+                </button>
+            </div>
+        </section>
+
+
+        <!-- Two-Column Interactive Layout -->
+        <div class="chatbot-container">
+
+            <!-- LEFT: Real-Time Chatbot Console -->
+            <section class="chat-console-card" aria-label="Interactive Waste Assistant Chat">
+
+                <!-- Console Header -->
+                <div class="chat-console-header">
+                    <div class="bot-identity">
+                        <div class="bot-avatar-wrapper">
+                            <div class="bot-avatar">
+                                <i class="fa-solid fa-brain"></i>
+                            </div>
+                            <span class="online-dot" title="Knowledge Engine Active"></span>
+                        </div>
+                        <div class="bot-text">
+                            <h3>MedWaste AI Assistant</h3>
+                            <p id="activeEngineLabel"><i class="fa-solid fa-microchip" style="color: #10b981;"></i> Neural AI Reasoner</p>
+                        </div>
+                    </div>
+
+                    <div class="chat-header-actions">
+                        <button type="button" id="engineSettingsBtn" class="icon-btn" title="AI Model Settings (Gemini LLM / Neural Engine)" onclick="openEngineModal()">
+                            <i class="fa-solid fa-sliders"></i>
+                        </button>
+                        <button type="button" id="soundToggleBtn" class="icon-btn active-sound" title="Toggle Voice Narration (TTS)" onclick="toggleSound()">
+                            <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+                        </button>
+                        <button type="button" id="clearChatBtn" class="icon-btn" title="Clear Conversation" onclick="clearConversation()">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chat Messages Stream -->
+                <div class="chat-messages-container" id="chatMessages" role="log" aria-live="polite">
+
+                    <!-- Welcome Bot Message -->
+                    <div class="message-row bot-row">
+                        <div class="msg-avatar bot-msg-avatar">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                        <div class="msg-bubble-wrap">
+                            <div class="msg-bubble bot-bubble">
+                                <span class="stream-badge general">
+                                    <i class="fa-solid fa-sparkles"></i> Welcome
+                                </span>
+                                <p>
+                                    Hello! 👋 Hope you're having a wonderful day! I am your <strong>MedWaste AI Companion</strong>. 
+                                    Feel free to chat casually with me, say hello, or ask any question regarding hospital safety and biomedical waste:
+                                </p>
+                                <ul>
+                                    <li><strong>Friendly Conversation:</strong> Say <em>"Good morning"</em>, ask <em>"How's your day going?"</em>, or chat about your shift.</li>
+                                    <li><strong>Waste Segregation:</strong> Which items belong in Yellow, Red, White, Blue, or Cytotoxic bins.</li>
+                                    <li><strong>Collection Logistics:</strong> Barcode tracking, 48-hour storage limits, and CBWTF pickups.</li>
+                                    <li><strong>Clinical Safety &amp; Emergencies:</strong> Needle-stick injury first-aid and blood spill SOPs.</li>
+                                </ul>
+
+                                <!-- Initial Quick Prompt Chips -->
+                                <div class="suggestions-box">
+                                    <div class="suggestions-title">
+                                        <i class="fa-solid fa-bolt"></i> Popular Inquiries:
+                                    </div>
+                                    <div class="prompt-chips-wrap">
+                                        <button type="button" class="prompt-chip" onclick="askQuickPrompt('Good morning! How is your day going?')">
+                                            ☀️ Good morning! How is your day going?
+                                        </button>
+                                        <button type="button" class="prompt-chip" onclick="askQuickPrompt('Where do used plastic syringes and IV sets go?')">
+                                            💉 Where do plastic syringes go?
+                                        </button>
+                                        <button type="button" class="prompt-chip" onclick="askQuickPrompt('What is the emergency protocol for a needle-stick injury?')">
+                                            🚨 Needle-stick injury emergency SOP
+                                        </button>
+                                        <button type="button" class="prompt-chip" onclick="askQuickPrompt('What is the 48-hour waste storage rule?')">
+                                            ⏱️ 48-hour bio-waste storage rule
+                                        </button>
+                                        <button type="button" class="prompt-chip" onclick="askQuickPrompt('What belongs in the Blue container?')">
+                                            🔷 What goes in the Blue container?
+                                        </button>
+                                        <button type="button" class="prompt-chip" onclick="askQuickPrompt('How should cytotoxic chemotherapy waste be handled?')">
+                                            🟣 Cytotoxic chemo waste rules
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="msg-meta">
+                                <span>Just now</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Typing Indicator Element -->
+                    <div class="message-row bot-row" id="typingIndicator">
+                        <div class="msg-avatar bot-msg-avatar">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                        <div class="typing-indicator" style="display: flex;">
+                            <span class="typing-dot"></span>
+                            <span class="typing-dot"></span>
+                            <span class="typing-dot"></span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Input Console Form -->
+                <div class="chat-console-input-area">
+                    <form class="chat-form" id="chatForm" onsubmit="handleChatSubmit(event)">
+                        <button type="button" class="input-action-btn voice-btn" id="voiceInputBtn" title="Speak your question using microphone" onclick="toggleVoiceRecognition()">
+                            <i class="fa-solid fa-microphone" id="voiceIcon"></i>
+                        </button>
+
+                        <input 
+                            type="text" 
+                            class="chat-input" 
+                            id="chatInput" 
+                            placeholder="Ask any doubt about waste segregation, collection, or precautions..." 
+                            autocomplete="off"
+                            required
+                        >
+
+                        <button type="submit" class="input-action-btn send-btn" id="sendBtn" title="Send Question">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+
+                    <div class="input-disclaimer">
+                        <i class="fa-solid fa-circle-check" style="color: var(--chat-primary);"></i>
+                        Grounded in Bio-Medical Waste Management Rules (CPCB India).
+                    </div>
+                </div>
+
+            </section>
+
+
+            <!-- RIGHT: Frequently Asked Questions & Quick Reference Hub -->
+            <aside class="faq-hub-card" aria-label="Frequently Asked Questions Hub">
+
+                <div class="faq-header">
+                    <div class="faq-title">
+                        <div class="faq-title-icon">
+                            <i class="fa-solid fa-circle-question"></i>
+                        </div>
+                        <div>
+                            <h2>Frequently Asked Questions</h2>
+                        </div>
+                    </div>
+
+                    <!-- Category Filter Tabs -->
+                    <div class="faq-filter-tabs" role="tablist">
+                        <button type="button" class="tab-btn active" onclick="filterFaqs('All', this)">All</button>
+                        <button type="button" class="tab-btn" onclick="filterFaqs('Segregation', this)">Segregation</button>
+                        <button type="button" class="tab-btn" onclick="filterFaqs('Collection', this)">Collection</button>
+                        <button type="button" class="tab-btn" onclick="filterFaqs('Precautions', this)">Precautions</button>
+                        <button type="button" class="tab-btn" onclick="filterFaqs('Emergency', this)">Emergency</button>
+                    </div>
+                </div>
+
+                <!-- Dynamic FAQ List -->
+                <div class="faq-list-container" id="faqListContainer">
+                    <!-- Populated dynamically by chatbot.js -->
+                </div>
+
+                <!-- Color Cheat Sheet Footer -->
+                <div class="faq-footer-cheat">
+                    <div class="cheat-title">
+                        <i class="fa-solid fa-palette"></i> Quick Stream Cheat Sheet
+                    </div>
+                    <div class="cheat-stream-grid">
+                        <div class="cheat-pill c-yellow" onclick="askQuickPrompt('What items belong in the Yellow biohazard bag and how is it treated?')">
+                            🟡 Yellow<br><small>Infectious</small>
+                        </div>
+                        <div class="cheat-pill c-red" onclick="askQuickPrompt('Which items go into the Red container and how are they recycled?')">
+                            🔴 Red<br><small>Plastics</small>
+                        </div>
+                        <div class="cheat-pill c-white" onclick="askQuickPrompt('What goes into the White translucent container and what are the rules?')">
+                            ⚪ White<br><small>Sharps</small>
+                        </div>
+                        <div class="cheat-pill c-blue" onclick="askQuickPrompt('Which items go into the Blue-marked container and how are they treated?')">
+                            🔵 Blue<br><small>Glassware</small>
+                        </div>
+                    </div>
+                </div>
+
+            </aside>
+
+        </div>
+
+    </main>
+
+
+    <!-- ================= AI ENGINE SETTINGS MODAL ================= -->
+    <div id="engineModal" class="engine-modal-backdrop" style="display: none;">
+        <div class="engine-modal-dialog">
+            <div class="engine-modal-header">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class="engine-modal-icon">
+                        <i class="fa-solid fa-microchip"></i>
+                    </div>
+                    <div>
+                        <h3>AI Engine &amp; Intelligence Model</h3>
+                        <p>Configure model processing &amp; reasoning parameters</p>
+                    </div>
+                </div>
+                <button type="button" class="engine-modal-close" onclick="closeEngineModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="engine-modal-body">
+                <div class="engine-card active-engine-card" id="cardNeuralEngine">
+                    <div class="engine-card-header">
+                        <div class="engine-radio-wrap">
+                            <input type="radio" id="engineModeNeural" name="engineMode" value="neural" checked onchange="handleEngineChange()">
+                            <label for="engineModeNeural"><strong>MedWaste AI Clinical Reasoner</strong></label>
+                        </div>
+                        <span class="badge-default">Built-in (Zero-Latency)</span>
+                    </div>
+                    <p>
+                        High-precision biomedical reasoning engine trained specifically on Bio-Medical Waste Management Rules 2016 (CPCB). 
+                        Instantly recognizes over 100 clinical items, scenarios, emergency SOPs, and penalties without external API calls.
+                    </p>
+                </div>
+
+                <div class="engine-card" id="cardGeminiEngine">
+                    <div class="engine-card-header">
+                        <div class="engine-radio-wrap">
+                            <input type="radio" id="engineModeGemini" name="engineMode" value="gemini" onchange="handleEngineChange()">
+                            <label for="engineModeGemini"><strong>Google Gemini 2.5 Flash LLM</strong></label>
+                        </div>
+                        <span class="badge-gemini"><i class="fa-solid fa-sparkles"></i> Cloud LLM</span>
+                    </div>
+                    <p>
+                        Connect directly to Google's cutting-edge multimodal Gemini 2.5 Flash model for natural conversational synthesis and advanced hospital edge-case reasoning.
+                    </p>
+                    <div class="api-key-input-wrap" id="apiKeyWrap" style="margin-top: 12px; display: none;">
+                        <label for="geminiApiKeyInput">Enter Gemini API Key:</label>
+                        <div class="input-with-action">
+                            <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." autocomplete="off">
+                            <button type="button" class="btn-toggle-key" onclick="toggleKeyVisibility()">
+                                <i class="fa-solid fa-eye" id="keyEyeIcon"></i>
+                            </button>
+                        </div>
+                        <small style="color: #64748b; margin-top: 4px; display: block;">
+                            Your key is stored securely in your browser's local storage and used directly for queries.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="engine-modal-footer">
+                <button type="button" class="outline-btn" onclick="closeEngineModal()">Cancel</button>
+                <button type="button" class="primary-btn" onclick="saveEngineSettings()">Save Preferences</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="footer">
+        <div class="footer-container">
+
+            <div class="footer-column">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fa-solid fa-leaf"></i>
+                    </div>
+                    <div>
+                        <h2>MedWaste <span>AI</span></h2>
+                        <p>Clean Care • Safer Tomorrow</p>
+                    </div>
+                </div>
+                <p style="margin-top: 15px; font-size: 14px; color: #64748b;">
+                    Intelligent biomedical waste segregation, automated logistics, 
+                    and regulatory compliance platform for modern healthcare facilities.
+                </p>
+            </div>
+
+            <div class="footer-column">
+                <h3>Platform</h3>
+                <a href="index.html">Home</a>
+                <a href="scanner.html">AI Scanner</a>
+                <a href="dashboard.html">Live Dashboard</a>
+                <a href="pickup.html">Pickup Logistics</a>
+                <a href="precautions.html">Clinical Precautions</a>
+                <a href="chatbot.html">AI Assistant Q&amp;A</a>
+            </div>
+
+            <div class="footer-column">
+                <h3>Solutions</h3>
+                <a href="scanner.html">AI Classification</a>
+                <a href="dashboard.html">IoT Bin Monitoring</a>
+                <a href="pickup.html">Smart Collection</a>
+                <a href="chatbot.html">Regulatory Guidance</a>
+            </div>
+
+            <div class="footer-column">
+                <h3>Contact</h3>
+                <a href="mailto:contact@medwasteai.com">contact@medwasteai.com</a>
+                <a href="#">Pune, Maharashtra, India</a>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2026 MedWaste AI. All Rights Reserved. Compliant with CPCB BMWM Rules.</p>
+            <div class="socials">
+                <a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="#" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+                <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Application Scripts -->
+    <script src="script.js"></script>
+    <script src="chatbot.js"></script>
+
+</body>
+
+</html>
