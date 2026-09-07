@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Safety Precautions & Audio Guide | MedWaste AI</title>
+
+    <!-- Global & Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="precautions.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+    <header class="navbar">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fa-solid fa-leaf"></i>
+            </div>
+            <div>
+                <h2>MedWaste <span>AI</span></h2>
+                <p>Clean Care • Safer Tomorrow</p>
+            </div>
+        </div>
+
+        <nav id="navMenu">
+            <a href="index.html">Home</a>
+            <a href="scanner.html">AI Scanner</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="pickup.html">Pickup</a>
+            <a href="precautions.html" class="active">Precautions</a>
+            <a href="index.html#contact">Contact</a>
+        </nav>
+
+        <div class="nav-actions">
+            <button class="search-btn" title="Search System" onclick="document.getElementById('precautionsSearchInput').focus()">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+
+            <div id="authNavContainer">
+                <a href="login.html" class="login-btn">
+                    <i class="fa-solid fa-user-lock"></i> Login / Register
+                </a>
+            </div>
+
+            <button class="primary-btn" onclick="window.location.href='scanner.html'">
+                Try AI Scanner
+            </button>
+        </div>
+
+        <button class="menu-btn" onclick="toggleMenu()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+
+    <!-- ================= HERO & MASTER AUDIO ================= -->
+    <section class="precautions-hero">
+        <div class="precautions-hero-content">
+            <div class="precautions-badge">
+                <i class="fa-solid fa-shield-virus"></i>
+                BMWM Biosafety Standards & SOPs
+            </div>
+
+            <h1>
+                Clinical Precautions & <span>Safety Audio Guide</span>
+            </h1>
+
+            <p>
+                Essential safety protocols, mandatory Personal Protective Equipment (PPE) checklists, 
+                and regulatory handling procedures for each medical waste stream. 
+                Listen to voice-guided narrations for hands-free learning during clinical duties.
+            </p>
+
+            <!-- Master Audio Overview Banner -->
+            <div class="master-audio-banner">
+                <div class="audio-banner-info">
+                    <div class="audio-banner-icon">
+                        <i class="fa-solid fa-headphones-simple"></i>
+                    </div>
+                    <div class="audio-banner-text">
+                        <h3>Complete Waste Safety Audio Briefing</h3>
+                        <p>Voice-guided summary of all 4 color-coded streams & critical handling precautions.</p>
+                    </div>
+                </div>
+
+                <div class="master-audio-controls">
+                    <button type="button" class="master-play-btn" id="masterPlayBtn" onclick="toggleSectionAudio('master')">
+                        <i class="fa-solid fa-headphones"></i> Listen to Complete Safety Guide
+                    </button>
+                    <button type="button" class="master-stop-btn" onclick="stopAudio('master')">
+                        <i class="fa-solid fa-stop"></i> Stop
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ================= STICKY FILTER & SEARCH BAR ================= -->
+    <nav class="precautions-filter-bar" aria-label="Waste Category Filters">
+        <div class="filter-bar-inner">
+            <div class="filter-pills">
+                <button type="button" class="filter-pill active" data-filter="all">
+                    <i class="fa-solid fa-layer-group"></i> All Categories
+                </button>
+                <button type="button" class="filter-pill pill-yellow" data-filter="yellow">
+                    <i class="fa-solid fa-biohazard" style="color:#eab308;"></i> Yellow (Infectious)
+                </button>
+                <button type="button" class="filter-pill pill-red" data-filter="red">
+                    <i class="fa-solid fa-syringe" style="color:#ef4444;"></i> Red (Plastics)
+                </button>
+                <button type="button" class="filter-pill pill-white" data-filter="white">
+                    <i class="fa-solid fa-shield-halved"></i> White (Sharps)
+                </button>
+                <button type="button" class="filter-pill pill-blue" data-filter="blue">
+                    <i class="fa-solid fa-vial" style="color:#2563eb;"></i> Blue (Glass & Metals)
+                </button>
+                <button type="button" class="filter-pill pill-purple" data-filter="purple">
+                    <i class="fa-solid fa-radiation" style="color:#9333ea;"></i> Cytotoxic
+                </button>
+                <button type="button" class="filter-pill" data-filter="emergency">
+                    <i class="fa-solid fa-kit-medical" style="color:#dc2626;"></i> Spill & Needle-Stick
+                </button>
+            </div>
+
+            <div class="filter-search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="precautionsSearchInput" class="filter-search-input" placeholder="Search precautions, PPE, needle, bleach...">
+            </div>
+        </div>
+    </nav>
+
+
+    <!-- ================= MAIN CONTENT CONTAINER ================= -->
+    <main class="precautions-container">
+
+        <!-- Voice Narration Settings Bar -->
+        <div class="voice-settings-bar">
+            <div class="voice-select-wrap">
+                <i class="fa-solid fa-sliders"></i>
+                <strong>Narration Voice:</strong>
+                <select id="voiceSelect" class="voice-select" title="Choose narration voice">
+                    <option value="">Default English Voice</option>
+                </select>
+            </div>
+
+            <div class="global-speed-wrap">
+                <strong>Narration Speed:</strong>
+                <button type="button" class="speed-chip" data-speed="0.8">0.8x</button>
+                <button type="button" class="speed-chip active" data-speed="1.0">1.0x</button>
+                <button type="button" class="speed-chip" data-speed="1.25">1.25x</button>
+                <button type="button" class="speed-chip" data-speed="1.5">1.5x</button>
+            </div>
+        </div>
+
+        <!-- Quick SOP Actions -->
+        <div class="sop-action-bar">
+            <div class="sop-action-title">
+                <i class="fa-solid fa-clipboard-check" style="color: #0c8c66;"></i>
+                Hospital Ward Biosafety & Standard Operating Procedures (SOP) Reference
+            </div>
+            <div class="sop-action-btns">
+                <button type="button" class="sop-btn" onclick="printPrecautionsSOP()">
+                    <i class="fa-solid fa-print"></i> Print Clinical SOP Sheet
+                </button>
+                <button type="button" class="sop-btn" onclick="copyAllEmergencyGuidelines()">
+                    <i class="fa-solid fa-copy"></i> Copy Emergency Protocol
+                </button>
+            </div>
+        </div>
+
+
+        <!-- =========================================================
+             SECTION 1: YELLOW CATEGORY (INFECTIOUS & ANATOMICAL)
+             ========================================================= -->
+        <article class="precaution-section section-yellow" id="section-yellow" data-category="yellow">
+            
+            <div class="section-header">
+                <div class="section-title-wrap">
+                    <div class="category-icon-box box-yellow">
+                        <i class="fa-solid fa-biohazard"></i>
+                    </div>
+                    <div class="section-title-text">
+                        <h2>Yellow Stream: Infectious & Anatomical Waste</h2>
+                        <span class="cat-subtitle">Pathological, anatomical, soiled dressings, expired drugs & clinical lab cultures</span>
+                    </div>
+                </div>
+                <span class="category-badge-pill badge-yellow">Yellow Bag • Biohazard</span>
+            </div>
+
+            <!-- Embedded Audio Player Widget -->
+            <div class="section-audio-player" id="player-yellow">
+                <div class="audio-controls-left">
+                    <button type="button" class="audio-btn-play" id="playBtn-yellow" onclick="toggleSectionAudio('yellow')" title="Listen to Yellow Waste Precautions">
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                    <button type="button" class="audio-btn-stop" onclick="stopAudio('yellow')" title="Stop Audio">
+                        <i class="fa-solid fa-stop"></i>
+                    </button>
+                    <div class="audio-equalizer">
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                    </div>
+                    <div class="audio-track-info">
+                        <span class="audio-track-title">
+                            <i class="fa-solid fa-volume-high" style="color: #ca8a04;"></i> Audio Narration: Yellow Stream Precautions
+                        </span>
+                        <span class="audio-track-status" id="audioStatus-yellow">Audio Ready • Click Play to Listen</span>
+                    </div>
+                </div>
+
+                <div class="audio-controls-right">
+                    <div class="audio-progress-container">
+                        <div class="audio-progress-bar-bg">
+                            <div class="audio-progress-fill" id="progressFill-yellow" style="background:#eab308;"></div>
+                        </div>
+                        <div class="audio-time-row">
+                            <span id="timeCurrent-yellow">0:00</span>
+                            <span id="timeTotal-yellow">0:45</span>
+                        </div>
+                    </div>
+
+                    <div class="speed-selector">
+                        <button type="button" class="speed-opt" data-speed="0.8" onclick="setPlaybackSpeed('yellow', 0.8)">0.8x</button>
+                        <button type="button" class="speed-opt active" data-speed="1.0" onclick="setPlaybackSpeed('yellow', 1.0)">1.0x</button>
+                        <button type="button" class="speed-opt" data-speed="1.25" onclick="setPlaybackSpeed('yellow', 1.25)">1.25x</button>
+                        <button type="button" class="speed-opt" data-speed="1.5" onclick="setPlaybackSpeed('yellow', 1.5)">1.5x</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body Content -->
+            <div class="section-body">
+                <div class="precaution-grid">
+                    <!-- Waste Examples -->
+                    <div class="detail-card">
+                        <h3><i class="fa-solid fa-list-check"></i> Typical Waste Items Included</h3>
+                        <div class="examples-tag-list">
+                            <span class="example-chip">Human tissues & organs</span>
+                            <span class="example-chip">Placentas & amputations</span>
+                            <span class="example-chip">Soiled gauze & bandages</span>
+                            <span class="example-chip">Blood-soaked cotton swabs</span>
+                            <span class="example-chip">Plaster casts with blood</span>
+                            <span class="example-chip">Expired pharmaceutical medicines</span>
+                            <span class="example-chip">Microbiology specimen cultures</span>
+                            <span class="example-chip">Discarded live vaccines</span>
+                        </div>
+                    </div>
+
+                    <!-- PPE Checklist -->
+                    <div class="detail-card">
+                        <h3><i class="fa-solid fa-user-shield"></i> Mandatory PPE Checklist</h3>
+                        <ul class="ppe-list">
+                            <li class="ppe-item"><i class="fa-solid fa-circle-check"></i> Heavy-duty Nitrile / Latex Gloves (Double gloving for pathology)</li>
+                            <li class="ppe-item"><i class="fa-solid fa-circle-check"></i> N95 or Certified Fluid-Resistant Surgical Mask</li>
+                            <li class="ppe-item"><i class="fa-solid fa-circle-check"></i> Fluid-impermeable plastic apron or disposable gown</li>
+                            <li class="ppe-item"><i class="fa-solid fa-circle-check"></i> Protective eye goggles / full face shield</li>
+                            <li class="ppe-item"><i class="fa-solid fa-circle-check"></i> Closed-toe non-skid rubber gumboots</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- SOP Handling Steps (Highlighted during Audio Narration) -->
+                <div class="sop-steps-card">
+                    <h3><i class="fa-solid fa-shoe-prints"></i> Handling & Segregation Standard Operating Procedure</h3>
+                    <ol class="step-list">
+                        <li class="step-item">
+                            <span class="step-num">1</span>
+                            <span><strong>Certified Non-Chlorinated Bags:</strong> Always deposit infectious waste into non-chlorinated yellow plastic bags bearing the national biohazard insignia. Never use black or regular garbage liners.</span>
+                        </li>
+                        <li class="step-item">
+                            <span class="step-num">2</span>
+                            <span><strong>Three-Quarter Fill Limit:</strong> Tie and seal bags with zip-ties or swan-neck knots strictly when bags reach <strong>75% capacity</strong>. Never overfill or force items inside.</span>
+                        </li>
+                        <li class="step-item">
+                            <span class="step-num">3</span>
+                            <span><strong>No Manual Compression:</strong> Never press down, squeeze, or step on waste bags to create space. Doing so expels infectious aerosol plumes and bursts seams.</span>
+                        </li>
+                        <li class="step-item">
+                            <span class="step-num">4</span>
+                            <span><strong>Direct Enclosed Transport:</strong> Move yellow bags directly via dedicated, sealed biomedical trolleys to the hospital central bio-waste holding area. Never leave bags in ward hallways.</span>
+                        </li>
+                        <li class="step-item">
+                            <span class="step-num">5</span>
+                            <span><strong>48-Hour Storage Rule:</strong> Yellow infectious waste must not be stored beyond 48 hours before high-temperature incineration or authorized common treatment facility dispatch.</span>
+                        </li>
+                    </ol>
+                </div>
+
+                <!-- Do's & Don'ts -->
+                <div class="dos-donts-row">
+                    <div class="dos-box">
+                        <h4><i class="fa-solid fa-check"></i> Essential Do's</h4>
+                        <ul class="guide-list">
+                            <li><i class="fa-solid fa-circle-check"></i> Barcode label every yellow bag with ward number and generator timestamp.</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Autoclave microbiology cultures at 121°C before bagging.</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Perform thorough 6-step hand hygiene immediately after glove removal.</li>
+                        </ul>
+                    </div>
+                    <div class="donts-box">
+                        <h4><i class="fa-solid fa-xmark"></i> Critical Don'ts</h4>
+                        <ul class="guide-list">
+                            <li><i class="fa-solid fa-triangle-exclamation"></i> NEVER place needles, scalpels, or glass ampoules in yellow bags.</li>
+                            <li><i class="fa-solid fa-triangle-exclamation"></i> NEVER drag waste bags across hospital floors.</li>
+                            <li><i class="fa-solid fa-triangle-exclamation"></i> NEVER discard chlorinated plastics in yellow stream (produces toxic dioxins).</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Final Treatment -->
+                <div class="section-footer-treatment">
+                    <span class="treatment-label"><i class="fa-solid fa-fire"></i> Regulated Final Disposal Method:</span>
+                    <span class="treatment-method">High-Temperature Incineration (1050°C) or Plasma Pyrolysis / Authorized Deep Burial</span>
+                </div>
+            </div>
+
+        </article>
+
+
+        <!-- =========================================================
+             SECTION 2: RED CATEGORY (CONTAMINATED RECYCLABLE PLASTICS)
+             ========================================================= -->
+        <article class="precaution-section section-red" id="section-red" data-category="red">
+            
+            <div class="section-header">
+                <div class="section-title-wrap">
+                    <div class="category-icon-box box-red">
+                        <i class="fa-solid fa-syringe"></i>
+                    </div>
+                    <div class="section-title-text">
+                        <h2>Red Stream: Contaminated Recyclable Plastics</h2>
+                        <span class="cat-subtitle">Syringes (without needle), IV sets, catheters, urine bags, dialysis kits & tubing</span>
+                    </div>
+                </div>
+                <span class="category-badge-pill badge-red">Red Bag • Recyclable Plastics</span>
+            </div>
+
+            <!-- Embedded Audio Player Widget -->
+            <div class="section-audio-player" id="player-red">
+                <div class="audio-controls-left">
+                    <button type="button" class="audio-btn-play" id="playBtn-red" onclick="toggleSectionAudio('red')" title="Listen to Red Waste Precautions">
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                    <button type="button" class="audio-btn-stop" onclick="stopAudio('red')" title="Stop Audio">
+                        <i class="fa-solid fa-stop"></i>
+                    </button>
+                    <div class="audio-equalizer">
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                    </div>
+                    <div class="audio-track-info">
+                        <span class="audio-track-title">
+                            <i class="fa-solid fa-volume-high" style="color: #dc2626;"></i> Audio Narration: Red Stream Precautions
+                        </span>
+                        <span class="audio-track-status" id="audioStatus-red">Audio Ready • Click Play to Listen</span>
+                    </div>
+                </div>
+
+                <div class="audio-controls-right">
+                    <div class="audio-progress-container">
+                        <div class="audio-progress-bar-bg">
+                            <div class="audio-progress-fill" id="progressFill-red" style="background:#ef4444;"></div>
+                        </div>
+                        <div class="audio-time-row">
+                            <span id="timeCurrent-red">0:00</span>
+                            <span id="timeTotal-red">0:45</span>
+                        </div>
+                    </div>
+
+                    <div class="speed-selector">
+                        <button type="button" class="speed-opt" data-speed="0.8" onclick="setPlaybackSpeed('red', 0.8)">0.8x</button>
+                        <button type="button" class="speed-opt active" data-speed="1.0" onclick="setPlaybackSpeed('red', 1.0)">1.0x</button>
+                        <button type="button" class="speed-opt" data-speed="1.25" onclick="setPlaybackSpeed('red', 1.25)">1.25x</button>
+                        <button type="button" class="speed-opt" data-speed="1.5" onclick="setPlaybackSpeed('red', 1.5)">1.5x</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body Content -->
+            <div class="section-body">
+                <div class="precaution-grid">
+                    <div class="detail-card">
+                        <h3><i class="fa-solid fa-list-check"></i> Typical Waste Items Included</h3>
+                        <div class="examples-tag-list">
+                            <span class="example-chip">Disposable plastic syringes (hub-cut)</span>
+                            <span class="example-chip">Intravenous (IV) bottles & sets</span>
+                            <span class="example-chip">Foley catheters & drainage tubes</span>
+                            <span class="example-chip">Urine drainage bags (emptied)</span>
+                            <span class="example-chip">Hemodialysis tubing kits</span>
+                            <span class="example-chip">Contaminated examination gloves</span>
+                            <span class="example-chip">Blood sample vacutainer tubes</span>
+                            <span class="example-chip">Oxygen masks & nebulizer cups</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-card">
+                        <h3><i class="fa-solid fa-user-shield"></i> Mandatory PPE Checklist</h3>
+                        <ul class="ppe-list">
+                            <li class="ppe-item"><i class="fa-solid fa-circle-check"></i> Thick puncture-resistant utility gloves</li>
+                            <li class="ppe-item"><i class="fa-solid fa-circle-check"></i> Splash-proof eye goggles or full visor face shield</li>
+                            <li class="ppe-item"><i class="fa-solid fa-circle-check"></i> Impervious protective apron</li>
+                            <li class="ppe-item"><i class="fa-solid fa-circle-check"></i> Non-slip fluid-resistant boots</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="sop-steps-card">
+                    <h3><i class="fa-solid fa-shoe-prints"></i> Handling & Segregation Standard Operating Procedure</h3>
+                    <ol class="step-list">
+                        <li class="step-item">
+                            <span class="step-num">1</span>
+                            <span><strong>Mutilate / Cut Syringe Hubs:</strong> Cut needle tips using point-of-use mechanical needle cutters. Syringes must be rendered un-reusable before dropping into red bags to prevent black market recycling.</span>
+                        </li>
+                        <li class="step-item">
+                            <span class="step-num">2</span>
+                            <span><strong>Completely Drain Residual Liquids:</strong> Completely empty urine bags, IV fluid bottles, and dialyzer lines into hospital sanitary drains before bagging. Never dispose filled liquid containers into red bins.</span>
+                        </li>
+                        <li class="step-item">
+                            <span class="step-num">3</span>
+                            <span><strong>Pre-treatment Chemical Disinfection:</strong> Soak plastics in freshly prepared <strong>1% to 2% Sodium Hypochlorite solution</strong> or autoclave for 30 minutes to neutralize infectious pathogen loads.</span>
+                        </li>
+                        <li class="step-item">
+                            <span class="step-num">4</span>
+                            <span><strong>Segregate strictly from Sharps:</strong> Verify zero needle attachments or glass ampoules exist in the red bin. Red plastics go directly to industrial shredders.</span>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="dos-donts-row">
+                    <div class="dos-box">
+                        <h4><i class="fa-solid fa-check"></i> Essential Do's</h4>
+                        <ul class="guide-list">
+                            <li><i class="fa-solid fa-circle-check"></i> Empty all IV fluids and body fluids into sanitary drainage prior to disposal.</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Use red non-chlorinated plastic bags with biohazard symbol.</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Ensure shredding occurs only after documented autoclaving/disinfection.</li>
+                        </ul>
+                    </div>
+                    <div class="donts-box">
+                        <h4><i class="fa-solid fa-xmark"></i> Critical Don'ts</h4>
+                        <ul class="guide-list">
+                            <li><i class="fa-solid fa-triangle-exclamation"></i> NEVER drop needles or scalpels into red bags (severe shredder hazard).</li>
+                            <li><i class="fa-solid fa-triangle-exclamation"></i> NEVER burn or incinerate red plastics (creates carcinogenic fumes).</li>
+                            <li><i class="fa-solid fa-triangle-exclamation"></i> NEVER dispose of general food packaging in red clinical bins.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="section-footer-treatment">
+                    <span class="treatment-label"><i class="fa-solid fa-recycle"></i> Regulated Final Disposal Method:</span>
+                    <span class="treatment-method">Autoclaving / Microwaving / 1-2% Sodium Hypochlorite Disinfection followed by Industrial Shredding & Registered Plastic Recycling</span>
+                </div>
+            </div>
+
+        </article>
+
+
+        <!-- =========================================================
+             SECTION 3: WHITE CATEGORY (SHARPS & BLADES)
+             ========================================================= -->
+        <article class="precaution-section section-white" id="section-white" data-category="white">
+            
+            <div class="section-header">
+                <div class="section-title-wrap">
+                    <div class="category-icon-box box-white">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div class="section-title-text">
+                        <h2>White Stream: Sharps, Needles & Blades</h2>
+                        <span class="cat-subtitle">Hypodermic needles, scalpels, surgical blades, lancets & suture needles</span>
+                    </div>
+                </div>
+                <span class="category-badge-pill badge-white">White Translucent • Puncture-Proof</span>
+            </div>
+
+            <!-- Embedded Audio Player Widget -->
+            <div class="section-audio-player" id="player-white">
+                <div class="audio-controls-left">
+                    <button type="button" class="audio-btn-play" id="playBtn-white" onclick="toggleSectionAudio('white')" title="Listen to Sharps Precautions">
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                    <button type="button" class="audio-btn-stop" onclick="stopAudio('white')" title="Stop Audio">
+                        <i class="fa-solid fa-stop"></i>
+                    </button>
+                    <div class="audio-equalizer">
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                    </div>
+                    <div class="audio-track-info">
+                        <span class="audio-track-title">
+                            <i class="fa-solid fa-volume-high" style="color: #475569;"></i> Audio Narration: White Sharps Precautions
+                        </span>
+                        <span class="audio-track-status" id="audioStatus-white">Audio Ready • Click Play to Listen</span>
+                    </div>
+                </div>
+
+                <div class="audio-controls-right">
+                    <div class="audio-progress-container">
+                        <div class="audio-progress-bar-bg">
+                            <div class="audio-progress-fill" id="progressFill-white" style="background:#64748b;"></div>
+                        </div>
+                        <div class="audio-time-row">
+                            <span id="timeCurrent-white">0:00</span>
+                            <span id="timeTotal-white">0:45</span>
+                        </div>
+                    </div>
+
+                    <div class="speed-selector">
+                        <button type="button" class="speed-opt" data-speed="0.8" onclick="setPlaybackSpeed('white', 0.8)">0.8x</button>
+                        <button type="button" class="speed-opt active" data-speed="1.0" onclick="setPlaybackSpeed('white', 1.0)">1.0x</button>
+                        <button type="button" class="speed-opt" data-speed="1.25" onclick="setPlaybackSpeed('white', 1.25)">1.25x</button>
+                        <button type="button" class="speed-opt" data-speed="1.5" onclick="setPlaybackSpeed('white', 1.5)">1.5x</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body Content -->
+            <div class="section-body">
+                <div class="precaution-grid">
+                    <div class="detail-card">
+                        <h3><i class="fa-solid fa-list-check"></i> Typical Waste Items Included</h3>
+                        <div class="examples-tag-list">
+                            <span class="example-chip">Hypodermic injection needles</span>
+                            <span class="example-chip">Fixed-needle syringe units</span>
+                            <span class="example-chip">Surgical scalpel blades & handles</span>
+                            <span class="example-chip">Curved surgical suture needles</span>
+                            <span class="example-chip">Blood lancets & micro-needles</span>
+                            <span class="example-chip">Needles cut via electric burner</span>
+                            <span class="example-chip">Sharp contaminated stylets</span>
+                            <span class="example-chip">Broken contaminated glass ampoule tips</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-card">
+                        <h3><i class="fa-solid fa-user-shield"></i> Mandatory PPE Checklist</h3>
+                        <ul class="ppe-list">
+                            <li class="ppe-item"><i class="fa-solid fa-circle-check"></i> Heavy-duty Cut-Resistant Kevlar / Leather Utility Gloves</li>
+                            <li class="ppe-item"><i class="fa-solid fa-circle-check"></i> Protective safety glasses with side shields</li>
+                            <li class="ppe-item"><i class="fa-solid fa-circle-check"></i> Steel-toe reinforced non-pierce footwear</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="sop-steps-card">
+                    <h3><i class="fa-solid fa-shoe-prints"></i> Handling & Segregation Standard Operating Procedure</h3>
+                    <ol class="step-list">
+                        <li class="step-item">
+                            <span class="step-num">1</span>
+                            <span><strong>Puncture-Proof Rigid Container:</strong> All sharps MUST go directly into a rigid, tamper-evident, puncture-proof, leak-proof translucent white sharps container placed right at the bedside.</span>
+                        </li>
+                        <li class="step-item">
+                            <span class="step-num">2</span>
+                            <span><strong>NO Two-Handed Recapping:</strong> NEVER recap needles using both hands! Recapping is the #1 cause of occupational HIV and Hepatitis B infections worldwide. If recapping is unavoidable, use the single-handed scoop technique.</span>
+                        </li>
+                        <li class="step-item">
+                            <span class="step-num">3</span>
+                            <span><strong>Immediate Needle Destruction:</strong> Utilize electric needle burners or mechanical cutters immediately following drug administration to burn or shear the needle hub.</span>
+                        </li>
+                        <li class="step-item">
+                            <span class="step-num">4</span>
+                            <span><strong>75% Fill Level Cap:</strong> When container reaches the marked 3/4 fill line, permanently close the snap-lock tamper-proof seal. Never shake or tamp down sharps.</span>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="dos-donts-row">
+                    <div class="dos-box">
+                        <h4><i class="fa-solid fa-check"></i> Essential Do's</h4>
+                        <ul class="guide-list">
+                            <li><i class="fa-solid fa-circle-check"></i> Keep sharp containers within arm's reach of the injection site.</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Drop sharps point-down without putting fingers near the opening aperture.</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Permanently lock the lid before moving the container.</li>
+                        </ul>
+                    </div>
+                    <div class="donts-box">
+                        <h4><i class="fa-solid fa-xmark"></i> Critical Don'ts</h4>
+                        <ul class="guide-list">
+                            <li><i class="fa-solid fa-triangle-exclamation"></i> NEVER bend, break, or manually strip needles from syringes with bare hands.</li>
+                            <li><i class="fa-solid fa-triangle-exclamation"></i> NEVER place sharps in plastic bags, cardboard, or non-rigid boxes.</li>
+                            <li><i class="fa-solid fa-triangle-exclamation"></i> NEVER retrieve or fish out items once dropped into a sharps container.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="section-footer-treatment">
+                    <span class="treatment-label"><i class="fa-solid fa-lock"></i> Regulated Final Disposal Method:</span>
+                    <span class="treatment-method">Autoclaving / Dry Heat Sterilization followed by Concrete Encapsulation in Sharps Pit or Metal Foundry Melting</span>
+                </div>
+            </div>
+
+        </article>
+
+
+        <!-- =========================================================
+             SECTION 4: BLUE CATEGORY (GLASSWARE & METALLIC IMPLANTS)
+             ========================================================= -->
+        <article class="precaution-section section-blue" id="section-blue" data-category="blue">
+            
+            <div class="section-header">
+                <div class="section-title-wrap">
+                    <div class="category-icon-box box-blue">
+                        <i class="fa-solid fa-vial"></i>
+                    </div>
+                    <div class="section-title-text">
+                        <h2>Blue Stream: Glassware & Metallic Implants</h2>
+                        <span class="cat-subtitle">Medicine vials, ampoules, microscope slides & orthopedic titanium/steel implants</span>
+                    </div>
+                </div>
+                <span class="category-badge-pill badge-blue">Blue Box • Glass & Metal</span>
+            </div>
+
+            <!-- Embedded Audio Player Widget -->
+            <div class="section-audio-player" id="player-blue">
+                <div class="audio-controls-left">
+                    <button type="button" class="audio-btn-play" id="playBtn-blue" onclick="toggleSectionAudio('blue')" title="Listen to Glass & Metals Precautions">
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                    <button type="button" class="audio-btn-stop" onclick="stopAudio('blue')" title="Stop Audio">
+                        <i class="fa-solid fa-stop"></i>
+                    </button>
+                    <div class="audio-equalizer">
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                    </div>
+                    <div class="audio-track-info">
+                        <span class="audio-track-title">
+                            <i class="fa-solid fa-volume-high" style="color: #2563eb;"></i> Audio Narration: Blue Stream Precautions
+                        </span>
+                        <span class="audio-track-status" id="audioStatus-blue">Audio Ready • Click Play to Listen</span>
+                    </div>
+                </div>
+
+                <div class="audio-controls-right">
+                    <div class="audio-progress-container">
+                        <div class="audio-progress-bar-bg">
+                            <div class="audio-progress-fill" id="progressFill-blue" style="background:#2563eb;"></div>
+                        </div>
+                        <div class="audio-time-row">
+                            <span id="timeCurrent-blue">0:00</span>
+                            <span id="timeTotal-blue">0:45</span>
+                        </div>
+                    </div>
+
+                    <div class="speed-selector">
+                        <button type="button" class="speed-opt" data-speed="0.8" onclick="setPlaybackSpeed('blue', 0.8)">0.8x</button>
+                        <button type="button" class="speed-opt active" data-speed="1.0" onclick="setPlaybackSpeed('blue', 1.0)">1.0x</button>
+                        <button type="button" class="speed-opt" data-speed="1.25" onclick="setPlaybackSpeed('blue', 1.25)">1.25x</button>
+                        <button type="button" class="speed-opt" data-speed="1.5" onclick="setPlaybackSpeed('blue', 1.5)">1.5x</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body Content -->
+            <div class="section-body">
+                <div class="precaution-grid">
+                    <div class="detail-card">
+                        <h3><i class="fa-solid fa-list-check"></i> Typical Waste Items Included</h3>
+                        <div class="examples-tag-list">
+                            <span class="example-chip">Glass medicine ampoules (empty)</span>
+                            <span class="example-chip">Glass vaccine vials</span>
+                            <span class="example-chip">Broken glass laboratory beakers</span>
+                            <span class="example-chip">Microscope glass slides & coverslips</span>
+                            <span class="example-chip">Orthopedic metallic bone plates</span>
+                            <span class="example-chip">Orthopedic screws, pins & rods</span>
+                            <span class="example-chip">Metallic prosthetics & surgical clips</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-card">
+                        <h3><i class="fa-solid fa-user-shield"></i> Mandatory PPE Checklist</h3>
+                        <ul class="ppe-list">
+                            <li class="ppe-item"><i class="fa-solid fa-circle-check"></i> Heavy-duty puncture-resistant rubber gloves</li>
+                            <li class="ppe-item"><i class="fa-solid fa-circle-check"></i> Safety goggles to shield eyes against glass splinters</li>
+                            <li class="ppe-item"><i class="fa-solid fa-circle-check"></i> Protective lab coat or apron</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="sop-steps-card">
+                    <h3><i class="fa-solid fa-shoe-prints"></i> Handling & Segregation Standard Operating Procedure</h3>
+                    <ol class="step-list">
+                        <li class="step-item">
+                            <span class="step-num">1</span>
+                            <span><strong>Rigid Cardboard or Blue Containers:</strong> Discard all broken or intact glass articles and metallic surgical implants into cardboard boxes with blue colored markings or rigid blue containers.</span>
+                        </li>
+                        <li class="step-item">
+                            <span class="step-num">2</span>
+                            <span><strong>Handle Broken Glass with Tongs:</strong> NEVER pick up broken glass fragments with bare hands or thin gloves! Always use mechanical forceps, tongs, or a dustpan brush.</span>
+                        </li>
+                        <li class="step-item">
+                            <span class="step-num">3</span>
+                            <span><strong>Chemical Disinfection Soak:</strong> Decontaminate glass and metallic hardware by soaking in <strong>1% Sodium Hypochlorite</strong> solution for 30 minutes, or autoclave before handling.</span>
+                        </li>
+                        <li class="step-item">
+                            <span class="step-num">4</span>
+                            <span><strong>Reinforce Heavy Boxes:</strong> Ensure blue cardboard containers are taped securely along bottom seams to prevent glass piercing through during transport.</span>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="dos-donts-row">
+                    <div class="dos-box">
+                        <h4><i class="fa-solid fa-check"></i> Essential Do's</h4>
+                        <ul class="guide-list">
+                            <li><i class="fa-solid fa-circle-check"></i> Rinse medicine bottles with disinfectant if chemical residue is suspected.</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Keep blue boxes dry to preserve structural cardboard integrity.</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Route decontaminated glass directly to authorized glass bottle recyclers.</li>
+                        </ul>
+                    </div>
+                    <div class="donts-box">
+                        <h4><i class="fa-solid fa-xmark"></i> Critical Don'ts</h4>
+                        <ul class="guide-list">
+                            <li><i class="fa-solid fa-triangle-exclamation"></i> NEVER throw glass vials into red or yellow plastic bags (causes bag cuts).</li>
+                            <li><i class="fa-solid fa-triangle-exclamation"></i> NEVER mix cytotoxic chemotherapy vials into regular blue stream.</li>
+                            <li><i class="fa-solid fa-triangle-exclamation"></i> NEVER crush glass manually with bare footwear.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="section-footer-treatment">
+                    <span class="treatment-label"><i class="fa-solid fa-industry"></i> Regulated Final Disposal Method:</span>
+                    <span class="treatment-method">Autoclaving / 1% Sodium Hypochlorite Disinfection followed by Glass Crushing & Recycling / Metal Smelting</span>
+                </div>
+            </div>
+
+        </article>
+
+
+        <!-- =========================================================
+             SECTION 5: CYTOTOXIC & ONCOLOGY DRUGS (PURPLE STREAM)
+             ========================================================= -->
+        <article class="precaution-section section-purple" id="section-purple" data-category="purple">
+            
+            <div class="section-header">
+                <div class="section-title-wrap">
+                    <div class="category-icon-box box-purple">
+                        <i class="fa-solid fa-radiation"></i>
+                    </div>
+                    <div class="section-title-text">
+                        <h2>Cytotoxic & Chemotherapy Oncology Waste</h2>
+                        <span class="cat-subtitle">Expired antineoplastics, chemotherapy IV sets, contaminated gloves & patient body fluids</span>
+                    </div>
+                </div>
+                <span class="category-badge-pill badge-purple">Purple / Yellow • Cytotoxic Hazard</span>
+            </div>
+
+            <!-- Embedded Audio Player Widget -->
+            <div class="section-audio-player" id="player-purple">
+                <div class="audio-controls-left">
+                    <button type="button" class="audio-btn-play" id="playBtn-purple" onclick="toggleSectionAudio('purple')" title="Listen to Cytotoxic Waste Precautions">
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                    <button type="button" class="audio-btn-stop" onclick="stopAudio('purple')" title="Stop Audio">
+                        <i class="fa-solid fa-stop"></i>
+                    </button>
+                    <div class="audio-equalizer">
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                    </div>
+                    <div class="audio-track-info">
+                        <span class="audio-track-title">
+                            <i class="fa-solid fa-volume-high" style="color: #9333ea;"></i> Audio Narration: Cytotoxic Waste Precautions
+                        </span>
+                        <span class="audio-track-status" id="audioStatus-purple">Audio Ready • Click Play to Listen</span>
+                    </div>
+                </div>
+
+                <div class="audio-controls-right">
+                    <div class="audio-progress-container">
+                        <div class="audio-progress-bar-bg">
+                            <div class="audio-progress-fill" id="progressFill-purple" style="background:#9333ea;"></div>
+                        </div>
+                        <div class="audio-time-row">
+                            <span id="timeCurrent-purple">0:00</span>
+                            <span id="timeTotal-purple">0:45</span>
+                        </div>
+                    </div>
+
+                    <div class="speed-selector">
+                        <button type="button" class="speed-opt" data-speed="0.8" onclick="setPlaybackSpeed('purple', 0.8)">0.8x</button>
+                        <button type="button" class="speed-opt active" data-speed="1.0" onclick="setPlaybackSpeed('purple', 1.0)">1.0x</button>
+                        <button type="button" class="speed-opt" data-speed="1.25" onclick="setPlaybackSpeed('purple', 1.25)">1.25x</button>
+                        <button type="button" class="speed-opt" data-speed="1.5" onclick="setPlaybackSpeed('purple', 1.5)">1.5x</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body Content -->
+            <div class="section-body">
+                <div class="precaution-grid">
+                    <div class="detail-card">
+                        <h3><i class="fa-solid fa-list-check"></i> Typical Waste Items Included</h3>
+                        <div class="examples-tag-list">
+                            <span class="example-chip">Expired chemotherapy vials</span>
+                            <span class="example-chip">Cytotoxic IV bags & tubing</span>
+                            <span class="example-chip">Chemo preparation gowns & masks</span>
+                            <span class="example-chip">Spill cleanup absorbent pads</span>
+                            <span class="example-chip">Excreta from chemotherapy patients</span>
+                            <span class="example-chip">Cytotoxic drug ampoules</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-card">
+                        <h3><i class="fa-solid fa-user-shield"></i> Mandatory PPE Checklist</h3>
+                        <ul class="ppe-list">
+                            <li class="ppe-item"><i class="fa-solid fa-circle-check"></i> <strong>Double Gloving:</strong> ASTM D6978 Chemo-Tested Nitrile Gloves</li>
+                            <li class="ppe-item"><i class="fa-solid fa-circle-check"></i> Impermeable Polyethylene-Coated Gown with closed front</li>
+                            <li class="ppe-item"><i class="fa-solid fa-circle-check"></i> N95 / HEPA Respirator Mask</li>
+                            <li class="ppe-item"><i class="fa-solid fa-circle-check"></i> Full Protective Face Shield & Goggles</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="sop-steps-card">
+                    <h3><i class="fa-solid fa-shoe-prints"></i> Handling & Segregation Standard Operating Procedure</h3>
+                    <ol class="step-list">
+                        <li class="step-item">
+                            <span class="step-num">1</span>
+                            <span><strong>Cytotoxic Warning Labeling:</strong> Bag in heavy-duty purple or yellow bags distinctly marked with the international cytotoxic trefoil symbol and the word <strong>CYTO</strong> in bold.</span>
+                        </li>
+                        <li class="step-item">
+                            <span class="step-num">2</span>
+                            <span><strong>Class II Biosafety Cabinets:</strong> Reconstitute and prepare all antineoplastic chemotherapy agents only inside certified Class II Biological Safety Cabinets with HEPA air filtration.</span>
+                        </li>
+                        <li class="step-item">
+                            <span class="step-num">3</span>
+                            <span><strong>On-Hand Spill Kits:</strong> Maintain specialized cytotoxic spill kits (containing chemical neutralizing agents, absorbent granules, and specialized tongs) immediately accessible in oncology wards.</span>
+                        </li>
+                        <li class="step-item">
+                            <span class="step-num">4</span>
+                            <span><strong>Ultra-High Temperature Incineration:</strong> Cytotoxic compounds are mutagens and carcinogens; they must undergo incineration at temperatures exceeding <strong>1200°C</strong> with secondary combustion chambers.</span>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="dos-donts-row">
+                    <div class="dos-box">
+                        <h4><i class="fa-solid fa-check"></i> Essential Do's</h4>
+                        <ul class="guide-list">
+                            <li><i class="fa-solid fa-circle-check"></i> Change outer chemo gloves every 30 minutes during active administration.</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Label and seal all cytotoxic bags with double ties.</li>
+                            <li><i class="fa-solid fa-circle-check"></i> Promptly report any skin or eye contamination to occupational health.</li>
+                        </ul>
+                    </div>
+                    <div class="donts-box">
+                        <h4><i class="fa-solid fa-xmark"></i> Critical Don'ts</h4>
+                        <ul class="guide-list">
+                            <li><i class="fa-solid fa-triangle-exclamation"></i> NEVER autoclave cytotoxic waste (volatilizes carcinogenic vapors).</li>
+                            <li><i class="fa-solid fa-triangle-exclamation"></i> NEVER discard cytotoxic packaging in regular municipal trash.</li>
+                            <li><i class="fa-solid fa-triangle-exclamation"></i> Pregnant or breastfeeding personnel must NOT handle cytotoxic waste.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="section-footer-treatment">
+                    <span class="treatment-label"><i class="fa-solid fa-fire-burner"></i> Regulated Final Disposal Method:</span>
+                    <span class="treatment-method">Incineration at temperatures > 1200°C in specialized hazardous waste combustion facilities</span>
+                </div>
+            </div>
+
+        </article>
+
+
+        <!-- =========================================================
+             SECTION 6: EMERGENCY NEEDLE-STICK & SPILL PROTOCOLS
+             ========================================================= -->
+        <article class="precaution-section section-emergency" id="section-emergency" data-category="emergency">
+            
+            <div class="section-header">
+                <div class="section-title-wrap">
+                    <div class="category-icon-box box-emergency">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div class="section-title-text">
+                        <h2>Emergency Incident Protocols: Needle-Stick & Blood Spills</h2>
+                        <span class="cat-subtitle">Step-by-step immediate first-aid, Post-Exposure Prophylaxis (PEP) & chemical spill management</span>
+                    </div>
+                </div>
+                <span class="category-badge-pill badge-emergency">Emergency SOP • Immediate Action</span>
+            </div>
+
+            <!-- Embedded Audio Player Widget -->
+            <div class="section-audio-player" id="player-emergency">
+                <div class="audio-controls-left">
+                    <button type="button" class="audio-btn-play" id="playBtn-emergency" onclick="toggleSectionAudio('emergency')" title="Listen to Emergency Protocols">
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                    <button type="button" class="audio-btn-stop" onclick="stopAudio('emergency')" title="Stop Audio">
+                        <i class="fa-solid fa-stop"></i>
+                    </button>
+                    <div class="audio-equalizer">
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                    </div>
+                    <div class="audio-track-info">
+                        <span class="audio-track-title">
+                            <i class="fa-solid fa-volume-high" style="color: #dc2626;"></i> Audio Narration: Emergency Incident Protocols
+                        </span>
+                        <span class="audio-track-status" id="audioStatus-emergency">Audio Ready • Click Play to Listen</span>
+                    </div>
+                </div>
+
+                <div class="audio-controls-right">
+                    <div class="audio-progress-container">
+                        <div class="audio-progress-bar-bg">
+                            <div class="audio-progress-fill" id="progressFill-emergency" style="background:#dc2626;"></div>
+                        </div>
+                        <div class="audio-time-row">
+                            <span id="timeCurrent-emergency">0:00</span>
+                            <span id="timeTotal-emergency">0:50</span>
+                        </div>
+                    </div>
+
+                    <div class="speed-selector">
+                        <button type="button" class="speed-opt" data-speed="0.8" onclick="setPlaybackSpeed('emergency', 0.8)">0.8x</button>
+                        <button type="button" class="speed-opt active" data-speed="1.0" onclick="setPlaybackSpeed('emergency', 1.0)">1.0x</button>
+                        <button type="button" class="speed-opt" data-speed="1.25" onclick="setPlaybackSpeed('emergency', 1.25)">1.25x</button>
+                        <button type="button" class="speed-opt" data-speed="1.5" onclick="setPlaybackSpeed('emergency', 1.5)">1.5x</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body Content -->
+            <div class="section-body">
+                
+                <div class="emergency-callout">
+                    <h3><i class="fa-solid fa-syringe"></i> Protocol A: Accidental Needle-Stick / Cut Injury (Step-by-Step)</h3>
+                    <div class="emergency-steps-grid">
+                        <div class="emergency-step-box">
+                            <span class="step-tag">Step 1 • Immediate</span>
+                            <h4>Wash Under Running Tap</h4>
+                            <p>Immediately flush the wound under cool running water with mild soap for 5 continuous minutes. Allow blood to flow freely.</p>
+                        </div>
+                        <div class="emergency-step-box">
+                            <span class="step-tag">Step 2 • Warning</span>
+                            <h4>DO NOT Squeeze or Scrub</h4>
+                            <p>Never squeeze, pinch, or violently scrub the puncture site. Never suck the wound with your mouth or use corrosive bleach.</p>
+                        </div>
+                        <div class="emergency-step-box">
+                            <span class="step-tag">Step 3 • Report</span>
+                            <h4>Cover & Notify Supervisor</h4>
+                            <p>Dry and apply a sterile waterproof adhesive bandage. Report incident to ward sister and the Infection Control Nurse immediately.</p>
+                        </div>
+                        <div class="emergency-step-box">
+                            <span class="step-tag">Step 4 • PEP Within 2 Hours</span>
+                            <h4>Post-Exposure Prophylaxis</h4>
+                            <p>Undergo baseline blood tests (HIV, Hepatitis B, Hepatitis C). If recommended, initiate ARV PEP treatment ideally within 2 hours.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="emergency-callout" style="border-color: #fb923c; background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);">
+                    <h3 style="color: #c2410c;"><i class="fa-solid fa-droplet"></i> Protocol B: Blood & Body Fluid Spill Management</h3>
+                    <div class="emergency-steps-grid">
+                        <div class="emergency-step-box" style="border-color: #fdba74;">
+                            <span class="step-tag" style="color: #ea580c;">Step 1</span>
+                            <h4>Cordon Area & Don Full PPE</h4>
+                            <p>Place warning caution signs. Don nitrile gloves, protective gown, eye visor, and shoe covers before approaching spill.</p>
+                        </div>
+                        <div class="emergency-step-box" style="border-color: #fdba74;">
+                            <span class="step-tag" style="color: #ea580c;">Step 2</span>
+                            <h4>Cover with Absorbent Towels</h4>
+                            <p>Place absorbent paper towels or spill pads over the puddle working inward from edges to center to stop spread.</p>
+                        </div>
+                        <div class="emergency-step-box" style="border-color: #fdba74;">
+                            <span class="step-tag" style="color: #ea580c;">Step 3</span>
+                            <h4>Pour 1% Sodium Hypochlorite</h4>
+                            <p>Gently pour freshly made 1% sodium hypochlorite (10,000 ppm chlorine) over towels. Wait <strong>20 minutes</strong> contact time.</p>
+                        </div>
+                        <div class="emergency-step-box" style="border-color: #fdba74;">
+                            <span class="step-tag" style="color: #ea580c;">Step 4</span>
+                            <h4>Collect in Yellow Bag & Mop</h4>
+                            <p>Use plastic scraper/tongs to deposit soaked towels into a yellow biohazard bag. Mop area with disinfectant.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hand Hygiene reminder -->
+                <div class="dos-donts-row" style="margin-top: 24px;">
+                    <div class="dos-box">
+                        <h4><i class="fa-solid fa-hand-holding-droplet"></i> Hand Hygiene Best Practice</h4>
+                        <p style="font-size: 13px; color: #166534; line-height: 1.6;">
+                            Always perform the WHO 6-step hand washing technique with soap and water for 40–60 seconds, or use an alcohol-based hand rub (70% ethanol) for 20–30 seconds after touching any waste or removing gloves.
+                        </p>
+                    </div>
+                    <div class="donts-box">
+                        <h4><i class="fa-solid fa-phone"></i> Emergency Hospital Extension Numbers</h4>
+                        <p style="font-size: 13px; color: #991b1b; line-height: 1.6;">
+                            • Infection Control Committee: Ext. 4401<br>
+                            • Occupational Health & Needle-Stick Hotline: Ext. 2222<br>
+                            • Bio-Medical Waste In-Charge: Ext. 3310
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+        </article>
+
+    </main>
+
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="footer">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fa-solid fa-leaf"></i>
+                    </div>
+                    <div>
+                        <h2>MedWaste <span>AI</span></h2>
+                        <p>Clean Care • Safer Tomorrow</p>
+                    </div>
+                </div>
+                <p>
+                    Smart medical-waste collection, segregation, and tracking powered by AI, IoT, and regulatory biosafety intelligence.
+                </p>
+            </div>
+
+            <div class="footer-column">
+                <h3>Platform</h3>
+                <a href="index.html">Home</a>
+                <a href="scanner.html">AI Scanner</a>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="pickup.html">Pickup Logistics</a>
+                <a href="precautions.html">Safety Precautions</a>
+                <a href="profile.html">User Profile</a>
+            </div>
+
+            <div class="footer-column">
+                <h3>Biosafety Resources</h3>
+                <a href="#section-yellow">Infectious Waste SOP</a>
+                <a href="#section-red">Plastics Handling</a>
+                <a href="#section-white">Sharps Safety</a>
+                <a href="#section-emergency">Needle-Stick Protocol</a>
+            </div>
+
+            <div class="footer-column">
+                <h3>Contact</h3>
+                <a href="mailto:contact@medwasteai.com">contact@medwasteai.com</a>
+                <a href="#">Pune, Maharashtra, India</a>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2026 MedWaste AI. All Rights Reserved. Compliant with Bio-Medical Waste Management Rules.</p>
+            <div class="socials">
+                <a href="#" title="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="#" title="GitHub"><i class="fa-brands fa-github"></i></a>
+                <a href="#" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification Element -->
+    <div id="precautionsToast" class="precautions-toast"></div>
+
+    <!-- Global App Logic & Precautions Audio Controller -->
+    <script src="script.js"></script>
+    <script src="precautions.js"></script>
+
+</body>
+</html>
