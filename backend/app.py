@@ -5,6 +5,9 @@ from werkzeug.utils import secure_filename
 
 import os
 import sqlite3
+import hashlib
+from datetime import datetime
+from gtts import gTTS
 
 from database import get_db, init_db
 from ai_classifier import classify_waste
@@ -90,6 +93,62 @@ def health():
         "database": "connected",
         "ai": "available"
     })
+
+
+# ==========================================
+# MULTILINGUAL TEXT-TO-SPEECH (TTS)
+# ==========================================
+
+TTS_CACHE_DIR = os.path.join(os.path.dirname(__file__), ".tts_cache")
+os.makedirs(TTS_CACHE_DIR, exist_ok=True)
+
+GTTS_LANG_MAP = {
+    "hi": "hi",
+    "mr": "mr",
+    "ta": "ta",
+    "te": "te",
+    "bn": "bn",
+    "gu": "gu",
+    "kn": "kn",
+    "ml": "ml",
+    "pa": "pa",
+    "ur": "ur",
+    "en": "en",
+    "or": "hi",
+}
+
+@app.route("/api/tts", methods=["GET", "POST"])
+def text_to_speech():
+    if request.method == "POST":
+        data = request.get_json(silent=True) or {}
+        text = data.get("text", "").strip()
+        lang = data.get("lang", "en").strip()
+    else:
+        text = request.args.get("text", "").strip()
+        lang = request.args.get("lang", "en").strip()
+
+    if not text:
+        return jsonify({"error": "Missing 'text' parameter"}), 400
+
+    target_lang = GTTS_LANG_MAP.get(lang.lower(), "en")
+    text_hash = hashlib.md5(f"{target_lang}:{text}".encode("utf-8")).hexdigest()
+    filename = f"tts_{target_lang}_{text_hash}.mp3"
+    filepath = os.path.join(TTS_CACHE_DIR, filename)
+
+    if not os.path.exists(filepath):
+        try:
+            tts = gTTS(text=text, lang=target_lang, slow=False)
+            tts.save(filepath)
+        except Exception as e:
+            try:
+                tts = gTTS(text=text, lang="en", slow=False)
+                tts.save(filepath)
+            except Exception as e2:
+                return jsonify({"error": str(e2)}), 500
+
+    response = send_from_directory(TTS_CACHE_DIR, filename, mimetype="audio/mpeg")
+    response.headers["Cache-Control"] = "public, max-age=86400"
+    return response
 
 
 # ==========================================
@@ -504,12 +563,174 @@ def classify():
 
     # Execute AI classification model
     result = classify_waste(file_path, hint=hint)
+    if "stage_1_upload" in result:
+        result["stage_1_upload"]["image_url"] = f"/uploads/{filename}"
 
     return jsonify({
         "success": True,
         "classification": result,
         "image_url": f"/uploads/{filename}",
         "filename": filename
+    })
+
+
+# ==========================================
+# AI SCANNER PIPELINE: SEGREGATE + RECORD + ALERT
+# Implements the 6-Stage Architecture Flow
+# ==========================================
+
+@app.route("/api/scanner/pipeline-segregate", methods=["POST"])
+def scanner_pipeline_segregate():
+    hint = ""
+    filename = f"scan_pipe_{int(time.time())}.jpg"
+    file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+
+    classification_override = None
+    hospital_id = 1
+
+    if request.is_json:
+        data = request.get_json() or {}
+        hint = data.get("hint", "")
+        hospital_id = data.get("hospital_id", 1)
+        img_b64 = data.get("image_base64") or data.get("image") or ""
+        classification_override = data.get("classification")
+
+        if img_b64:
+            if "," in img_b64:
+                img_b64 = img_b64.split(",", 1)[1]
+            try:
+                raw_bytes = base64.b64decode(img_b64)
+                with open(file_path, "wb") as f:
+                    f.write(raw_bytes)
+            except Exception as e:
+                return jsonify({"success": False, "message": f"Base64 error: {str(e)}"}), 400
+    elif "image" in request.files:
+        file = request.files["image"]
+        hint = request.form.get("hint", "")
+        hospital_id = int(request.form.get("hospital_id", 1) or 1)
+        clean_name = secure_filename(file.filename) or f"pipe_{int(time.time())}.jpg"
+        filename = clean_name
+        file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        file.save(file_path)
+
+    if classification_override:
+        result = classification_override
+    else:
+        if not os.path.exists(file_path):
+            with open(file_path, "wb") as f:
+                f.write(b"")
+        result = classify_waste(file_path, hint=hint)
+        if "stage_1_upload" in result:
+            result["stage_1_upload"]["image_url"] = f"/uploads/{filename}"
+
+    db_waste_type = result.get("db_waste_type", "Yellow")
+    if db_waste_type == "Multi":
+        db_waste_type = "Yellow"
+
+    est_weight = float(result.get("stage_4_segregation", {}).get("deposit_weight_kg", 1.5))
+    confidence = float(result.get("confidence", 0.95))
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT id, bin_code, current_level, weight, capacity, status 
+        FROM bins 
+        WHERE hospital_id = ? AND LOWER(waste_type) = LOWER(?)
+        LIMIT 1
+    """, (hospital_id, db_waste_type))
+    bin_row = cursor.fetchone()
+
+    if not bin_row:
+        cursor.execute("""
+            SELECT id, bin_code, current_level, weight, capacity, status 
+            FROM bins 
+            WHERE LOWER(waste_type) = LOWER(?)
+            LIMIT 1
+        """, (db_waste_type,))
+        bin_row = cursor.fetchone()
+
+    bin_id = bin_row["id"] if bin_row else 1
+    bin_code = bin_row["bin_code"] if bin_row else f"BIN-{db_waste_type[:3].upper()}-001"
+    cur_level = float(bin_row["current_level"]) if bin_row else 50.0
+    cur_weight = float(bin_row["weight"]) if bin_row else 10.0
+    capacity = float(bin_row["capacity"]) if bin_row else 50.0
+
+    cursor.execute("""
+        INSERT INTO waste_records (bin_id, waste_type, weight, confidence, image_path)
+        VALUES (?, ?, ?, ?, ?)
+    """, (bin_id, db_waste_type, est_weight, confidence, f"/uploads/{filename}"))
+    waste_record_id = cursor.lastrowid
+
+    new_weight = round(cur_weight + est_weight, 1)
+    new_level = min(round(cur_level + ((est_weight / capacity) * 100), 1), 100.0)
+
+    threshold_cap = 75.0 if db_waste_type.lower() == "white" else 80.0
+    is_urgent = new_level >= threshold_cap
+
+    if new_level >= 90.0:
+        bin_status = "Urgent"
+    elif new_level >= threshold_cap:
+        bin_status = "Collection Required"
+    elif new_level >= 60.0:
+        bin_status = "Warning"
+    else:
+        bin_status = "Normal"
+
+    cursor.execute("""
+        UPDATE bins 
+        SET weight = ?, current_level = ?, status = ?, last_updated = CURRENT_TIMESTAMP
+        WHERE id = ?
+    """, (new_weight, new_level, bin_status, bin_id))
+
+    collection_id = None
+    collection_created = False
+
+    if is_urgent:
+        cursor.execute("SELECT id FROM collections WHERE bin_id = ? AND status = 'Pending'", (bin_id,))
+        existing_col = cursor.fetchone()
+        if existing_col:
+            collection_id = existing_col["id"]
+        else:
+            now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            cursor.execute("""
+                INSERT INTO collections (bin_id, vehicle_id, collector_name, status, weight, requested_at)
+                VALUES (?, 1, 'CBWTF Rapid Response Fleet', 'Pending', ?, ?)
+            """, (bin_id, est_weight, now_str))
+            collection_id = cursor.lastrowid
+            collection_created = True
+
+    conn.commit()
+    conn.close()
+
+    manifest_id = result.get("stage_5_digital_record", {}).get("manifest_id", f"MW-MNF-{waste_record_id:04d}")
+    barcode_num = result.get("stage_5_digital_record", {}).get("barcode_number", f"CPCB-BMW-{waste_record_id:06d}")
+
+    return jsonify({
+        "success": True,
+        "message": "AI Waste Segregation, Digital Record, and Collection Alert Processed",
+        "architecture": "MedWaste-AI-6Stage-Model",
+        "classification": result,
+        "digital_record": {
+            "record_id": waste_record_id,
+            "manifest_id": manifest_id,
+            "barcode_number": barcode_num,
+            "bin_id": bin_id,
+            "bin_code": bin_code,
+            "waste_type": db_waste_type,
+            "weight_kg": est_weight,
+            "confidence": confidence,
+            "status": "Committed to Digital Biohazard Ledger"
+        },
+        "collection_alert": {
+            "alert_triggered": is_urgent,
+            "collection_id": collection_id,
+            "collection_created": collection_created,
+            "bin_code": bin_code,
+            "threshold_pct": threshold_cap,
+            "new_level_pct": new_level,
+            "status": "Automated CBWTF Fleet Dispatch Dispatched" if is_urgent else "Normal (Capacity Safe)"
+        }
     })
 
 
@@ -720,35 +941,148 @@ def get_waste():
 @app.route("/api/collections", methods=["POST"])
 def create_collection():
 
-    data = request.get_json()
+    data = request.get_json() or {}
 
-    bin_id = data.get("bin_id")
+    raw_bin_id = data.get("bin_id")
+    hospital_id = data.get("hospital_id")
+    waste_type = data.get("waste_type")
+    collector_name = data.get("collector_name", "CBWTF Rapid Response Fleet")
+    vehicle_id = data.get("vehicle_id")
+    status = data.get("status", "Pending")
 
-    if not bin_id:
+    weight = float(data.get("weight") or data.get("weight_kg") or data.get("deposit_weight_kg") or 0.0)
+    requested_at = data.get("requested_at") or data.get("timestamp") or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        return jsonify({
-            "success": False,
-            "message": "bin_id is required"
-        }), 400
+    if "T" in requested_at:
+        try:
+            if requested_at.endswith("Z"):
+                dt_utc = datetime.fromisoformat(requested_at.replace("Z", "+00:00"))
+                requested_at = dt_utc.astimezone().strftime("%Y-%m-%d %H:%M:%S")
+            else:
+                requested_at = requested_at.replace("T", " ").split(".")[0]
+        except Exception:
+            requested_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # Clean bin_id
+    bin_id = None
+    if raw_bin_id not in (None, "", "auto", "Auto"):
+        try:
+            bin_id = int(raw_bin_id)
+        except (ValueError, TypeError):
+            bin_id = None
+
+    if hospital_id is not None:
+        try:
+            hospital_id = int(hospital_id)
+        except (ValueError, TypeError):
+            hospital_id = None
 
     conn = get_db()
     cursor = conn.cursor()
 
+    target_bin = None
+
+    # Step 1: If bin_id is specified, check if it belongs to requested hospital_id
+    if bin_id:
+        cursor.execute("SELECT * FROM bins WHERE id = ?", (bin_id,))
+        b_row = cursor.fetchone()
+        if b_row:
+            # If hospital_id is specified and matches the bin, keep it
+            if hospital_id is None or b_row["hospital_id"] == hospital_id:
+                target_bin = dict(b_row)
+
+    # Step 2: If target_bin still not found, search by hospital_id and waste_type
+    if not target_bin:
+        if hospital_id is not None:
+            if waste_type:
+                cursor.execute("""
+                    SELECT * FROM bins 
+                    WHERE hospital_id = ? AND LOWER(waste_type) = LOWER(?)
+                    LIMIT 1
+                """, (hospital_id, waste_type))
+                b_row = cursor.fetchone()
+                if b_row:
+                    target_bin = dict(b_row)
+
+            if not target_bin:
+                # Any existing bin for this hospital
+                cursor.execute("""
+                    SELECT * FROM bins 
+                    WHERE hospital_id = ?
+                    ORDER BY id ASC
+                    LIMIT 1
+                """, (hospital_id,))
+                b_row = cursor.fetchone()
+                if b_row:
+                    target_bin = dict(b_row)
+
+            if not target_bin:
+                # Auto-initialize standard bin for this hospital
+                wtype = waste_type or "Yellow"
+                cursor.execute("SELECT COUNT(*) FROM bins")
+                total_b = cursor.fetchone()[0]
+                bin_code = f"BIN-{wtype[:3].upper()}-{total_b + 1:03d}"
+                cursor.execute("""
+                    INSERT INTO bins (bin_code, hospital_id, waste_type, capacity, current_level, weight, status)
+                    VALUES (?, ?, ?, 50.0, 10.0, 5.0, 'Normal')
+                """, (bin_code, hospital_id, wtype))
+                new_id = cursor.lastrowid
+                target_bin = {
+                    "id": new_id,
+                    "bin_code": bin_code,
+                    "hospital_id": hospital_id,
+                    "waste_type": wtype,
+                    "current_level": 10.0,
+                    "weight": 5.0
+                }
+        else:
+            # Fallback to first available bin
+            cursor.execute("SELECT * FROM bins LIMIT 1")
+            b_row = cursor.fetchone()
+            if b_row:
+                target_bin = dict(b_row)
+
+    if not target_bin:
+        conn.close()
+        return jsonify({
+            "success": False,
+            "message": "No valid smart container found to attach collection request"
+        }), 400
+
+    resolved_bin_id = target_bin["id"]
+    bin_code = target_bin.get("bin_code", f"BIN-{resolved_bin_id:03d}")
+
+    if weight <= 0:
+        weight = float(target_bin.get("weight", 0.0) or 1.8)
+    weight = round(weight, 1)
+
+    # Assign default vehicle if not provided
+    if not vehicle_id:
+        cursor.execute("SELECT id FROM vehicles LIMIT 1")
+        v_row = cursor.fetchone()
+        if v_row:
+            vehicle_id = v_row[0]
+
     cursor.execute("""
         INSERT INTO collections
-        (bin_id, status)
-        VALUES (?, 'Pending')
-    """, (bin_id,))
+        (bin_id, vehicle_id, collector_name, status, weight, requested_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (resolved_bin_id, vehicle_id, collector_name, status, weight, requested_at))
 
     collection_id = cursor.lastrowid
-
     conn.commit()
     conn.close()
 
     return jsonify({
         "success": True,
-        "message": "Collection request created",
-        "collection_id": collection_id
+        "message": "Collection request created successfully",
+        "collection_id": collection_id,
+        "bin_id": resolved_bin_id,
+        "bin_code": bin_code,
+        "waste_type": target_bin.get("waste_type", "Yellow"),
+        "weight": weight,
+        "requested_at": requested_at,
+        "status": status
     }), 201
 
 
@@ -766,26 +1100,64 @@ def get_collections():
     if hospital_id is not None:
         cursor.execute("""
             SELECT
-                collections.*,
+                collections.id,
+                collections.bin_id,
+                collections.vehicle_id,
+                collections.collector_name,
+                collections.status,
+                collections.requested_at,
+                collections.collected_at,
+                collections.delivered_at,
+                CASE 
+                    WHEN collections.weight IS NOT NULL AND collections.weight > 0 THEN collections.weight 
+                    ELSE bins.weight 
+                END AS weight,
                 bins.bin_code,
                 bins.waste_type,
-                bins.current_level
+                bins.current_level,
+                bins.hospital_id,
+                hospitals.name AS hospital_name,
+                vehicles.vehicle_number,
+                vehicles.driver_name
             FROM collections
             LEFT JOIN bins
             ON collections.bin_id = bins.id
+            LEFT JOIN hospitals
+            ON bins.hospital_id = hospitals.id
+            LEFT JOIN vehicles
+            ON collections.vehicle_id = vehicles.id
             WHERE bins.hospital_id = ?
             ORDER BY collections.requested_at DESC
         """, (hospital_id,))
     else:
         cursor.execute("""
             SELECT
-                collections.*,
+                collections.id,
+                collections.bin_id,
+                collections.vehicle_id,
+                collections.collector_name,
+                collections.status,
+                collections.requested_at,
+                collections.collected_at,
+                collections.delivered_at,
+                CASE 
+                    WHEN collections.weight IS NOT NULL AND collections.weight > 0 THEN collections.weight 
+                    ELSE bins.weight 
+                END AS weight,
                 bins.bin_code,
                 bins.waste_type,
-                bins.current_level
+                bins.current_level,
+                bins.hospital_id,
+                hospitals.name AS hospital_name,
+                vehicles.vehicle_number,
+                vehicles.driver_name
             FROM collections
             LEFT JOIN bins
             ON collections.bin_id = bins.id
+            LEFT JOIN hospitals
+            ON bins.hospital_id = hospitals.id
+            LEFT JOIN vehicles
+            ON collections.vehicle_id = vehicles.id
             ORDER BY collections.requested_at DESC
         """)
 

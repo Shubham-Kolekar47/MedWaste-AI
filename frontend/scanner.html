@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>AI Waste Scanner | MedWaste AI</title>
+    <title>AI Waste Detection & Segregation Model | MedWaste AI</title>
 
     <link rel="stylesheet" href="style.css">
 
@@ -74,15 +74,98 @@
             <div class="page-breadcrumb">
                 <a href="index.html"><i class="fa-solid fa-house"></i> Home</a>
                 <span>/</span>
-                <span>AI Scanner</span>
+                <span>AI Waste Detection & Segregation Architecture</span>
             </div>
 
-            <p class="section-label">CLINICAL OPTICAL VISION ENGINE</p>
-            <h1>Smart AI Waste Scanner & Segregator</h1>
+            <p class="section-label">FLOW-DRIVEN DEEP LEARNING ARCHITECTURE</p>
+            <h1>AI Waste Detection & Automated Segregation Engine</h1>
             <p class="page-hero-desc">
-                Instant deep classification and hazard segregation for biomedical waste streams. Upload medical photos,
-                test clinical samples, or activate live camera scanning with optical HUD.
+                Upload or capture medical waste imagery. Our AI model identifies the waste type across
+                <strong>Yellow</strong>, <strong>Red</strong>, or <strong>White/Blue</strong> streams,
+                automatically segregates into designated receptacles, generates an immutable
+                <strong>Digital Record</strong>, and triggers instant <strong>Collection Alerts</strong>.
             </p>
+        </div>
+    </section>
+
+
+    <!-- ================= ARCHITECTURE PIPELINE TRACKER ================= -->
+
+    <section class="architecture-tracker-container">
+        <div class="architecture-flow-tracker" id="architectureFlowTracker">
+
+            <div class="flow-stage-node active" id="stageNode1">
+                <div class="node-icon-circle">
+                    <i class="fa-solid fa-camera"></i>
+                </div>
+                <div class="node-meta">
+                    <span class="node-step-tag">STAGE 1</span>
+                    <strong class="node-title">Upload / Capture</strong>
+                    <span class="node-sub">User Image Input</span>
+                </div>
+            </div>
+
+            <div class="flow-connector" id="connector1">
+                <i class="fa-solid fa-chevron-right"></i>
+            </div>
+
+            <div class="flow-stage-node" id="stageNode2">
+                <div class="node-icon-circle">
+                    <i class="fa-solid fa-microchip"></i>
+                </div>
+                <div class="node-meta">
+                    <span class="node-step-tag">STAGE 2</span>
+                    <strong class="node-title">AI MODEL</strong>
+                    <span class="node-sub">Waste Detection</span>
+                </div>
+            </div>
+
+            <div class="flow-connector" id="connector2">
+                <i class="fa-solid fa-chevron-right"></i>
+            </div>
+
+            <div class="flow-stage-node" id="stageNode3">
+                <div class="node-icon-circle">
+                    <i class="fa-solid fa-tags"></i>
+                </div>
+                <div class="node-meta">
+                    <span class="node-step-tag">STAGE 3</span>
+                    <strong class="node-title">Identify Waste Type</strong>
+                    <span class="node-sub">Yellow • Red • White/Blue</span>
+                </div>
+            </div>
+
+            <div class="flow-connector" id="connector3">
+                <i class="fa-solid fa-chevron-right"></i>
+            </div>
+
+            <div class="flow-stage-node" id="stageNode4">
+                <div class="node-icon-circle">
+                    <i class="fa-solid fa-code-fork"></i>
+                </div>
+                <div class="node-meta">
+                    <span class="node-step-tag">STAGE 4</span>
+                    <strong class="node-title">Software "Segregates"</strong>
+                    <span class="node-sub">Automated Bin Routing</span>
+                </div>
+            </div>
+
+            <div class="flow-connector" id="connector4">
+                <i class="fa-solid fa-chevron-right"></i>
+            </div>
+
+            <div class="flow-stage-node dual-node" id="stageNode5">
+                <div class="node-icon-circle">
+                    <i class="fa-solid fa-file-shield"></i>
+                    <i class="fa-solid fa-bell"></i>
+                </div>
+                <div class="node-meta">
+                    <span class="node-step-tag">STAGE 5 & 6</span>
+                    <strong class="node-title">Digital Record & Alert</strong>
+                    <span class="node-sub">Ledger + Collection Dispatch</span>
+                </div>
+            </div>
+
         </div>
     </section>
 
@@ -93,39 +176,42 @@
 
         <div class="classifier-grid">
 
-            <!-- Input / Upload Card -->
+            <!-- INPUT PANEL (STAGE 1: Upload / Capture) -->
             <div class="classifier-card input-panel">
 
                 <div class="panel-header">
                     <i class="fa-solid fa-camera-retro"></i>
                     <div>
-                        <h3>AI Waste Optical Scanner</h3>
-                        <p>Real-time optical segregation & deep neural inference</p>
+                        <h3>Stage 1: Upload / Capture Image</h3>
+                        <p>User input feed via camera snapshot, file upload, or clinical preset</p>
                     </div>
                 </div>
 
-                <!-- Scanner Mode Selector: Upload vs Camera -->
+                <!-- Mode Selector: Upload vs Camera -->
                 <div class="scanner-mode-tabs">
-                    <button type="button" class="scanner-mode-btn active" id="modeUploadBtn" onclick="switchScannerMode('upload')">
-                        <i class="fa-solid fa-images"></i> Upload / Samples
+                    <button type="button" class="scanner-mode-btn active" id="modeUploadBtn"
+                        onclick="switchScannerMode('upload')">
+                        <i class="fa-solid fa-images"></i> File Upload / Clinical Samples
                     </button>
-                    <button type="button" class="scanner-mode-btn" id="modeCameraBtn" onclick="switchScannerMode('camera')">
-                        <i class="fa-solid fa-camera"></i> Live WebCam Scanner
+                    <button type="button" class="scanner-mode-btn" id="modeCameraBtn"
+                        onclick="switchScannerMode('camera')">
+                        <i class="fa-solid fa-video"></i> Live WebCam Optical Sensor
                     </button>
                 </div>
 
-                <!-- MODE 1: Upload & Clinical Samples -->
+                <!-- MODE 1: Upload & Samples -->
                 <div id="uploadModeContainer">
                     <div class="upload-dropzone" id="uploadDropzone" onclick="handleDropzoneClick(event)">
-                        <input type="file" id="wasteImageInput" accept="image/*" class="sr-only-file-input" onchange="handleImageFileSelect(event)">
-                        
+                        <input type="file" id="wasteImageInput" accept="image/*" class="sr-only-file-input"
+                            onchange="handleImageFileSelect(event)">
+
                         <div class="dropzone-content" id="dropzoneContent">
                             <div class="dropzone-icon">
                                 <i class="fa-solid fa-cloud-arrow-up"></i>
                             </div>
-                            <h4>Click to choose or drop waste photo</h4>
-                            <p>or <span class="browse-link">browse medical imagery</span></p>
-                            <small>Supports PNG, JPG, JPEG, WEBP</small>
+                            <h4>Click to choose or drag medical waste photo</h4>
+                            <p>or <span class="browse-link">browse clinical images</span></p>
+                            <small>Supports PNG, JPG, JPEG, WEBP • Max 10MB</small>
                         </div>
 
                         <div class="dropzone-preview" id="dropzonePreview" style="display:none">
@@ -133,7 +219,7 @@
                                 <img id="imagePreviewImg" alt="Waste preview">
                                 <div class="scanner-laser" id="scannerLaser"></div>
                                 <div class="scanning-overlay-badge" id="scanningBadge" style="display:none;">
-                                    <i class="fa-solid fa-circle-notch fa-spin"></i> Neural Net Analyzing...
+                                    <i class="fa-solid fa-microchip fa-spin"></i> AI Model Detecting Waste...
                                 </div>
                             </div>
                             <button type="button" class="preview-remove-btn" onclick="resetClassifier(event)">
@@ -142,35 +228,62 @@
                         </div>
                     </div>
 
-                    <div class="sample-picker">
-                        <span class="sample-title"><i class="fa-solid fa-wand-magic-sparkles"></i> One-Click Clinical Waste Samples:</span>
-                        <div class="sample-tags">
-                            <button type="button" class="sample-tag station-tag" onclick="selectSampleStation()">
-                                <i class="fa-solid fa-layer-group"></i> 4-Bin Medical Waste Station
-                            </button>
-                            <button type="button" class="sample-tag yellow-tag" onclick="selectSampleWaste('Yellow', 'soiled_cotton_gauze.jpg', 'Soiled Cotton Gauze & Dressing')">
-                                <i class="fa-solid fa-biohazard"></i> Soiled Dressing (Yellow)
-                            </button>
-                            <button type="button" class="sample-tag red-tag" onclick="selectSampleWaste('Red', 'plastic_syringe_tubing.jpg', 'Plastic Syringe & IV Tubing')">
-                                <i class="fa-solid fa-syringe"></i> Plastic Syringe (Red)
-                            </button>
-                            <button type="button" class="sample-tag blue-tag" onclick="selectSampleWaste('Blue', 'glass_medicine_vial.jpg', 'Glass Medicine Ampoule / Vial')">
-                                <i class="fa-solid fa-vial"></i> Glass Vial (Blue)
-                            </button>
-                            <button type="button" class="sample-tag white-tag" onclick="selectSampleWaste('White', 'surgical_needle_scalpel.jpg', 'Surgical Needle & Scalpel Sharp')">
-                                <i class="fa-solid fa-shield-halved"></i> Sharp Needle (White)
-                            </button>
+                    <!-- CLINICAL SAMPLES GROUPED BY ARCHITECTURE STREAMS -->
+                    <div class="architecture-sample-picker">
+                        <span class="sample-picker-title">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Test with Clinical Category Presets:
+                        </span>
+
+                        <div class="category-preset-group">
+                            <!-- Yellow Category Preset -->
+                            <div class="preset-stream-card yellow-stream-card"
+                                onclick="selectSampleWaste('Yellow', 'soiled_cotton_gauze.jpg', 'Soiled Cotton Gauze & Blood Dressing')">
+                                <div class="preset-badge yellow-badge">Yellow Category</div>
+                                <div class="preset-name">
+                                    <i class="fa-solid fa-biohazard"></i> Soiled Gauze & Dressings
+                                </div>
+                                <small>Infectious • Incineration</small>
+                            </div>
+
+                            <!-- Red Category Preset -->
+                            <div class="preset-stream-card red-stream-card"
+                                onclick="selectSampleWaste('Red', 'plastic_syringe_tubing.jpg', 'Plastic Syringe & IV Tubing')">
+                                <div class="preset-badge red-badge">Red Category</div>
+                                <div class="preset-name">
+                                    <i class="fa-solid fa-syringe"></i> Syringes & IV Tubing
+                                </div>
+                                <small>Contaminated Recyclable Plastics</small>
+                            </div>
+
+                            <!-- White/Blue Category Preset -->
+                            <div class="preset-stream-card blue-stream-card"
+                                onclick="selectSampleWaste('White/Blue', 'surgical_needle_scalpel.jpg', 'Surgical Needle, Scalpel Blade & Glass Vial')">
+                                <div class="preset-badge blue-badge">White/Blue Category</div>
+                                <div class="preset-name">
+                                    <i class="fa-solid fa-shield-halved"></i> Sharps & Glass Vials
+                                </div>
+                                <small>Puncture Sharps • Glass Cullet</small>
+                            </div>
+
+                            <!-- Central Multi-Stream Station -->
+                            <div class="preset-stream-card multi-stream-card" onclick="selectSampleStation()">
+                                <div class="preset-badge multi-badge">Full Audit</div>
+                                <div class="preset-name">
+                                    <i class="fa-solid fa-layer-group"></i> 4-Bin Central Station
+                                </div>
+                                <small>Simultaneous Stream Inspection</small>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- MODE 2: Live Camera Scanner -->
+                <!-- MODE 2: Live Camera Sensor -->
                 <div id="cameraModeContainer" style="display: none;">
                     <div class="camera-scanner-view">
                         <div class="camera-viewport" id="cameraViewport">
                             <video id="scannerVideo" autoplay playsinline muted></video>
                             <canvas id="scannerCanvas" style="display:none;"></canvas>
-                            
+
                             <div class="scanner-hud">
                                 <div class="hud-corner top-left"></div>
                                 <div class="hud-corner top-right"></div>
@@ -185,7 +298,8 @@
                             <button type="button" class="primary-btn" id="toggleCamBtn" onclick="toggleCamera()">
                                 <i class="fa-solid fa-video"></i> Start Camera Feed
                             </button>
-                            <button type="button" class="primary-btn capture-btn" id="captureCamBtn" style="display:none;" onclick="captureAndScan()">
+                            <button type="button" class="primary-btn capture-btn" id="captureCamBtn"
+                                style="display:none;" onclick="captureAndScan()">
                                 <i class="fa-solid fa-camera"></i> Capture & Classify
                             </button>
                         </div>
@@ -195,73 +309,277 @@
             </div>
 
 
-            <!-- Result / Output Card -->
+            <!-- OUTPUT PANEL (STAGES 2, 3, 4, 5, 6) -->
             <div class="classifier-card output-panel" id="classifierOutputPanel">
 
                 <div class="panel-header">
                     <i class="fa-solid fa-microchip"></i>
                     <div>
-                        <h3>AI Classification Output</h3>
-                        <p>Real-time inference & segregation routing</p>
+                        <h3>AI Model Inference & Segregation Engine</h3>
+                        <p>Stages 2 to 6: Detection, Identification, Segregation, Record & Alert</p>
                     </div>
                 </div>
 
+                <!-- IDLE PLACEHOLDER WITH ARCHITECTURE SITEMAP -->
                 <div class="result-placeholder" id="classifierPlaceholder">
                     <div class="placeholder-icon">
                         <i class="fa-solid fa-robot"></i>
                     </div>
-                    <h4>AI Engine Ready</h4>
-                    <p>Upload a waste photo, select a clinical sample, or start the live camera above to trigger instant AI segregation.</p>
+                    <h4>AI Model Ready for Waste Input</h4>
+                    <p>
+                        Upload a photo, capture from camera, or choose a clinical category preset.
+                        The neural vision model will execute real-time detection, identify the category,
+                        perform automated segregation, and generate the digital record with collection alert.
+                    </p>
+
+                    <div class="placeholder-architecture-mini">
+                        <div class="mini-branch yellow-mini"><i class="fa-solid fa-biohazard"></i> Yellow Category</div>
+                        <div class="mini-branch red-mini"><i class="fa-solid fa-syringe"></i> Red Category</div>
+                        <div class="mini-branch blue-mini"><i class="fa-solid fa-shield-halved"></i> White/Blue Category
+                        </div>
+                    </div>
                 </div>
 
 
+                <!-- ACTIVE OUTPUT CONTAINER -->
                 <div class="result-content" id="classifierResult" style="display: none;">
 
-                    <!-- Headline Banner -->
-                    <div class="result-headline" id="resultHeadlineBanner">
-                        <div class="result-badge" id="resultCategoryBadge">
-                            <i class="fa-solid fa-biohazard" id="resultCategoryIcon"></i>
-                            <span id="resultCategoryName">Infectious Waste</span>
+                    <!-- STAGE 2: AI MODEL DETECTION TELEMETRY -->
+                    <div class="pipeline-section-box stage-2-box">
+                        <div class="box-header">
+                            <span class="stage-tag"><i class="fa-solid fa-microchip"></i> STAGE 2: AI MODEL (Waste
+                                Detection)</span>
+                            <span class="confidence-badge" id="aiConfidenceBadge">98% Match</span>
                         </div>
-                        <div class="confidence-pill" id="resultConfidencePill">
-                            96% Match
-                        </div>
-                    </div>
-
-                    <!-- DUSTBIN FULFILLMENT TELEMETRY SECTION -->
-                    <div class="fulfillment-section" id="fulfillmentContainer"></div>
-
-                    <!-- SUGGESTED WASTE MANAGEMENT TECHNIQUES SECTION -->
-                    <div class="techniques-section" id="techniquesContainer"></div>
-
-                    <!-- General Metadata Info Grid -->
-                    <div class="result-info-grid" id="classicInfoGrid">
-                        <div class="info-block">
-                            <span class="info-label">Assigned Container</span>
-                            <strong class="info-value" id="resultTargetBin">Yellow Biohazard Bin</strong>
-                        </div>
-
-                        <div class="info-block">
-                            <span class="info-label">Treatment Method</span>
-                            <strong class="info-value" id="resultTreatment">Incineration / Deep Burial</strong>
-                        </div>
-
-                        <div class="info-block full-width">
-                            <span class="info-label">Hazard Scope & Clinical Notes</span>
-                            <p class="info-description" id="resultDescription">
-                                Highly infectious soiled materials. Requires sealed biohazard autoclave containment.
-                            </p>
+                        <div class="model-telemetry-row">
+                            <div class="model-info">
+                                <strong id="aiModelName">MedWaste Optical Net v3.2</strong>
+                                <small id="aiLatency">Inference Latency: 42ms • MobileNet Vision Backbone</small>
+                            </div>
+                            <div class="features-pill-list" id="aiVisualFeatures">
+                                <span class="feature-pill">Polymer structure</span>
+                                <span class="feature-pill">Biohazard fluid profile</span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Actions Row -->
-                    <div class="result-actions" id="resultActionsContainer">
-                        <button class="primary-btn record-btn" id="recordWasteBtn" onclick="recordClassifiedWasteToDb()">
-                            <i class="fa-solid fa-database"></i> Log Waste & Update Smart Bin
+
+                    <!-- STAGE 3: IDENTIFY WASTE TYPE (3-WAY CATEGORY CARDS) -->
+                    <div class="pipeline-section-box stage-3-box">
+                        <div class="box-header">
+                            <span class="stage-tag"><i class="fa-solid fa-tags"></i> STAGE 3: Identify Waste Type</span>
+                            <span class="category-confirmed-badge" id="categoryConfirmedBadge">Category
+                                Identified</span>
+                        </div>
+
+                        <!-- 3 Streams Side-by-Side: Yellow, Red, White/Blue -->
+                        <div class="three-categories-grid">
+
+                            <!-- Yellow Category Card -->
+                            <div class="category-stream-card" id="catCardYellow">
+                                <div class="stream-card-header">
+                                    <span class="stream-dot dot-yellow"></span>
+                                    <h4>Yellow Category</h4>
+                                    <i class="fa-solid fa-biohazard stream-icon"></i>
+                                </div>
+                                <div class="stream-label">Infectious & Anatomical</div>
+                                <div class="stream-items-summary">Gauze, Cotton, Bandages, Tissues</div>
+                                <div class="stream-active-marker"><i class="fa-solid fa-circle-check"></i> DETECTED
+                                </div>
+                            </div>
+
+                            <!-- Red Category Card -->
+                            <div class="category-stream-card" id="catCardRed">
+                                <div class="stream-card-header">
+                                    <span class="stream-dot dot-red"></span>
+                                    <h4>Red Category</h4>
+                                    <i class="fa-solid fa-syringe stream-icon"></i>
+                                </div>
+                                <div class="stream-label">Contaminated Plastics</div>
+                                <div class="stream-items-summary">Syringes, IV Tubing, Catheters</div>
+                                <div class="stream-active-marker"><i class="fa-solid fa-circle-check"></i> DETECTED
+                                </div>
+                            </div>
+
+                            <!-- White/Blue Category Card -->
+                            <div class="category-stream-card" id="catCardWhiteBlue">
+                                <div class="stream-card-header">
+                                    <span class="stream-dot dot-white-blue"></span>
+                                    <h4>White/Blue Category</h4>
+                                    <i class="fa-solid fa-shield-halved stream-icon"></i>
+                                </div>
+                                <div class="stream-label">Sharps & Glassware</div>
+                                <div class="stream-items-summary">Needles, Blades, Glass Vials</div>
+                                <div class="stream-active-marker"><i class="fa-solid fa-circle-check"></i> DETECTED
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Sub-stream specification notice if applicable -->
+                        <div class="sub-stream-notice" id="subStreamNotice" style="display:none;">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <span id="subStreamText">Sub-stream: White Sharps (Puncture-Proof Container Required)</span>
+                        </div>
+                    </div>
+
+
+                    <!-- STAGE 4: SOFTWARE "SEGREGATES" -->
+                    <div class="pipeline-section-box stage-4-box">
+                        <div class="box-header">
+                            <span class="stage-tag"><i class="fa-solid fa-code-fork"></i> STAGE 4: Software
+                                "Segregates"</span>
+                            <span class="segregation-status-badge"><i class="fa-solid fa-check-double"></i> Automated
+                                Routing</span>
+                        </div>
+
+                        <div class="segregation-details-grid">
+                            <div class="seg-item">
+                                <span class="seg-label">Assigned Smart Container</span>
+                                <strong class="seg-val" id="segTargetBin">Yellow Non-Chlorinated Biohazard Bin</strong>
+                            </div>
+                            <div class="seg-item">
+                                <span class="seg-label">Statutory Treatment Method</span>
+                                <strong class="seg-val" id="segTreatment">Double-Chamber Incineration (1050°C)</strong>
+                            </div>
+                            <div class="seg-item">
+                                <span class="seg-label">Disposal Weight Impact</span>
+                                <strong class="seg-val highlight-weight" id="segWeight">1.8 kg (+3.6% Bin Fill)</strong>
+                            </div>
+                            <div class="seg-item">
+                                <span class="seg-label">Compliance Rule</span>
+                                <strong class="seg-val" id="segRule">CPCB Bio-Medical Waste Rules 2016</strong>
+                            </div>
+                        </div>
+
+                        <!-- Mini Live Fill Meter -->
+                        <div class="segregation-meter-wrapper">
+                            <div class="meter-meta">
+                                <span>Bin Fill Progression:</span>
+                                <span id="segMeterText">78% ➔ 81.6% (Capacity Limit: 80%)</span>
+                            </div>
+                            <div class="meter-bar-track">
+                                <div class="meter-bar-fill" id="segMeterFill" style="width: 81.6%;"></div>
+                                <div class="meter-threshold-line" title="80% Collection Alert Threshold"></div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- STAGES 5 & 6: DUAL BRANCH OUTPUTS (Digital Record & Collection Alert) -->
+                    <div class="dual-output-section">
+                        <div class="dual-output-header">
+                            <i class="fa-solid fa-diagram-project"></i>
+                            <h4>Stages 5 & 6: Dual Automated Outcomes</h4>
+                        </div>
+
+                        <div class="dual-cards-container">
+
+                            <!-- DIGITAL RECORD CARD (Stage 5) -->
+                            <div class="outcome-card digital-record-card">
+                                <div class="outcome-card-header">
+                                    <div class="card-title-group">
+                                        <i class="fa-solid fa-file-invoice digital-icon"></i>
+                                        <div>
+                                            <h5>Digital Record</h5>
+                                            <span class="card-subtitle">CPCB Barcoded Biohazard Manifest</span>
+                                        </div>
+                                    </div>
+                                    <span class="status-chip success-chip" id="recordStatusChip">
+                                        <i class="fa-solid fa-shield-check"></i> Verified
+                                    </span>
+                                </div>
+
+                                <div class="manifest-receipt">
+                                    <div class="manifest-barcode-box">
+                                        <div class="barcode-stripes"></div>
+                                        <span class="barcode-num" id="recordBarcode">CPCB-BMW-705711</span>
+                                    </div>
+                                    <div class="manifest-data-rows">
+                                        <div class="data-row">
+                                            <span>Manifest ID:</span>
+                                            <strong id="recordManifestId">MW-MNF-4201</strong>
+                                        </div>
+                                        <div class="data-row">
+                                            <span>Stream Category:</span>
+                                            <strong id="recordCategory">Yellow Category</strong>
+                                        </div>
+                                        <div class="data-row">
+                                            <span>Deposit Weight:</span>
+                                            <strong id="recordWeight">1.8 kg</strong>
+                                        </div>
+                                        <div class="data-row">
+                                            <span>Logged Timestamp:</span>
+                                            <strong id="recordTimestamp">2026-09-08 16:20</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="outcome-actions">
+                                    <button type="button" class="primary-btn record-action-btn" id="commitRecordBtn"
+                                        onclick="commitDigitalRecordAndAlert()">
+                                        <i class="fa-solid fa-database"></i> Commit to Digital Ledger
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- COLLECTION ALERT CARD (Stage 6) -->
+                            <div class="outcome-card collection-alert-card">
+                                <div class="outcome-card-header">
+                                    <div class="card-title-group">
+                                        <i class="fa-solid fa-triangle-exclamation alert-icon"></i>
+                                        <div>
+                                            <h5>Collection Alert</h5>
+                                            <span class="card-subtitle">Live Capacity & Logistics Dispatch</span>
+                                        </div>
+                                    </div>
+                                    <span class="status-chip alert-chip" id="alertStatusChip">
+                                        Alert Triggered
+                                    </span>
+                                </div>
+
+                                <div class="alert-body">
+                                    <div class="capacity-gauge-box">
+                                        <div class="gauge-number" id="alertCapacityPct">81.6%</div>
+                                        <div class="gauge-label">
+                                            <strong id="alertLevelText">Collection Threshold Exceeded</strong>
+                                            <small id="alertThresholdNote">Threshold: 80% • CPCB 48h Evacuation
+                                                Limit</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="alert-logistics-box">
+                                        <div class="logistics-status">
+                                            <i class="fa-solid fa-truck-fast"></i>
+                                            <span id="alertDispatchStatus">CBWTF Automated Dispatch Recommended</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="outcome-actions">
+                                    <button type="button" class="urgent-dispatch-btn" id="dispatchFleetBtn"
+                                        onclick="dispatchCollectionFleet()">
+                                        <i class="fa-solid fa-truck-ramp-box"></i> Dispatch Collection Fleet
+                                    </button>
+                                    <a href="pickup.html" class="outline-btn" id="viewPickupLogisticsLink"
+                                        style="text-decoration: none; display: none; margin-top: 8px; justify-content: center; width: 100%; font-size: 13px; font-weight: 600; padding: 10px; border-color: #2563eb; color: #2563eb;">
+                                        <i class="fa-solid fa-arrow-up-right-from-square" style="margin-right: 6px;"></i> View Dispatched Requests on Pickup Page
+                                    </a>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+
+                    <!-- RESET / NEW SCAN ACTION -->
+                    <div class="scanner-footer-actions">
+                        <button type="button" class="outline-btn" onclick="resetClassifier()">
+                            <i class="fa-solid fa-rotate-left"></i> Test Another Waste Item
                         </button>
-                        <button class="outline-btn" onclick="resetClassifier()">
-                            <i class="fa-solid fa-rotate-left"></i> Test Another
-                        </button>
+                        <a href="dashboard.html" class="primary-btn" style="text-decoration: none;">
+                            <i class="fa-solid fa-chart-line"></i> View Waste & Alerts in Dashboard
+                        </a>
                     </div>
 
                 </div>
@@ -291,7 +609,7 @@
             <div>
                 <h4>Navigation</h4>
                 <p><a href="index.html" style="color: inherit; text-decoration:none;">Home</a></p>
-                <p><a href="scanner.html" style="color: inherit; text-decoration:none;">AI Scanner</a></p>
+                <p><a href="scanner.html" style="color: inherit; text-decoration:none;">AI Scanner & Model</a></p>
                 <p><a href="dashboard.html" style="color: inherit; text-decoration:none;">Dashboard</a></p>
                 <p><a href="pickup.html" style="color: inherit; text-decoration:none;">Pickup Logistics</a></p>
                 <p><a href="precautions.html" style="color: inherit; text-decoration:none;">Safety Precautions</a></p>
@@ -299,10 +617,11 @@
             </div>
 
             <div>
-                <h4>Support</h4>
+                <h4>Regulatory Compliance</h4>
                 <p>National Pollution Control Board Guidelines</p>
                 <p>Bio-Medical Waste Management Rules, 2016</p>
-                <p>ISO 14001 Compliant Architecture</p>
+                <p>CPCB Schedule II Segregation Taxonomy</p>
+                <p>ISO 14001 Compliant Healthcare Architecture</p>
             </div>
 
             <div>
@@ -315,7 +634,7 @@
         </div>
 
         <p class="copyright">
-            © 2026 MedWaste AI. All rights reserved. Transforming Healthcare Waste Management.
+            © 2026 MedWaste AI. All rights reserved. Transforming Healthcare Waste Management with AI & IoT.
         </p>
 
     </footer>

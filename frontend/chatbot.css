@@ -44,8 +44,8 @@
 
 /* Header Section */
 .chatbot-hero {
-    max-width: 1300px;
-    margin: 0 auto 28px;
+    max-width: 960px;
+    margin: 0 auto 24px;
     text-align: center;
 }
 
@@ -120,14 +120,14 @@
     font-size: 13px;
 }
 
-/* Main Grid Layout */
+/* Main Centered Layout */
 .chatbot-container {
-    max-width: 1300px;
+    max-width: 960px;
     margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1.15fr 0.85fr;
-    gap: 28px;
-    align-items: start;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    width: 100%;
 }
 
 /* Chat Console Panel */
@@ -135,10 +135,13 @@
     background: var(--chat-card-bg);
     border: 1px solid var(--chat-border);
     border-radius: 20px;
-    box-shadow: var(--chat-shadow);
+    box-shadow: 0 10px 30px rgba(12, 140, 102, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
     display: flex;
     flex-direction: column;
-    height: 720px;
+    height: 740px;
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
     overflow: hidden;
     position: relative;
 }
@@ -855,17 +858,16 @@
 
 /* Responsive adjustments */
 @media (max-width: 992px) {
+    .chatbot-hero {
+        max-width: 100%;
+    }
+
     .chatbot-container {
-        grid-template-columns: 1fr;
+        max-width: 100%;
     }
 
     .chat-console-card {
-        height: 600px;
-    }
-
-    .faq-hub-card {
-        height: auto;
-        max-height: 600px;
+        height: 640px;
     }
 }
 

@@ -92,7 +92,7 @@
                     </div>
                     <div class="audio-banner-text">
                         <h3>Complete Waste Safety Audio Briefing</h3>
-                        <p>Voice-guided summary of all 4 color-coded streams & critical handling precautions.</p>
+                        <p>Voice-guided summary of all 4 color-coded streams &amp; critical handling precautions in <span id="masterLangBadge" class="master-lang-badge">English</span>.</p>
                     </div>
                 </div>
 
@@ -147,13 +147,32 @@
     <!-- ================= MAIN CONTENT CONTAINER ================= -->
     <main class="precautions-container">
 
-        <!-- Voice Narration Settings Bar -->
+        <!-- Voice & Language Narration Settings Bar -->
         <div class="voice-settings-bar">
+            <div class="language-select-wrap">
+                <i class="fa-solid fa-language" style="color: #0c8c66; font-size: 18px;"></i>
+                <strong>Language / भाषा:</strong>
+                <select id="languageSelect" class="language-select" title="Choose narration language" onchange="changeNarrationLanguage(this.value)">
+                    <option value="en" selected>English</option>
+                    <option value="hi">हिंदी (Hindi)</option>
+                    <option value="mr">मराठी (Marathi)</option>
+                    <option value="ta">தமிழ் (Tamil)</option>
+                    <option value="te">తెలుగు (Telugu)</option>
+                    <option value="bn">বাংলা (Bengali)</option>
+                    <option value="gu">ગુજરાતી (Gujarati)</option>
+                    <option value="kn">ಕನ್ನಡ (Kannada)</option>
+                    <option value="ml">മലയാളം (Malayalam)</option>
+                    <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+                    <option value="or">ଓଡ଼ିଆ (Odia)</option>
+                    <option value="ur">اردو (Urdu)</option>
+                </select>
+            </div>
+
             <div class="voice-select-wrap">
-                <i class="fa-solid fa-sliders"></i>
-                <strong>Narration Voice:</strong>
+                <i class="fa-solid fa-microphone-lines"></i>
+                <strong>Voice:</strong>
                 <select id="voiceSelect" class="voice-select" title="Choose narration voice">
-                    <option value="">Default English Voice</option>
+                    <option value="">Default Voice</option>
                 </select>
             </div>
 
@@ -163,6 +182,23 @@
                 <button type="button" class="speed-chip active" data-speed="1.0">1.0x</button>
                 <button type="button" class="speed-chip" data-speed="1.25">1.25x</button>
                 <button type="button" class="speed-chip" data-speed="1.5">1.5x</button>
+            </div>
+
+            <!-- Indian Language Quick Switch Pills -->
+            <div class="language-pills-row" id="languagePillsRow">
+                <span class="lang-pills-label"><i class="fa-solid fa-earth-asia"></i> Indian Regional Languages:</span>
+                <button type="button" class="lang-pill active" data-lang="en" onclick="changeNarrationLanguage('en')">English</button>
+                <button type="button" class="lang-pill" data-lang="hi" onclick="changeNarrationLanguage('hi')">हिंदी</button>
+                <button type="button" class="lang-pill" data-lang="mr" onclick="changeNarrationLanguage('mr')">मराठी</button>
+                <button type="button" class="lang-pill" data-lang="ta" onclick="changeNarrationLanguage('ta')">தமிழ்</button>
+                <button type="button" class="lang-pill" data-lang="te" onclick="changeNarrationLanguage('te')">తెలుగు</button>
+                <button type="button" class="lang-pill" data-lang="bn" onclick="changeNarrationLanguage('bn')">বাংলা</button>
+                <button type="button" class="lang-pill" data-lang="gu" onclick="changeNarrationLanguage('gu')">ગુજરાતી</button>
+                <button type="button" class="lang-pill" data-lang="kn" onclick="changeNarrationLanguage('kn')">ಕನ್ನಡ</button>
+                <button type="button" class="lang-pill" data-lang="ml" onclick="changeNarrationLanguage('ml')">മലയാളം</button>
+                <button type="button" class="lang-pill" data-lang="pa" onclick="changeNarrationLanguage('pa')">ਪੰਜਾਬੀ</button>
+                <button type="button" class="lang-pill" data-lang="or" onclick="changeNarrationLanguage('or')">ଓଡ଼ିଆ</button>
+                <button type="button" class="lang-pill" data-lang="ur" onclick="changeNarrationLanguage('ur')">اردو</button>
             </div>
         </div>
 
@@ -1088,6 +1124,7 @@
 
     <!-- Global App Logic & Precautions Audio Controller -->
     <script src="script.js"></script>
+    <script src="precautions_i18n.js"></script>
     <script src="precautions.js"></script>
 
 </body>

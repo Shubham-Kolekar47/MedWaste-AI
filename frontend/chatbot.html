@@ -78,7 +78,7 @@
             </div>
 
             <h1>
-                Biomedical Waste <span>Assistant & Q&amp;A Hub</span>
+                Biomedical Waste <span>AI Assistant</span>
             </h1>
 
             <p>
@@ -104,7 +104,7 @@
         </section>
 
 
-        <!-- Two-Column Interactive Layout -->
+        <!-- Centered AI Chatbot Console -->
         <div class="chatbot-container">
 
             <!-- LEFT: Real-Time Chatbot Console -->
@@ -237,58 +237,6 @@
                 </div>
 
             </section>
-
-
-            <!-- RIGHT: Frequently Asked Questions & Quick Reference Hub -->
-            <aside class="faq-hub-card" aria-label="Frequently Asked Questions Hub">
-
-                <div class="faq-header">
-                    <div class="faq-title">
-                        <div class="faq-title-icon">
-                            <i class="fa-solid fa-circle-question"></i>
-                        </div>
-                        <div>
-                            <h2>Frequently Asked Questions</h2>
-                        </div>
-                    </div>
-
-                    <!-- Category Filter Tabs -->
-                    <div class="faq-filter-tabs" role="tablist">
-                        <button type="button" class="tab-btn active" onclick="filterFaqs('All', this)">All</button>
-                        <button type="button" class="tab-btn" onclick="filterFaqs('Segregation', this)">Segregation</button>
-                        <button type="button" class="tab-btn" onclick="filterFaqs('Collection', this)">Collection</button>
-                        <button type="button" class="tab-btn" onclick="filterFaqs('Precautions', this)">Precautions</button>
-                        <button type="button" class="tab-btn" onclick="filterFaqs('Emergency', this)">Emergency</button>
-                    </div>
-                </div>
-
-                <!-- Dynamic FAQ List -->
-                <div class="faq-list-container" id="faqListContainer">
-                    <!-- Populated dynamically by chatbot.js -->
-                </div>
-
-                <!-- Color Cheat Sheet Footer -->
-                <div class="faq-footer-cheat">
-                    <div class="cheat-title">
-                        <i class="fa-solid fa-palette"></i> Quick Stream Cheat Sheet
-                    </div>
-                    <div class="cheat-stream-grid">
-                        <div class="cheat-pill c-yellow" onclick="askQuickPrompt('What items belong in the Yellow biohazard bag and how is it treated?')">
-                            🟡 Yellow<br><small>Infectious</small>
-                        </div>
-                        <div class="cheat-pill c-red" onclick="askQuickPrompt('Which items go into the Red container and how are they recycled?')">
-                            🔴 Red<br><small>Plastics</small>
-                        </div>
-                        <div class="cheat-pill c-white" onclick="askQuickPrompt('What goes into the White translucent container and what are the rules?')">
-                            ⚪ White<br><small>Sharps</small>
-                        </div>
-                        <div class="cheat-pill c-blue" onclick="askQuickPrompt('Which items go into the Blue-marked container and how are they treated?')">
-                            🔵 Blue<br><small>Glassware</small>
-                        </div>
-                    </div>
-                </div>
-
-            </aside>
 
         </div>
 

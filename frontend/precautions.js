@@ -103,12 +103,15 @@ const PRECAUTION_TRANSCRIPTS = {
 // Global State
 const AudioState = {
     synth: window.speechSynthesis || null,
+    audioElement: null,
     currentUtterance: null,
     activeSectionId: null,
     isPlaying: false,
     isPaused: false,
     currentSpeed: 1.0,
+    selectedLanguage: "en",
     selectedVoice: null,
+    selectedVoiceMode: "auto",
     availableVoices: [],
     stepHighlightTimer: null,
     progressInterval: null,
@@ -125,80 +128,175 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* =========================================================
-   SPEECH SYNTHESIS ENGINE
+   SPEECH SYNTHESIS & MULTI-LANGUAGE ENGINE
    ========================================================= */
 
 function initSpeechSynthesis() {
-    if (!AudioState.synth) {
-        console.warn("Speech Synthesis API not supported in this browser.");
-        showAudioToast("Speech synthesis not supported in this browser. Please use Chrome, Edge, or Safari.", true);
-        return;
+    loadVoices();
+    if (window.speechSynthesis && speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = loadVoices;
     }
 
-    loadVoices();
-    if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = loadVoices;
+    // Sync UI with default language
+    const langSelect = document.getElementById("languageSelect");
+    if (langSelect) {
+        langSelect.value = AudioState.selectedLanguage;
     }
 }
 
+/**
+ * Find the best matching browser speech synthesis voice for an Indian language
+ */
+function findBestVoiceForLanguage(langCode) {
+    if (!AudioState.synth) return null;
+    const voices = AudioState.synth.getVoices();
+    if (!voices || voices.length === 0) return null;
+
+    const config = (typeof SUPPORTED_LANGUAGES !== "undefined" && SUPPORTED_LANGUAGES[langCode]) 
+                || { tag: "en-IN", fallbackTag: "en", name: "English", native: "English" };
+
+    // 1. Exact match by BCP-47 tag (e.g. 'hi-IN', 'mr-IN', 'ta-IN')
+    let voice = voices.find(v => v.lang && v.lang.toLowerCase().replace("_", "-") === config.tag.toLowerCase());
+
+    // 2. Starts with language code (e.g. 'hi', 'mr', 'ta', 'bn')
+    if (!voice) {
+        voice = voices.find(v => v.lang && (v.lang.toLowerCase().startsWith(config.fallbackTag.toLowerCase()) || v.lang.toLowerCase().startsWith(langCode.toLowerCase())));
+    }
+
+    // 3. Name includes language name (e.g. 'Google Hindi', 'Lekha', 'Shruti')
+    if (!voice) {
+        voice = voices.find(v => v.name && (v.name.toLowerCase().includes(config.name.toLowerCase()) || (config.native && v.name.toLowerCase().includes(config.native.toLowerCase()))));
+    }
+
+    return voice || null;
+}
+
+/**
+ * Load and filter voices based on active language
+ */
 function loadVoices() {
     if (!AudioState.synth) return;
     const voices = AudioState.synth.getVoices();
     if (!voices || voices.length === 0) return;
 
-    AudioState.availableVoices = voices.filter(v => v.lang.startsWith("en") || v.lang.startsWith("hi"));
-    if (AudioState.availableVoices.length === 0) {
-        AudioState.availableVoices = voices;
+    const lang = AudioState.selectedLanguage || "en";
+    const config = (typeof SUPPORTED_LANGUAGES !== "undefined" && SUPPORTED_LANGUAGES[lang]) 
+                || { tag: "en-IN", fallbackTag: "en", name: "English", native: "English" };
+
+    // Match voices for current selected language
+    let langVoices = voices.filter(v => 
+        v.lang && (
+            v.lang.toLowerCase().replace("_", "-") === config.tag.toLowerCase() ||
+            v.lang.toLowerCase().startsWith(config.fallbackTag.toLowerCase()) ||
+            v.lang.toLowerCase().startsWith(lang.toLowerCase()) ||
+            v.name.toLowerCase().includes(config.name.toLowerCase())
+        )
+    );
+
+    // Fallback if OS has no specific regional TTS pack installed
+    if (langVoices.length === 0) {
+        langVoices = voices.filter(v => v.lang && (v.lang.startsWith("en") || v.lang.startsWith("hi")));
+        if (langVoices.length === 0) langVoices = voices;
     }
 
-    // Populate voice dropdown if present
+    AudioState.availableVoices = langVoices;
+
+    // Populate voice dropdown
     const voiceSelect = document.getElementById("voiceSelect");
     if (voiceSelect) {
         voiceSelect.innerHTML = "";
+
+        const autoOpt = document.createElement("option");
+        autoOpt.value = "auto";
+        autoOpt.textContent = `🌟 Natural Voice (${config.native} - ${config.name})`;
+        voiceSelect.appendChild(autoOpt);
+
         AudioState.availableVoices.forEach((v, index) => {
             const opt = document.createElement("option");
-            opt.value = index;
-            opt.textContent = `${v.name} (${v.lang})${v.default ? ' — Default' : ''}`;
+            opt.value = `browser_${index}`;
+            opt.textContent = `Device: ${v.name} (${v.lang})`;
             voiceSelect.appendChild(opt);
         });
 
-        // Pick preferred natural voice (e.g. Google UK/US, Natural, or first English)
-        const preferredIdx = AudioState.availableVoices.findIndex(v => 
-            v.name.includes("Natural") || 
-            v.name.includes("Google") || 
-            v.name.includes("Samantha") ||
-            v.name.includes("Jenny") ||
-            v.name.includes("India")
-        );
-        if (preferredIdx !== -1) {
-            voiceSelect.selectedIndex = preferredIdx;
-            AudioState.selectedVoice = AudioState.availableVoices[preferredIdx];
-        } else {
-            AudioState.selectedVoice = AudioState.availableVoices[0];
-        }
+        // Default to natural high-fidelity voice mode
+        voiceSelect.value = "auto";
+        AudioState.selectedVoiceMode = "auto";
+        AudioState.selectedVoice = null;
 
-        voiceSelect.addEventListener("change", (e) => {
-            const idx = parseInt(e.target.value, 10);
-            AudioState.selectedVoice = AudioState.availableVoices[idx];
-            showAudioToast(`Voice changed to ${AudioState.selectedVoice.name}`);
+        voiceSelect.onchange = (e) => {
+            const val = e.target.value;
+            if (val === "auto") {
+                AudioState.selectedVoiceMode = "auto";
+                AudioState.selectedVoice = null;
+                showAudioToast(`🌟 Natural High-Fidelity Voice selected for ${config.native}`);
+            } else if (val.startsWith("browser_")) {
+                const idx = parseInt(val.replace("browser_", ""), 10);
+                if (AudioState.availableVoices[idx]) {
+                    AudioState.selectedVoiceMode = "browser";
+                    AudioState.selectedVoice = AudioState.availableVoices[idx];
+                    showAudioToast(`Device Voice set to ${AudioState.selectedVoice.name}`);
+                }
+            }
             if (AudioState.isPlaying && AudioState.activeSectionId) {
                 const active = AudioState.activeSectionId;
                 stopAudio(active);
                 playSectionAudio(active);
             }
-        });
+        };
     }
 }
+
+/**
+ * Change Narration Language across 11 Indian Languages + English
+ */
+function changeNarrationLanguage(langCode) {
+    const config = (typeof SUPPORTED_LANGUAGES !== "undefined" && SUPPORTED_LANGUAGES[langCode]) 
+                || (typeof SUPPORTED_LANGUAGES !== "undefined" && SUPPORTED_LANGUAGES["en"])
+                || { name: "Hindi", native: "हिंदी" };
+
+    AudioState.selectedLanguage = langCode;
+
+    // 1. Sync dropdown
+    const selectEl = document.getElementById("languageSelect");
+    if (selectEl && selectEl.value !== langCode) {
+        selectEl.value = langCode;
+    }
+
+    // 2. Sync quick pills
+    document.querySelectorAll(".lang-pill").forEach(pill => {
+        if (pill.getAttribute("data-lang") === langCode) {
+            pill.classList.add("active");
+        } else {
+            pill.classList.remove("active");
+        }
+    });
+
+    // 3. Update master audio banner badge
+    const masterBadge = document.getElementById("masterLangBadge");
+    if (masterBadge) {
+        masterBadge.innerText = `${config.native} (${config.name})`;
+    }
+
+    // 4. Reload voice options for this language
+    loadVoices();
+
+    // 5. Toast notification in user's chosen language
+    showAudioToast(`🎙️ Language: ${config.native} (${config.name}) - Narrator Ready!`);
+
+    // 6. If audio is currently playing, immediately restart in new language!
+    if (AudioState.isPlaying && AudioState.activeSectionId) {
+        const active = AudioState.activeSectionId;
+        stopAudio(active);
+        playSectionAudio(active);
+    }
+}
+
+window.changeNarrationLanguage = changeNarrationLanguage;
 
 /**
  * Play/Toggle Audio for a given section ID ('master', 'yellow', 'red', etc.)
  */
 function toggleSectionAudio(sectionId) {
-    if (!AudioState.synth) {
-        showAudioToast("Text-to-speech not available in browser.", true);
-        return;
-    }
-
     // If already playing this section, toggle pause/play
     if (AudioState.activeSectionId === sectionId) {
         if (AudioState.isPlaying && !AudioState.isPaused) {
@@ -220,56 +318,123 @@ function toggleSectionAudio(sectionId) {
 }
 
 /**
- * Start speech narration for a specific section
+ * Start speech narration for a specific section in the selected language
  */
 function playSectionAudio(sectionId) {
-    const data = PRECAUTION_TRANSCRIPTS[sectionId];
+    const lang = AudioState.selectedLanguage || "en";
+    const i18nSet = (typeof PRECAUTION_TRANSCRIPTS_I18N !== "undefined" && PRECAUTION_TRANSCRIPTS_I18N[lang]) 
+                 || (typeof PRECAUTION_TRANSCRIPTS_I18N !== "undefined" && PRECAUTION_TRANSCRIPTS_I18N["en"])
+                 || PRECAUTION_TRANSCRIPTS;
+
+    const data = i18nSet[sectionId] || PRECAUTION_TRANSCRIPTS[sectionId];
     if (!data) return;
 
-    if (AudioState.synth.speaking) {
+    // 1. Stop any currently active audio or synthesis
+    if (AudioState.audioElement) {
+        AudioState.audioElement.pause();
+        AudioState.audioElement.currentTime = 0;
+    }
+    if (AudioState.synth && AudioState.synth.speaking) {
         AudioState.synth.cancel();
     }
+    clearInterval(AudioState.progressInterval);
+    clearTimeout(AudioState.stepHighlightTimer);
 
     const textToSpeak = `${data.title}. ${data.summary}`;
-    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    const config = (typeof SUPPORTED_LANGUAGES !== "undefined" && SUPPORTED_LANGUAGES[lang]) 
+                || { tag: "en-IN", name: "English", native: "English" };
 
-    if (AudioState.selectedVoice) {
-        utterance.voice = AudioState.selectedVoice;
-    }
-    utterance.rate = AudioState.currentSpeed;
-    utterance.pitch = 1.0;
-    utterance.lang = "en-US";
-
-    AudioState.currentUtterance = utterance;
     AudioState.activeSectionId = sectionId;
     AudioState.isPlaying = true;
     AudioState.isPaused = false;
     AudioState.elapsedSeconds = 0;
 
-    // Estimate duration based on word count (approx 140 words per min at 1.0x)
+    // Estimate initial duration
     const wordCount = textToSpeak.split(/\s+/).length;
-    AudioState.estimatedTotalSeconds = Math.max(10, Math.round((wordCount / (140 * AudioState.currentSpeed)) * 60));
+    AudioState.estimatedTotalSeconds = Math.max(10, Math.round((wordCount / (130 * AudioState.currentSpeed)) * 60));
 
     // Update UI Elements
     updatePlayerUIState(sectionId, "playing");
 
-    // Progress Bar Ticker
-    clearInterval(AudioState.progressInterval);
-    AudioState.progressInterval = setInterval(() => {
-        if (AudioState.isPlaying && !AudioState.isPaused) {
-            AudioState.elapsedSeconds++;
-            const pct = Math.min(100, Math.round((AudioState.elapsedSeconds / AudioState.estimatedTotalSeconds) * 100));
-            updateProgressBar(sectionId, pct, AudioState.elapsedSeconds, AudioState.estimatedTotalSeconds);
-        }
-    }, 1000);
-
     // Sentence/Step-by-step visual tracker
     startStepHighlighting(sectionId, data.steps);
 
-    // Utterance boundary tracking
-    utterance.onboundary = (event) => {
-        // Can be used for fine-grained word highlighting if desired
+    // If user explicitly chose a device browser voice
+    if (AudioState.selectedVoiceMode === "browser" && AudioState.selectedVoice && AudioState.synth) {
+        playWithBrowserSynth(sectionId, textToSpeak, config, data);
+        return;
+    }
+
+    // Default & High-Fidelity: Play via Native Audio Engine (Backend / Local Cache / Google Cloud TTS)
+    playWithHighFidelityAudio(sectionId, textToSpeak, lang, config, data);
+}
+
+function playWithHighFidelityAudio(sectionId, textToSpeak, lang, config, data) {
+    const primaryUrl = `http://localhost:5000/api/tts?lang=${encodeURIComponent(lang)}&text=${encodeURIComponent(textToSpeak)}`;
+    const fallbackUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(lang)}&client=tw-ob&q=${encodeURIComponent(textToSpeak)}`;
+
+    if (!AudioState.audioElement) {
+        AudioState.audioElement = new Audio();
+    }
+    const audio = AudioState.audioElement;
+    audio.playbackRate = AudioState.currentSpeed;
+    audio.preservesPitch = true;
+
+    // Setup event handlers
+    audio.onloadedmetadata = () => {
+        if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+            AudioState.estimatedTotalSeconds = Math.round(audio.duration);
+        }
     };
+
+    audio.ontimeupdate = () => {
+        if (AudioState.isPlaying && !AudioState.isPaused) {
+            AudioState.elapsedSeconds = Math.floor(audio.currentTime);
+            const total = AudioState.estimatedTotalSeconds || Math.max(1, Math.floor(audio.duration) || 20);
+            const pct = Math.min(100, Math.round((audio.currentTime / total) * 100));
+            updateProgressBar(sectionId, pct, AudioState.elapsedSeconds, total);
+        }
+    };
+
+    audio.onended = () => {
+        stopAudio(sectionId, true);
+        showAudioToast(`Finished narration for ${data.title}`);
+    };
+
+    audio.onerror = (e) => {
+        console.warn("High-fidelity audio load failed, trying direct fallback:", e);
+        if (audio.src !== fallbackUrl && !audio.src.includes("translate_tts")) {
+            audio.src = fallbackUrl;
+            audio.play().catch(() => playWithBrowserSynth(sectionId, textToSpeak, config, data));
+        } else {
+            playWithBrowserSynth(sectionId, textToSpeak, config, data);
+        }
+    };
+
+    audio.src = primaryUrl;
+    audio.play().then(() => {
+        showAudioToast(`🔊 Speaking in ${config.native} (${config.name}): ${data.title}`);
+    }).catch(err => {
+        console.warn("Primary audio play failed, falling back to direct stream:", err);
+        audio.src = fallbackUrl;
+        audio.play().then(() => {
+            showAudioToast(`🔊 Speaking in ${config.native}: ${data.title}`);
+        }).catch(() => {
+            playWithBrowserSynth(sectionId, textToSpeak, config, data);
+        });
+    });
+}
+
+function playWithBrowserSynth(sectionId, textToSpeak, config, data) {
+    if (!AudioState.synth) return;
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    utterance.lang = config.tag || "en-US";
+    const voice = AudioState.selectedVoice || findBestVoiceForLanguage(AudioState.selectedLanguage);
+    if (voice) {
+        utterance.voice = voice;
+    }
+    utterance.rate = AudioState.currentSpeed;
+    utterance.pitch = 1.0;
 
     utterance.onend = () => {
         stopAudio(sectionId, true);
@@ -281,38 +446,57 @@ function playSectionAudio(sectionId) {
         stopAudio(sectionId, false);
     };
 
+    clearInterval(AudioState.progressInterval);
+    AudioState.progressInterval = setInterval(() => {
+        if (AudioState.isPlaying && !AudioState.isPaused) {
+            AudioState.elapsedSeconds++;
+            const pct = Math.min(100, Math.round((AudioState.elapsedSeconds / AudioState.estimatedTotalSeconds) * 100));
+            updateProgressBar(sectionId, pct, AudioState.elapsedSeconds, AudioState.estimatedTotalSeconds);
+        }
+    }, 1000);
+
+    AudioState.currentUtterance = utterance;
     AudioState.synth.speak(utterance);
-    showAudioToast(`Listening to: ${data.title}`);
+    showAudioToast(`🔊 Listening in ${config.native}: ${data.title}`);
 }
 
 /**
  * Pause Audio
  */
 function pauseAudio(sectionId) {
+    if (AudioState.audioElement && !AudioState.audioElement.paused) {
+        AudioState.audioElement.pause();
+    }
     if (AudioState.synth && AudioState.synth.speaking) {
         AudioState.synth.pause();
-        AudioState.isPaused = true;
-        updatePlayerUIState(sectionId, "paused");
-        showAudioToast("Narration paused");
     }
+    AudioState.isPaused = true;
+    updatePlayerUIState(sectionId, "paused");
+    showAudioToast("Narration paused");
 }
 
 /**
  * Resume Audio
  */
 function resumeAudio(sectionId) {
-    if (AudioState.synth && AudioState.synth.paused) {
+    if (AudioState.audioElement && AudioState.audioElement.paused) {
+        AudioState.audioElement.play().catch(e => console.warn(e));
+    } else if (AudioState.synth && AudioState.synth.paused) {
         AudioState.synth.resume();
-        AudioState.isPaused = false;
-        updatePlayerUIState(sectionId, "playing");
-        showAudioToast("Resumed narration");
     }
+    AudioState.isPaused = false;
+    updatePlayerUIState(sectionId, "playing");
+    showAudioToast("Resumed narration");
 }
 
 /**
  * Stop Audio and reset UI
  */
 function stopAudio(sectionId, completed = false) {
+    if (AudioState.audioElement) {
+        AudioState.audioElement.pause();
+        AudioState.audioElement.currentTime = 0;
+    }
     if (AudioState.synth) {
         AudioState.synth.cancel();
     }
@@ -449,6 +633,11 @@ function updateProgressBar(sectionId, percent, elapsedSec, totalSec) {
 function setPlaybackSpeed(sectionId, speed) {
     AudioState.currentSpeed = parseFloat(speed);
 
+    // Update HTML5 audio playback speed dynamically without stopping!
+    if (AudioState.audioElement) {
+        AudioState.audioElement.playbackRate = AudioState.currentSpeed;
+    }
+
     // Update speed UI chips in section and globally
     const chips = document.querySelectorAll(`#player-${sectionId} .speed-opt, .speed-chip`);
     chips.forEach(chip => {
@@ -461,8 +650,8 @@ function setPlaybackSpeed(sectionId, speed) {
 
     showAudioToast(`Playback speed set to ${speed}x`);
 
-    // If currently speaking, restart with new rate smoothly
-    if (AudioState.isPlaying && AudioState.activeSectionId === sectionId) {
+    // If using browser speech synthesis, restart with new rate smoothly
+    if (AudioState.selectedVoiceMode === "browser" && AudioState.isPlaying && AudioState.activeSectionId === sectionId) {
         const sec = AudioState.activeSectionId;
         stopAudio(sec);
         playSectionAudio(sec);
@@ -474,10 +663,13 @@ function initSpeedChips() {
         chip.addEventListener("click", () => {
             const speed = chip.dataset.speed;
             AudioState.currentSpeed = parseFloat(speed);
+            if (AudioState.audioElement) {
+                AudioState.audioElement.playbackRate = AudioState.currentSpeed;
+            }
             document.querySelectorAll(".speed-chip").forEach(c => c.classList.remove("active"));
             chip.classList.add("active");
             showAudioToast(`Global speed set to ${speed}x`);
-            if (AudioState.isPlaying && AudioState.activeSectionId) {
+            if (AudioState.selectedVoiceMode === "browser" && AudioState.isPlaying && AudioState.activeSectionId) {
                 const sec = AudioState.activeSectionId;
                 stopAudio(sec);
                 playSectionAudio(sec);

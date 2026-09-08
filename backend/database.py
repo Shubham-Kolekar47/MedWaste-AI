@@ -93,6 +93,7 @@ def init_db():
             vehicle_id INTEGER,
             collector_name TEXT,
             status TEXT DEFAULT 'Pending',
+            weight REAL DEFAULT 0,
             requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             collected_at TIMESTAMP,
             delivered_at TIMESTAMP,
@@ -100,6 +101,11 @@ def init_db():
             FOREIGN KEY(vehicle_id) REFERENCES vehicles(id)
         )
     """)
+
+    # Auto-migrate if collections table exists without weight column
+    cols = [col[1] for col in cursor.execute("PRAGMA table_info(collections)").fetchall()]
+    if "weight" not in cols:
+        cursor.execute("ALTER TABLE collections ADD COLUMN weight REAL DEFAULT 0")
 
     # Inquiries / Demo Requests
     cursor.execute("""
