@@ -1919,624 +1919,866 @@ CHATBOT_FAQS = [
 ]
 
 
+# New AI Chatbot Engine for backend/app.py
+
 def call_gemini_llm(query, api_key):
-    """Invokes Google Gemini 2.5 Flash model for natural clinical intelligence."""
+    """Invokes Google Gemini model for natural clinical intelligence with model fallbacks."""
     if not HAS_GENAI or not api_key:
         return None
-    try:
-        client = genai.Client(api_key=api_key)
-        system_instruction = (
-            "You are MedWaste AI, a friendly, warm, empathetic, and intelligent AI companion and clinical biomedical waste guide. "
-            "You communicate naturally like a kind, supportive, and knowledgeable human colleague on a hospital healthcare team:\n"
-            "1. For casual greetings, small talk, and social questions (such as 'hi', 'hello', 'good morning', 'how are you', 'how is your day going', 'tell me a joke', 'thank you', 'goodbye', 'i am tired'): "
-            "Respond warmly, naturally, and conversationally like a caring friend (e.g., greet them back, say 'Good morning! How is your day going?', ask how their shift is, show empathy if they are stressed, or joke lightly). "
-            "Do NOT dump unnecessary clinical lectures when someone is just saying hello or asking how you are!\n"
-            "2. When asked questions about biomedical waste segregation, collection logistics, clinical precautions, emergencies, or regulations: "
-            "Provide authoritative, clear, and structured guidance strictly adhering to India's Bio-Medical Waste Management Rules 2016 (CPCB) and WHO Infection Control protocols.\n"
-            "3. If a question mixes a greeting with a waste question (e.g., 'Good morning, where do plastic syringes go?'): "
-            "Warmly greet them back first, then clearly answer their question.\n"
-            "Format replies cleanly using markdown with bolding and bullet points when appropriate.\n"
-            "At the very end of your response, strictly output these three metadata tags on separate lines:\n"
-            "CATEGORY: <Yellow | Red | White | Blue | Cytotoxic | General | Emergency | Regulatory | Educational>\n"
-            "ACTION: <A single concise sentence with the key takeaway action or friendly thought>\n"
-            "FOLLOWUPS: <Followup 1> | <Followup 2> | <Followup 3>"
-        )
 
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=query,
-            config=types.GenerateContentConfig(
-                system_instruction=system_instruction,
-                temperature=0.3,
+    models_to_try = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+    client = genai.Client(api_key=api_key)
+    system_instruction = (
+        "You are MedWaste AI, an intelligent, empathetic, and expert clinical AI companion and hospital biomedical waste specialist.\n"
+        "You think through questions carefully, analyze what the user is asking, and communicate naturally, warmly, and clearly like an experienced human colleague on a hospital healthcare team:\n"
+        "1. For casual greetings, small talk, social questions, or shift empathy: Respond warmly, naturally, and conversationally like a caring friend (greet them back, ask how their shift is, show empathy if they are tired or stressed). Do NOT dump unnecessary clinical lectures when someone is just saying hello!\n"
+        "2. When asked about bins (Red, Blue, Yellow, White, Black, Green, Purple), multi-bin comparisons ('what goes in blue or red bin', 'difference between yellow and red'), or specific hospital items: Think and analyze the question, then break down the explanation clearly with practical examples, rationale (why it goes there, how it's treated), and safety tips.\n"
+        "3. Explain the reasoning clearly rather than sounding like an inflexible robot reciting a legal statute.\n"
+        "4. If a question mixes a greeting with a question (e.g., 'hey bro what goes into the blue bin?'): Warmly greet them back first, then clearly answer their question.\n"
+        "Format replies cleanly using markdown with bolding and bullet points when appropriate.\n"
+        "At the very end of your response, strictly output these three metadata tags on separate lines:\n"
+        "CATEGORY: <Yellow | Red | White | Blue | Cytotoxic | General | Emergency | Regulatory | Educational>\n"
+        "ACTION: <A single concise sentence with the key takeaway action or friendly thought>\n"
+        "FOLLOWUPS: <Followup 1> | <Followup 2> | <Followup 3>"
+    )
+
+    for model_name in models_to_try:
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=query,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction,
+                    temperature=0.3,
+                )
             )
-        )
+            text = response.text or ""
+            if not text.strip():
+                continue
 
-        text = response.text or ""
-        category_tag = "General"
-        action = "Follow hospital infection control SOPs and CPCB guidelines."
-        followups = [
-            "Which bin do used syringes go into?",
-            "What is the needle-stick injury emergency SOP?",
-            "What is the 48-hour waste storage rule?"
-        ]
+            category_tag = "General"
+            action = "Follow hospital infection control SOPs and waste segregation guidelines."
+            followups = [
+                "Which bin do used plastic syringes go into?",
+                "What is the emergency protocol for a needle-stick injury?",
+                "What goes into the Blue container?"
+            ]
 
-        # Extract metadata tags
-        cat_match = re.search(r"CATEGORY:\s*([^\n\r]+)", text, re.IGNORECASE)
-        if cat_match:
-            category_tag = cat_match.group(1).strip()
-            text = re.sub(r"CATEGORY:\s*[^\n\r]+", "", text, flags=re.IGNORECASE)
+            cat_match = re.search(r"CATEGORY:\s*([^\n\r]+)", text, re.IGNORECASE)
+            if cat_match:
+                category_tag = cat_match.group(1).strip()
+                text = re.sub(r"CATEGORY:\s*[^\n\r]+", "", text, flags=re.IGNORECASE)
 
-        act_match = re.search(r"ACTION:\s*([^\n\r]+)", text, re.IGNORECASE)
-        if act_match:
-            action = act_match.group(1).strip()
-            text = re.sub(r"ACTION:\s*[^\n\r]+", "", text, flags=re.IGNORECASE)
+            act_match = re.search(r"ACTION:\s*([^\n\r]+)", text, re.IGNORECASE)
+            if act_match:
+                action = act_match.group(1).strip()
+                text = re.sub(r"ACTION:\s*[^\n\r]+", "", text, flags=re.IGNORECASE)
 
-        fol_match = re.search(r"FOLLOWUPS:\s*([^\n\r]+)", text, re.IGNORECASE)
-        if fol_match:
-            raw_fols = fol_match.group(1).split("|")
-            followups = [f.strip() for f in raw_fols if f.strip()]
-            text = re.sub(r"FOLLOWUPS:\s*[^\n\r]+", "", text, flags=re.IGNORECASE)
+            fol_match = re.search(r"FOLLOWUPS:\s*([^\n\r]+)", text, re.IGNORECASE)
+            if fol_match:
+                raw_fols = fol_match.group(1).split("|")
+                followups = [f.strip() for f in raw_fols if f.strip()]
+                text = re.sub(r"FOLLOWUPS:\s*[^\n\r]+", "", text, flags=re.IGNORECASE)
 
-        return {
-            "reply": text.strip(),
-            "category_tag": category_tag,
-            "recommended_action": action,
-            "suggested_followups": followups,
-            "engine": "Gemini 2.5 Flash"
-        }
-    except Exception as e:
-        print(f"[!] Gemini LLM invocation failed: {e}")
-        return None
+            return {
+                "reply": text.strip(),
+                "category_tag": category_tag,
+                "recommended_action": action,
+                "suggested_followups": followups,
+                "engine": f"Gemini ({model_name})"
+            }
+        except Exception as e:
+            print(f"[!] Gemini LLM invocation failed for {model_name}: {e}")
+            continue
+
+    return None
 
 
 def advanced_semantic_biomed_ai(query):
     """
-    Comprehensive Semantic Reasoning Engine for Biomedical Waste Management.
-    Understands user intent, question structure, hospital scenarios, and specific items.
+    Comprehensive Cognitive AI Reasoning Engine for Healthcare & Biomedical Waste.
+    Thinks through question intent, analyzes multi-bin comparisons, explains clinical rationales,
+    and converses naturally like a human hospital clinical specialist.
     """
     raw_q = (query or "").strip()
     q = raw_q.lower()
 
     if not q:
         return {
-            "reply": "Hello! I am your **MedWaste AI Clinical & Regulatory Assistant**. You can ask me any question about biomedical waste segregation (Yellow, Red, White, Blue streams), collection schedules, barcoding, CPCB 2016 rules, and clinical safety precautions.",
+            "reply": "Hello! I am your **MedWaste AI Clinical Specialist**. You can ask me anything about hospital waste segregation (Red, Blue, Yellow, White, Black/Green bins), clinical item handling, emergency SOPs, or healthcare safety protocols.",
             "category_tag": "General",
-            "recommended_action": "Type any waste item or question to get instant segregation guidance.",
+            "recommended_action": "Ask any question about waste bins, hospital items, or emergency procedures.",
             "suggested_followups": [
-                "Which bin do used syringes go into?",
-                "What is the needle-stick injury emergency SOP?",
-                "What is the 48-hour waste storage rule?"
+                "What goes into the Blue or Red bin?",
+                "Which bin do used plastic syringes go into?",
+                "What is the emergency first-aid for a needle-stick injury?"
             ],
-            "engine": "MedWaste AI Neural Rule Engine"
+            "engine": "MedWaste AI Cognitive Engine"
         }
 
     # -------------------------------------------------------------
-    # GREETING PREFIX HELPER (FOR MIXED GREETING + CLINICAL QUERIES)
+    # 1. GREETINGS & CASUAL SOCIAL CONVERSATION (HUMAN-LIKE)
     # -------------------------------------------------------------
-    greeting_prefix = ""
-    if re.search(r"\b(good\s*morning|morning|gm)\b", q):
-        greeting_prefix = "Good morning! ☀️ Hope your day is off to a great start!\n\n"
-    elif re.search(r"\b(good\s*afternoon|afternoon)\b", q):
-        greeting_prefix = "Good afternoon! 🌤️ Hope your day is going well!\n\n"
-    elif re.search(r"\b(good\s*evening|evening)\b", q):
-        greeting_prefix = "Good evening! 🌆 Hope you had a fulfilling day!\n\n"
-    elif re.search(r"\b(hi+|hello+|hey+|namaste)\b", q):
-        greeting_prefix = "Hello! 👋 Great to connect with you!\n\n"
+    pure_greeting = (
+        bool(re.search(r"^(hi+|hello+|hey+|namaste|yo|heya|howdy|greetings)\b", q))
+        and len(q.split()) <= 4
+        and not any(w in q for w in ["bin", "waste", "needle", "syringe", "plastic", "glass", "blood", "red", "blue", "yellow", "white", "black", "green"])
+    )
 
-    # Check if query is asking a specific clinical / waste / regulatory question
-    exact_clinical_words = {"bin", "bins", "waste", "red", "blue", "ppe", "pus", "sharp", "sharps"}
-    query_tokens = set(re.findall(r"\b[a-z0-9_]+\b", q))
-    multiword_or_stems = [
-        "needle", "syringe", "iv set", "iv tube", "catheter", "scalpel", "blade",
-        "lancet", "glass", "ampoule", "vial", "yellow bag", "yellow bin", "white container",
-        "cytotoxic", "chemo", "spill", "leak", "hypochlorite", "vomit", "vomited",
-        "blood", "prick", "needlestick", "infection", "hazard", "segregat", "cpcb",
-        "spcb", "48 hour", "48hr", "storage", "collection", "pickup", "autoclave",
-        "incinerat", "glove", "mask", "gowns", "mercury", "disinfect", "cotton",
-        "gauze", "dressing", "placenta", "tissue", "anatomical", "pathology",
-        "dialysis", "overfill", "recap"
-    ]
-    is_clinical_query = bool(exact_clinical_words & query_tokens) or any(k in q for k in multiword_or_stems)
-
-    # -------------------------------------------------------------
-    # 1. CASUAL CONVERSATION & SOCIAL INTERACTION (HUMAN-LIKE)
-    # -------------------------------------------------------------
-    if not is_clinical_query:
-        # A. How are you / How is your day / What's up
-        if any(k in q for k in ["how are you", "how r u", "how is your day", "how's your day", "how is ur day", "hows your day", "how are you doing", "how are things", "how's it going", "how is it going", "what's up", "whats up", "wassup", "sup", "how do you do"]):
-            prefix = "Good morning! ☀️ " if ("morning" in q or "gm" in q) else ("Good afternoon! 🌤️ " if "afternoon" in q else ("Good evening! 🌆 " if "evening" in q else ""))
-            return {
-                "reply": f"{prefix}I'm doing really well, thank you so much for asking! 😊 My day has been going great. How about you? How is your day going? Are you working a busy shift at the hospital today or taking things easy?",
-                "category_tag": "General",
-                "recommended_action": "Stay positive, drink water, and have a wonderful day!",
-                "suggested_followups": [
-                    "I'm having a busy shift today",
-                    "Which bin do used plastic syringes go into?",
-                    "What is the emergency protocol for a needle-stick injury?"
-                ],
-                "engine": "MedWaste AI Conversational Engine"
-            }
-
-        # B. Good Morning
-        if any(k in q for k in ["good morning", "morning", "mornin", "gm"]):
-            return {
-                "reply": "Good morning! ☀️ Hope your day is off to a wonderful start! How is your day going so far? Let me know if you need any help with waste segregation, hospital protocols, or anything around the ward today. Wishing you a smooth, safe, and productive day ahead! 😊",
-                "category_tag": "General",
-                "recommended_action": "Have a wonderful, safe, and productive morning!",
-                "suggested_followups": [
-                    "How are you doing today?",
-                    "Where do used plastic syringes go?",
-                    "What is the 48-hour waste storage rule?"
-                ],
-                "engine": "MedWaste AI Conversational Engine"
-            }
-
-        # C. Good Afternoon
-        if any(k in q for k in ["good afternoon", "afternoon"]):
-            return {
-                "reply": "Good afternoon! 🌤️ Hope you're having a pleasant and productive day. How is your shift or workday going so far? I'm right here if you need a quick hand with clinical waste sorting, storage rules, or anything else today!",
-                "category_tag": "General",
-                "recommended_action": "Stay energized and have a great afternoon!",
-                "suggested_followups": [
-                    "How are you doing?",
-                    "What belongs in the Yellow biohazard bag?",
-                    "What PPE is required for waste handling?"
-                ],
-                "engine": "MedWaste AI Conversational Engine"
-            }
-
-        # D. Good Evening / Good Night
-        if any(k in q for k in ["good evening", "evening"]):
-            return {
-                "reply": "Good evening! 🌆 Hope you had a fulfilling day today. How are things winding down for you? Feel free to ask if you're wrapping up ward duties, checking storage logs, or just checking in!",
-                "category_tag": "General",
-                "recommended_action": "Wishing you a calm and peaceful evening!",
-                "suggested_followups": [
-                    "How was your day?",
-                    "What is the 48-hour waste storage rule?",
-                    "What goes into the White sharps container?"
-                ],
-                "engine": "MedWaste AI Conversational Engine"
-            }
-
-        if any(k in q for k in ["good night", "goodnight"]):
-            return {
-                "reply": "Good night! 🌙 Wishing you a peaceful and restful night! If you're on the night shift, stay safe, alert, and take good care of yourself. I'm always here if you need any guidance!",
-                "category_tag": "General",
-                "recommended_action": "Have a restful night and stay safe on night shifts!",
-                "suggested_followups": [
-                    "What is the emergency protocol for a needle stick?",
-                    "Where do plastic IV sets go?",
-                    "Tell me a joke"
-                ],
-                "engine": "MedWaste AI Conversational Engine"
-            }
-
-        # E. Casual Greetings ("Hi", "Hello", "Hey", "Namaste", "Yo", etc.)
-        if re.search(r"^(hi+|hello+|hey+|heya|namaste|yo|greetings)\b", q):
-            return {
-                "reply": "Hey there! 👋 It's great to see you! How are you doing today? How's your day going so far?\n\nWhether you have a quick question about waste segregation, need an emergency protocol, or just want to chat, I'm right here with you! What's on your mind today?",
-                "category_tag": "General",
-                "recommended_action": "Feel free to ask any question or chat anytime.",
-                "suggested_followups": [
-                    "How are you doing?",
-                    "Which bin do used syringes go into?",
-                    "What is the emergency protocol for a needle-stick injury?"
-                ],
-                "engine": "MedWaste AI Conversational Engine"
-            }
-
-        # F. Work Shift Feelings & Empathy ("I'm tired", "busy day", "stressful", "hectic", "rough shift")
-        if any(w in q for w in ["tired", "exhausted", "busy day", "stressful", "hectic", "rough day", "hard shift", "long day", "tough day", "overwhelmed"]):
-            return {
-                "reply": "Oh, hang in there! 💙 Healthcare and hospital work can be so demanding and mentally draining. Please remember to take a short breather, drink some water, and give yourself credit for the incredible work you do keeping people safe every single day! 💪\n\nIs there anything I can help you with right now to take some load off your shoulders?",
-                "category_tag": "General",
-                "recommended_action": "Take a 5-minute breather and remember to stay hydrated!",
-                "suggested_followups": [
-                    "Where do used plastic syringes go?",
-                    "What is the 48-hour waste storage rule?",
-                    "Tell me a joke"
-                ],
-                "engine": "MedWaste AI Conversational Engine"
-            }
-
-        # G. User is doing good / fine ("I'm good", "doing well", "all good")
-        if any(k in q for k in ["i'm good", "im good", "doing well", "doing good", "all good", "i am good", "fine thanks", "great thanks", "doing fine"]):
-            return {
-                "reply": "That's wonderful to hear! 😊 So glad to know you're doing well today. Is there anything on your mind I can help you with—whether it's checking a waste bin rule, collection schedule, or safety precaution?",
-                "category_tag": "General",
-                "recommended_action": "Let me know whenever you have any question or need help!",
-                "suggested_followups": [
-                    "Which bin do used plastic syringes go into?",
-                    "What is the needle-stick injury emergency SOP?",
-                    "What is the 48-hour waste storage rule?"
-                ],
-                "engine": "MedWaste AI Conversational Engine"
-            }
-
-        # H. Short confirmations ("ok", "cool", "alright")
-        if q in ["ok", "okay", "alright", "got it", "cool", "sure", "yep", "yes", "gotcha"]:
-            return {
-                "reply": "Sounds great! 👍 I'm right here whenever you need anything. Wishing you a safe and smooth rest of your day!",
-                "category_tag": "General",
-                "recommended_action": "Ask anytime if you need more information.",
-                "suggested_followups": [
-                    "Where do used plastic syringes go?",
-                    "What belongs in the Yellow biohazard bag?",
-                    "What is the emergency protocol for a needle stick?"
-                ],
-                "engine": "MedWaste AI Conversational Engine"
-            }
-
-        # I. Gratitude & Compliments ("Thank you", "Thanks", "You are awesome", "Great job")
-        if any(k in q for k in ["thank you", "thanks", "thx", "appreciate it", "awesome", "good job", "great job", "you're great", "you are great", "you're awesome", "you are awesome", "cool", "love you", "nice bot", "good bot"]):
-            return {
-                "reply": "You're so very welcome! 🥰 It really makes my day to know I could help you out! Thank you for the kind words. How is the rest of your day looking? Let me know whenever you need anything else!",
-                "category_tag": "General",
-                "recommended_action": "Always here and happy to support you!",
-                "suggested_followups": [
-                    "How's your day going?",
-                    "What are the 4 main color-coded waste streams?",
-                    "What is the emergency protocol for a needle stick?"
-                ],
-                "engine": "MedWaste AI Conversational Engine"
-            }
-
-        # J. Farewells ("Bye", "Goodbye", "See you", "Later", "Take care")
-        if any(k in q for k in ["bye", "goodbye", "good bye", "see you", "cya", "take care", "talk later", "ttyl", "see ya"]):
-            return {
-                "reply": "Goodbye for now! 👋 It was wonderful chatting with you. Have a fantastic rest of your day, take care of yourself, and stay safe out there! Come back anytime!",
-                "category_tag": "General",
-                "recommended_action": "Stay safe and have a wonderful day ahead!",
-                "suggested_followups": [
-                    "Good morning!",
-                    "How are you doing today?",
-                    "What is the 48-hour waste storage rule?"
-                ],
-                "engine": "MedWaste AI Conversational Engine"
-            }
-
-        # K. Jokes & Humor
-        if any(k in q for k in ["joke", "funny", "make me laugh", "humor"]):
-            return {
-                "reply": "Here's a light one for you! 😄\n\n*Why did the recycling bin break up with the trash can?*\n**Because it felt like their relationship was just going to waste!** 🗑️💚\n\nHope that brought a little smile to your day! How are things going with you today?",
-                "category_tag": "General",
-                "recommended_action": "Keep smiling and have a wonderful day!",
-                "suggested_followups": [
-                    "Tell me another joke",
-                    "How are you doing today?",
-                    "Where do used plastic syringes go?"
-                ],
-                "engine": "MedWaste AI Conversational Engine"
-            }
-
-        # L. Identity & Purpose
-        if any(k in q for k in ["who are you", "what are you", "what can you do", "are you human", "are you a bot", "are you ai", "what is your name", "your name", "help me"]):
-            return {
-                "reply": "I'm **MedWaste AI**—your friendly digital companion and healthcare waste guide! 🤖✨\n\nWhile I am an AI, I love chatting just like a friendly human colleague on your hospital team. You can talk to me casually, ask me how my day is going, or consult me on serious hospital topics like waste segregation (Yellow, Red, White, Blue bins), emergency needle-stick SOPs, and CPCB regulations.\n\nHow are you doing today? How can I help make your day a little easier?",
-                "category_tag": "General",
-                "recommended_action": "Chat casually or ask about biomedical waste protocols.",
-                "suggested_followups": [
-                    "Good morning! How are you?",
-                    "Which bin do used syringes go into?",
-                    "What is the emergency protocol for a needle stick?"
-                ],
-                "engine": "MedWaste AI Conversational Engine"
-            }
-
-    # -------------------------------------------------------------
-    # 2. "WHY" / IMPORTANCE & HAZARDS OF MEDICAL WASTE
-    # -------------------------------------------------------------
-    if (any(k in q for k in ["why", "importance", "hazard", "risk", "danger", "why segregate", "why is medical waste", "consequence"]) and 
-        any(w in q for w in ["segregate", "segregation", "biomedical", "waste", "dangerous", "separate", "important"])):
+    if pure_greeting:
         return {
-            "reply": "### Why Proper Biomedical Waste Segregation is Crucial:\n\n1. **Infection & Disease Transmission:** Untreated medical waste can transmit bloodborne pathogens like **Hepatitis B (HBV)**, **Hepatitis C (HCV)**, and **HIV** to hospital staff, waste handlers, and the public.\n2. **Toxic Emissions:** If chlorinated plastics (like PVC tubing) are accidentally incinerated with Yellow waste, they release **Dioxins and Furans**, which are potent environmental carcinogens.\n3. **Preventing Illegal Reuse:** Unsegregated plastic syringes and needles can be scavenged, illicitly repackaged, and resold without sterilization.\n4. **Worker Safety:** Exposed sharps in general bags cause accidental punctures and severe injuries to sanitation staff.\n5. **Economic Efficiency:** Only **15%** of hospital waste is hazardous. Proper segregation prevents treating 85% of general waste as biohazardous, saving significant incineration costs.",
-            "category_tag": "Educational",
-            "recommended_action": "Segregate strictly at source to prevent infectious disease spread and toxic emissions.",
+            "reply": "Hey there! 👋 It's wonderful to connect with you! How are you doing today? How is your day or hospital shift going so far?\n\nWhether you need help sorting waste bins (like Red vs Blue), checking an emergency protocol, or just chatting, I'm right here with you! What can I help you with?",
+            "category_tag": "General",
+            "recommended_action": "Feel free to ask any question or chat anytime.",
             "suggested_followups": [
-                "What are the 4 main color-coded streams?",
-                "What happens if needles are placed in the Red bin?",
-                "What is the legal penalty for improper segregation?"
+                "What goes into the Blue or Red bin?",
+                "How are you doing today?",
+                "Where do used plastic syringes go?"
             ],
-            "engine": "MedWaste AI Neural Rule Engine"
+            "engine": "MedWaste AI Conversational Engine"
+        }
+
+    # "How are you" / "How is your day"
+    if any(k in q for k in ["how are you", "how r u", "how is your day", "how's your day", "hows your day", "how are things", "how's it going", "how is it going", "what's up", "whats up", "wassup", "how do you do"]) and not any(w in q for w in ["bin", "waste", "needle", "glass", "red", "blue", "yellow"]):
+        prefix = "Good morning! ☀️ " if ("morning" in q or "gm" in q) else ("Good afternoon! 🌤️ " if "afternoon" in q else ("Good evening! 🌆 " if "evening" in q else ""))
+        return {
+            "reply": f"{prefix}I'm doing really well, thank you so much for asking! 😊 My day has been going great. How about you? How is your day going? Are you working a busy shift at the clinic or hospital today, or taking things easy?",
+            "category_tag": "General",
+            "recommended_action": "Stay positive, drink water, and have a wonderful day!",
+            "suggested_followups": [
+                "I'm having a busy hospital shift today",
+                "What goes into the Blue or Red bin?",
+                "What is the emergency protocol for a needle-stick injury?"
+            ],
+            "engine": "MedWaste AI Conversational Engine"
+        }
+
+    # Empathy for hard shift / fatigue
+    if any(w in q for w in ["tired", "exhausted", "busy day", "stressful", "hectic", "rough day", "hard shift", "long day", "tough day", "overwhelmed"]):
+        return {
+            "reply": "Oh, hang in there! 💙 Working in healthcare and clinical environments can be mentally and physically demanding. Please remember to take a short breather, drink some water, and give yourself credit for the vital work you do keeping patients and staff safe every single day! 💪\n\nIs there anything I can help you with right now to take some load off your shoulders?",
+            "category_tag": "General",
+            "recommended_action": "Take a 5-minute breather and stay hydrated!",
+            "suggested_followups": [
+                "What goes into the Blue or Red bin?",
+                "Tell me a joke to cheer me up",
+                "Where do used plastic syringes go?"
+            ],
+            "engine": "MedWaste AI Conversational Engine"
+        }
+
+    # Identity / Capabilities
+    if any(k in q for k in ["who are you", "what are you", "what can you do", "are you human", "are you a bot", "are you ai", "what is your name", "your name"]):
+        return {
+            "reply": "I'm **MedWaste AI**—your intelligent clinical AI companion and biomedical waste specialist! 🤖✨\n\nI'm designed to think through hospital scenarios and guide you naturally just like an experienced clinical colleague. You can ask me:\n- Detailed bin segregation (**Red, Blue, Yellow, White, Black/Green, Cytotoxic**)\n- Multi-bin comparisons (like *'What goes into the Blue or Red bin?'*)\n- How to dispose of specific items (syringes, glass vials, IV sets, expired medicines, pizza boxes)\n- Emergency protocols (needle sticks, blood spills, chemical leaks)\n- Scientific explanations (*'Why can't needles go into the red bin?'*)\n\nHow can I help you right now?",
+            "category_tag": "General",
+            "recommended_action": "Ask any question about waste bins, hospital items, or emergency procedures.",
+            "suggested_followups": [
+                "What goes into the Blue or Red bin?",
+                "What is the first-aid for a needle-stick injury?",
+                "Where do expired medicines go?"
+            ],
+            "engine": "MedWaste AI Conversational Engine"
+        }
+
+    # Jokes / Humor
+    if any(k in q for k in ["joke", "funny", "make me laugh", "humor"]):
+        return {
+            "reply": "Here's a light healthcare one for you! 😄\n\n*Why did the recycling bin break up with the trash can?*\n**Because it felt like their relationship was just going to waste!** 🗑️💚\n\nHope that brought a smile to your shift! What else is on your mind?",
+            "category_tag": "General",
+            "recommended_action": "Keep smiling and stay energized!",
+            "suggested_followups": [
+                "Tell me another joke",
+                "What goes into the Blue or Red bin?",
+                "Where do used plastic syringes go?"
+            ],
+            "engine": "MedWaste AI Conversational Engine"
+        }
+
+    # Gratitude
+    if any(k in q for k in ["thank you", "thanks", "thx", "appreciate it", "awesome", "great job", "you are great", "you're great"]):
+        return {
+            "reply": "You're so very welcome! 🥰 I'm really glad I could help make things clearer for you. Keep up the fantastic work keeping healthcare clean and safe. Let me know whenever you need anything else!",
+            "category_tag": "General",
+            "recommended_action": "Always here and happy to support you!",
+            "suggested_followups": [
+                "What goes into the Blue or Red bin?",
+                "What is the emergency protocol for a needle stick?",
+                "How is your day going?"
+            ],
+            "engine": "MedWaste AI Conversational Engine"
+        }
+
+    # Farewell
+    if any(k in q for k in ["bye", "goodbye", "good bye", "see you", "take care", "talk later"]):
+        return {
+            "reply": "Goodbye for now! 👋 Take care of yourself, stay safe around the ward, and have a wonderful day ahead. Come back whenever you need anything!",
+            "category_tag": "General",
+            "recommended_action": "Stay safe and take care!",
+            "suggested_followups": ["Good morning!", "How are you doing?"],
+            "engine": "MedWaste AI Conversational Engine"
         }
 
     # -------------------------------------------------------------
-    # 3. "WHAT IF" / SCENARIOS & MISTAKES
+    # 2. EMERGENCY PROTOCOLS & ACCIDENT PROCEDURES
     # -------------------------------------------------------------
-    if "what if" in q or "accidentally" in q or "wrong bin" in q or "mistake" in q or "mixed" in q:
-        # Scenario: needle in red bin
-        if any(w in q for w in ["needle", "sharp"]) and any(w in q for w in ["red", "plastic", "yellow"]):
-            return {
-                "reply": "⚠️ **CRITICAL HAZARD: Needle Placed in Wrong Bin (Red or Yellow)**\n\n- **Why it is Dangerous:** Red bin waste goes to autoclaving and mechanical granulators/shredders. A loose steel needle will damage shredding machinery and poses an extreme puncture/infection risk to plastic recycling plant workers.\n- **Immediate Corrective Action:**\n  1. Don heavy-duty puncture-resistant utility gloves and a face shield.\n  2. **Do NOT reach in with bare hands.** Use forceps or tongs to carefully extract the needle.\n  3. Immediately deposit the needle into the **White Translucent Puncture-Proof Container**.\n  4. Document the incident as a near-miss safety violation in the ward logbook.",
-                "category_tag": "Emergency",
-                "recommended_action": "Use tongs to extract needle; place into White sharps box; report near-miss.",
-                "suggested_followups": [
-                    "What is the proper procedure for needle disposal?",
-                    "Where do plastic syringes without needles go?",
-                    "What is the needle-stick injury emergency SOP?"
-                ],
-                "engine": "MedWaste AI Neural Rule Engine"
-            }
-
-        # Scenario: infectious waste in general municipal bin
-        if any(w in q for w in ["yellow", "blood", "gauze", "cotton", "infectious"]) and any(w in q for w in ["general", "black", "green", "municipal"]):
-            return {
-                "reply": "🚨 **CRITICAL VIOLATION: Infectious Waste in General Municipal Bin**\n\n- **Consequences:** Mixing infectious blood-soaked items into municipal trash contaminates city garbage trucks and landfills, creating widespread public health risks and violating the Environment (Protection) Act 1986.\n- **Corrective Protocol:**\n  1. Cordon off the bin.\n  2. Don full PPE (nitrile gloves, N95 mask, fluid apron).\n  3. Transfer the contaminated items using tongs into a **Yellow Non-Chlorinated Biohazard Bag**.\n  4. Disinfect the general bin using **1% Sodium Hypochlorite solution**.\n  5. Re-educate ward staff on strict source segregation.",
-                "category_tag": "Emergency",
-                "recommended_action": "Transfer contaminated waste into Yellow bag with tongs; disinfect general bin with 1% hypochlorite.",
-                "suggested_followups": [
-                    "What items belong in the Yellow bag?",
-                    "What are the penalties under BMWM Rules 2016?",
-                    "How to clean up a blood spill?"
-                ],
-                "engine": "MedWaste AI Neural Rule Engine"
-            }
-
-        # Scenario: overfilled bin
-        if any(w in q for w in ["overflow", "full", "overfilled", "capacity", "spilling"]):
-            return {
-                "reply": "⚠️ **OVERFLOWING BIN PROTOCOL**\n\n- **The Rule:** Biohazard bags must **never exceed 3/4 capacity (75%)**.\n- **Action Required:**\n  1. **NEVER push, stomp, or compress** the waste with hands or feet to make room.\n  2. Immediately seal the overfilled bag using a zip-tie or double knot.\n  3. Affix the CPCB Barcode label.\n  4. Place a fresh replacement liner in the bin.\n  5. Request an immediate collection dispatch via MedWaste AI.",
-                "category_tag": "Collection",
-                "recommended_action": "Never compress waste; seal tightly at 3/4 full and request collection.",
-                "suggested_followups": [
-                    "What is the 48-hour waste storage rule?",
-                    "How do I schedule a pickup?",
-                    "What PPE is needed when tying waste bags?"
-                ],
-                "engine": "MedWaste AI Neural Rule Engine"
-            }
-
-        # Scenario: recapping needles
-        if "recap" in q:
-            return {
-                "reply": "🚫 **STRICTLY PROHIBITED: Recapping Needles by Hand**\n\n- **The Risk:** Over **80% of accidental needle-stick injuries** in hospitals occur while trying to put the plastic cap back on a used needle.\n- **Regulatory Mandate (CPCB):** Recapping with two hands is strictly banned.\n- **Correct Handling:**\n  1. Destroy the needle hub immediately after injection using an electric needle burner or mechanical hub cutter at point-of-use.\n  2. If recapping is absolutely mandatory for blood gas sampling, use the **Single-Handed 'Scoop' Technique** only.\n  3. Drop directly into the **White Puncture-Proof Sharps Box**.",
-                "category_tag": "White",
-                "recommended_action": "Never recap needles by hand. Use electric needle burner or hub cutter immediately.",
-                "suggested_followups": [
-                    "What is the single-handed scoop technique?",
-                    "What is the emergency protocol for a needle-stick injury?",
-                    "What belongs in the White sharps container?"
-                ],
-                "engine": "MedWaste AI Neural Rule Engine"
-            }
-
-    # -------------------------------------------------------------
-    # 4. EMERGENCY PROTOCOLS (NEEDLE-STICK, BLOOD SPILL, MERCURY)
-    # -------------------------------------------------------------
+    # Needle-stick injury SOP
     if any(k in q for k in ["needle stick", "needlestick", "prick", "sharp injury", "punctured by needle", "pricked", "cut by blade"]):
         return {
-            "reply": "🚨 **EMERGENCY PROTOCOL: Needle-Stick / Sharps Injury**\n\n1. **Immediate Irrigation:** Wash the puncture wound immediately under cool running tap water with mild soap for at least **5 minutes**.\n2. **DO NOT Squeeze or Suck:** Never squeeze the wound or suck it with your mouth; this creates localized pressure and tissue trauma.\n3. **Disinfect & Cover:** Pat dry with sterile gauze and apply a sterile waterproof bandage.\n4. **Report Instantly:** Notify the Nursing Supervisor and Infection Control Officer immediately.\n5. **Post-Exposure Prophylaxis (PEP):** Must be evaluated and initiated within **2 hours** for HIV and Hepatitis B baseline testing.",
+            "reply": "🚨 **EMERGENCY FIRST-AID: Needle-Stick / Sharps Injury Protocol**\n\n"
+                     "If you have suffered an accidental needle-stick puncture, act immediately:\n\n"
+                     "1. **Wash Immediately:** Hold the wound under cool running tap water with soap for at least **5 minutes**.\n"
+                     "2. **DO NOT Squeeze or Suck:** Never squeeze, pinch, or suck the wound. Squeezing creates trauma and can draw virus particles deeper into vascular tissue.\n"
+                     "3. **Disinfect & Cover:** Pat dry with clean gauze and cover with a sterile waterproof adhesive bandage.\n"
+                     "4. **Report Promptly:** Inform your nursing in-charge or Infection Control Officer immediately.\n"
+                     "5. **Initiate PEP (Post-Exposure Prophylaxis):** Evaluation for HIV and Hepatitis B PEP must be started **within 2 hours** of exposure for maximum clinical efficacy.",
             "category_tag": "Emergency",
-            "recommended_action": "Wash under running water for 5 min. Report within 2 hours for PEP.",
+            "recommended_action": "Wash under running tap water for 5 minutes; report immediately for PEP within 2 hours.",
             "suggested_followups": [
                 "What PPE is required for handling sharps?",
                 "Where should hypodermic needles be disposed?",
-                "How do I manage a blood spill?"
+                "What goes into the Blue or Red bin?"
             ],
-            "engine": "MedWaste AI Neural Rule Engine"
+            "engine": "MedWaste AI Cognitive Engine"
         }
 
-    if any(k in q for k in ["spill", "leak", "hypochlorite", "vomit", "vomited", "fluid on floor"]) or (any(b in q for b in ["blood", "urine", "body fluid", "pus"]) and any(w in q for w in ["floor", "clean", "drop", "wipe", "puddle", "flow", "spill", "ward"])):
+    # Blood or bodily fluid spill
+    if any(k in q for k in ["spill", "leak", "blood spill", "vomit", "hypochlorite"]):
         return {
-            "reply": "⚠️ **CLINICAL BLOOD & FLUID SPILL MANAGEMENT**\n\n1. **Cordon Off:** Mark the spill perimeter to prevent foot traffic.\n2. **Don PPE:** Wear heavy nitrile gloves, eye protection/face shield, and fluid-resistant apron.\n3. **Contain Spill:** Cover the liquid spill with absorbent paper towels to contain spread.\n4. **Disinfect:** Flood paper towels with freshly prepared **1% Sodium Hypochlorite solution** (10,000 ppm available chlorine).\n5. **Contact Time:** Allow exactly **20 minutes** for viral inactivation (HIV, HBV, HCV).\n6. **Disposal:** Scoop soaked towels with forceps/dustpan into a **Yellow Biohazard Bag**.\n7. **Mop:** Clean area with neutral hospital disinfectant.",
+            "reply": "⚠️ **CLINICAL BLOOD & FLUID SPILL MANAGEMENT SOP**\n\n"
+                     "1. **Cordon Off:** Mark the spill perimeter with warning cones to prevent foot traffic.\n"
+                     "2. **Don PPE:** Put on heavy utility gloves, eye protection/face shield, and a fluid-resistant apron.\n"
+                     "3. **Contain with Paper Towels:** Cover the liquid spill with absorbent paper towels to absorb the liquid and prevent spreading.\n"
+                     "4. **Disinfect with Hypochlorite:** Pour freshly prepared **1% Sodium Hypochlorite solution** (10,000 ppm available chlorine) generously over the towels.\n"
+                     "5. **Wait 20 Minutes:** Allow a mandatory **20-minute contact time** for full viral inactivation (HIV, HBV, HCV).\n"
+                     "6. **Disposal:** Using tongs, scoop soaked towels into a **Yellow Biohazard Bag**.\n"
+                     "7. **Mop & Sanitize:** Mop the area thoroughly with hospital-grade disinfectant.",
             "category_tag": "Emergency",
-            "recommended_action": "Apply absorbent towels + 1% Sodium Hypochlorite for 20 minutes.",
+            "recommended_action": "Cover spill with towels + 1% Sodium Hypochlorite for 20 minutes; discard in Yellow bag.",
             "suggested_followups": [
-                "Which bin does soiled gauze go into?",
+                "What items go into the Yellow bag?",
                 "What PPE is mandatory for waste handlers?",
-                "What is the 48-hour waste storage rule?"
+                "What is the first aid for a needle stick?"
             ],
-            "engine": "MedWaste AI Neural Rule Engine"
+            "engine": "MedWaste AI Cognitive Engine"
         }
 
-    if "mercury" in q or "thermometer" in q or "sphygmomanometer" in q:
+    # Needle accidentally dropped in Red or Yellow bin (Near-miss)
+    if any(w in q for w in ["needle", "sharp"]) and any(w in q for w in ["wrong bin", "accidentally", "mistake", "dropped in", "dropped into", "mixed into"]):
         return {
-            "reply": "☣️ **SPECIAL PROTOCOL: Mercury Spill Management**\n\n- **CRITICAL WARNING:** **NEVER incinerate or autoclave mercury.** Mercury vaporizes into an odorless, neurotoxic heavy metal gas.\n- **NEVER put mercury in biohazard bags or down the drain.**\n- **Spill Handling Steps:**\n  1. Evacuate pregnant women and non-essential staff; ventilate the room.\n  2. Put on nitrile gloves (never use a vacuum cleaner).\n  3. Use two stiff cardboard pieces or an eyedropper to collect beads together.\n  4. Place mercury droplets into an airtight plastic container containing a layer of water or oil to suppress vapors.\n  5. Seal, label as **'Hazardous Mercury Waste'**, and route to an authorized hazardous waste treatment facility.",
+            "reply": "⚠️ **NEAR-MISS PROTOCOL: Needle Placed in Wrong Bin (Red or Yellow)**\n\n"
+                     "- **Why it is Dangerous:** Red waste goes to autoclaves and mechanical granulators. A metal needle can shatter shredder blades and severely injure recycling plant personnel.\n"
+                     "- **Corrective Action:**\n"
+                     "  1. Don heavy puncture-resistant utility gloves and eye protection.\n"
+                     "  2. **NEVER reach into the bin with bare or gloved hands!**\n"
+                     "  3. Use long forceps or tongs to carefully extract the needle.\n"
+                     "  4. Drop it immediately into the **White Puncture-Proof Sharps Container**.\n"
+                     "  5. Document the incident as an internal safety near-miss in the ward logbook.",
             "category_tag": "Emergency",
-            "recommended_action": "Collect beads with cardboard into sealed water container; never incinerate or vacuum.",
+            "recommended_action": "Extract needle using forceps/tongs only; place in White container; log near-miss.",
             "suggested_followups": [
-                "Where do broken glass thermometer parts go?",
-                "What are the toxic risks of mercury vapors?",
-                "What items go into the Blue container?"
-            ],
-            "engine": "MedWaste AI Neural Rule Engine"
-        }
-
-    # -------------------------------------------------------------
-    # 5. SPECIFIC WASTE STREAM ITEMS
-    # -------------------------------------------------------------
-    # Red Bin: Recyclable Plastics
-    if any(k in q for k in ["syringe", "iv set", "iv tube", "iv bottle", "catheter", "urine bag", "dialysis", "plastic tubing", "vacutainer", "specimen container"]):
-        return {
-            "reply": "🔴 **RED BIN: Contaminated Recyclable Plastics**\n\n- **Categorized Items:** Disposable plastic syringes (WITHOUT needles), IV infusion tubing sets, urinary catheters, drainage urine bags, dialysis kits, and plastic specimen vacutainers.\n- **Point-of-Use Preparation:**\n  1. The metal needle MUST be cut off at the hub using a needle destroyer or cutter before disposal.\n  2. Drain all residual urine, IV fluids, or blood into sanitary sewage before bagging.\n- **Treatment Method:** Autoclaving (121°C @ 15 psi) or microwaving, followed by mechanical shredding and polymer recycling by state-authorized recyclers.",
-            "category_tag": "Red",
-            "recommended_action": "Cut needle hub at point-of-use; drain fluids; place plastic body into RED bin.",
-            "suggested_followups": [
-                "Where do needle tips and scalpels go?",
-                "What happens to shredded plastic after autoclaving?",
-                "What items go into the Yellow bin?"
-            ],
-            "engine": "MedWaste AI Neural Rule Engine"
-        }
-
-    # White Container: Sharps
-    if any(k in q for k in ["needle", "sharp", "scalpel", "blade", "lancet", "suture needle", "ampoule tip"]):
-        return {
-            "reply": "⚪ **WHITE TRANSLUCENT CONTAINER: Contaminated Sharps**\n\n- **Categorized Items:** Hypodermic needles, fixed-needle syringes, surgical scalpel blades, suture needles, lancets, and broken glass ampoule tips.\n- **Container Specifications:** Rigid, puncture-proof, leak-proof, tamper-evident white translucent box.\n- **Essential Handling Rules:**\n  - **NEVER recap needles by hand.**\n  - Do not bend, shear, or break needles manually.\n  - Fill strictly up to **3/4 capacity** (never overfill).\n  - Permanently engage the tamper-proof lid before handoff.\n- **Final Disposal:** Autoclaving or dry-heat sterilization followed by encapsulation in cement or deep sharp-pit burial.",
-            "category_tag": "White",
-            "recommended_action": "Drop directly into WHITE puncture-proof container without recapping.",
-            "suggested_followups": [
-                "What is the first aid for needle-stick injuries?",
                 "Where do used plastic syringes go?",
+                "What is the first-aid for a needle stick?",
+                "What goes into the Blue or Red bin?"
+            ],
+            "engine": "MedWaste AI Cognitive Engine"
+        }
+
+    # -------------------------------------------------------------
+    # 3. "WHY" & SCIENTIFIC REASONING QUESTIONS
+    # -------------------------------------------------------------
+    # Why can't needles go in red bin?
+    if ("needle" in q or "sharp" in q) and ("red" in q) and any(w in q for w in ["why", "cannot", "can't", "not allowed", "prohibit", "never"]):
+        return {
+            "reply": "⚠️ **WHY NEEDLES CAN NEVER GO INTO THE RED BIN**\n\n"
+                     "1. **Severe Worker Puncture Hazard:** Red bin waste travels to recycling facilities where plastic items are sorted and fed into machines. A loose needle inside a Red bag poses an extreme risk of needle-stick injury and Hepatitis B/HIV infection to recycling workers.\n"
+                     "2. **Destruction of Shredding Machinery:** The Red stream goes directly to industrial granulators and rotating blade shredders. Hardened steel hypodermic needles jam, dull, and destroy mechanical shredder blades.\n"
+                     "3. **Regulatory Violation:** Under biomedical waste rules, all sharps must be placed strictly in puncture-proof White translucent containers.\n\n"
+                     "💡 **Proper Method:** Always cut the needle off at the hub using a needle destroyer before placing the plastic syringe barrel in the Red bin!",
+            "category_tag": "Educational",
+            "recommended_action": "Never put needles in Red bin; drop into White puncture-proof container.",
+            "suggested_followups": [
+                "What goes into the Blue or Red bin?",
+                "What is the emergency first-aid for a needle-stick injury?",
+                "What goes into the White sharps container?"
+            ],
+            "engine": "MedWaste AI Cognitive Engine"
+        }
+
+    # Why can't chlorinated plastics / PVC go in yellow bin?
+    if any(w in q for w in ["chlorinated", "pvc", "plastic"]) and "yellow" in q and any(w in q for w in ["why", "cannot", "can't", "not allowed", "burn", "incinerat"]):
+        return {
+            "reply": "🔥 **WHY CHLORINATED PLASTICS (PVC) ARE BANNED FROM YELLOW BAGS**\n\n"
+                     "1. **Dioxins & Furans Emission:** When chlorinated plastics (such as PVC IV tubing or blood bags) are incinerated, the chlorine reacts with organic compounds to produce **polychlorinated dibenzo-p-dioxins (PCDDs) and dibenzofurans (PCDFs)**. These are among the most toxic, carcinogenic environmental pollutants known.\n"
+                     "2. **Acid Gas Formation:** Burning chlorine generates hydrochloric acid (HCl) gas, which corrodes incinerator refractory brickwork and flue systems.\n"
+                     "3. **Proper Segregation:** All recyclable plastics belong in the **Red Bin** for steam sterilization (autoclaving), which uses zero combustion and produces zero dioxins.",
+            "category_tag": "Educational",
+            "recommended_action": "Place all plastics into Red bin for autoclaving; never incinerate chlorinated plastics.",
+            "suggested_followups": [
+                "What items belong in the Yellow bag?",
+                "What goes into the Red bin?",
+                "How does an autoclave work?"
+            ],
+            "engine": "MedWaste AI Cognitive Engine"
+        }
+
+    # Why is recapping needles prohibited?
+    if "recap" in q:
+        return {
+            "reply": "🚫 **WHY RECAPPING NEEDLES BY HAND IS STRICTLY PROHIBITED**\n\n"
+                     "- **The Danger:** Clinical studies show that **over 80% of accidental needle-stick injuries** occur while healthcare workers attempt to slide the tiny plastic cap back onto a used needle with two hands.\n"
+                     "- **Safety Protocol:**\n"
+                     "  1. Destroy or snip the needle hub immediately using a needle burner or hub cutter at the point of care.\n"
+                     "  2. Drop the needle directly into the **White Puncture-Proof Sharps Box**.\n"
+                     "  3. If recapping is absolutely unavoidable (e.g. arterial blood gas collection), use the **Single-Handed 'Scoop' Technique** only (place cap on table, scoop with needle using one hand, then click in place).",
+            "category_tag": "White",
+            "recommended_action": "Never recap needles by hand; drop directly into White sharps box.",
+            "suggested_followups": [
+                "What is the first-aid for a needle-stick injury?",
+                "Where do plastic syringes go?",
+                "What goes into the Blue or Red bin?"
+            ],
+            "engine": "MedWaste AI Cognitive Engine"
+        }
+
+    # Why segregate biomedical waste?
+    if any(k in q for k in ["why segregate", "importance of segregation", "why separate", "why is biomedical waste", "why segregation"]):
+        return {
+            "reply": "🏥 **WHY PROPER BIOMEDICAL WASTE SEGREGATION IS VITAL**\n\n"
+                     "1. **Only 15% is Hazardous:** In any hospital, approximately **85%** of waste is clean municipal trash (packaging, food, paper) and only **15%** is biohazardous. Without strict source segregation, the 85% clean waste becomes contaminated, escalating disposal costs by up to 10-fold.\n"
+                     "2. **Preventing Epidemics & Cross-Infection:** Segregation prevents dangerous bloodborne pathogens (HIV, Hepatitis B, Hepatitis C) from infecting sanitation workers, ragpickers, and the general community.\n"
+                     "3. **Eliminating Toxic Air Pollution:** Keeping plastics out of incinerators prevents toxic carcinogenic Dioxins and Furans from entering our atmosphere.\n"
+                     "4. **Worker Safety:** Keeping sharps contained in puncture-proof White boxes prevents life-threatening needle-stick punctures.\n"
+                     "5. **Resource Recovery:** Enables safe recycling of thousands of tons of high-grade clinical polymers and glass every year.",
+            "category_tag": "Educational",
+            "recommended_action": "Segregate strictly at source to prevent infection spread and environmental contamination.",
+            "suggested_followups": [
+                "What goes into the Blue or Red bin?",
+                "What are the 4 main color streams?",
+                "What is the first-aid for a needle-stick injury?"
+            ],
+            "engine": "MedWaste AI Cognitive Engine"
+        }
+
+    # -------------------------------------------------------------
+    # 4. MULTI-BIN COMPARISONS & REASONING
+    # -------------------------------------------------------------
+    bin_colors = []
+    if "blue" in q: bin_colors.append("blue")
+    if "red" in q: bin_colors.append("red")
+    if "yellow" in q: bin_colors.append("yellow")
+    if "white" in q: bin_colors.append("white")
+    if "black" in q: bin_colors.append("black")
+    if "green" in q: bin_colors.append("green")
+    if "purple" in q or "cytotoxic" in q or "chemo" in q or "oncology" in q: bin_colors.append("purple")
+
+    # A. Blue OR Red (The user's direct question!)
+    if ("blue" in bin_colors and "red" in bin_colors) or (("blue" in q or "red" in q) and ("or red" in q or "or blue" in q or "and red" in q or "and blue" in q or "blue vs red" in q or "red vs blue" in q)):
+        return {
+            "reply": "Great question! Both the **Blue container** and the **Red bin** handle recyclable hospital materials, but they are strictly separated because they contain completely different materials requiring different recycling technologies:\n\n"
+                     "🔵 **BLUE CONTAINER: Glassware & Metallic Implants**\n"
+                     "- **What goes here:**\n"
+                     "  - Medicine glass vials (broken or intact)\n"
+                     "  - Antibiotic glass ampoules\n"
+                     "  - Microscope glass slides and cover slips\n"
+                     "  - Contaminated orthopedic metal implants (pins, bone screws, plates, intramedullary rods)\n"
+                     "- **Why it goes to Blue:** Glass and metals CANNOT go into plastic shredders (they would destroy the shredder blades). Instead, they undergo chemical disinfection (1-2% Sodium Hypochlorite) or autoclaving, and are sent to licensed glass crushing recyclers and metal smelters.\n"
+                     "- **Safety Rule:** Always handle broken glass or ampoules with forceps or tongs—never with bare hands!\n\n"
+                     "🔴 **RED BIN: Contaminated Recyclable Plastics**\n"
+                     "- **What goes here:**\n"
+                     "  - Disposable plastic syringe barrels (**WITHOUT needles**)\n"
+                     "  - Intravenous (IV) infusion bottles and tubing sets\n"
+                     "  - Urinary catheters and drainage urine bags\n"
+                     "  - Dialysis kits and plastic tubing\n"
+                     "  - Vacutainer blood collection tubes (plastic bodies)\n"
+                     "- **Why it goes to Red:** These are high-grade recyclable polymers. They are sterilized via pressurized steam autoclaving (121°C @ 15 psi) or microwaving, then mechanically shredded into clean plastic granules to manufacture non-clinical plastic products.\n"
+                     "- **Crucial Rule:** The metal needle must ALWAYS be cut off at the hub using a needle destroyer before dropping the plastic syringe into the Red bin!\n\n"
+                     "💡 **Quick Summary to Remember:**\n"
+                     "- **Blue** = **Breakables & Metal Implants** (Glass vials, ampoules, orthopedic screws)\n"
+                     "- **Red** = **Recyclable Plastics** (Syringes, IV sets, catheters, urine bags)",
+            "category_tag": "Segregation",
+            "recommended_action": "Place glass vials/implants in Blue; place plastic syringes (no needle) and IV sets in Red.",
+            "suggested_followups": [
+                "Where do the metal needles go?",
+                "What items belong in the Yellow biohazard bag?",
+                "What is the emergency first-aid for a needle-stick injury?"
+            ],
+            "engine": "MedWaste AI Cognitive Engine"
+        }
+
+    # B. Yellow vs Red
+    if ("yellow" in bin_colors and "red" in bin_colors) or ("yellow vs red" in q or "red vs yellow" in q or "yellow or red" in q):
+        return {
+            "reply": "Here is the key distinction between the **Yellow bag** and the **Red bin**:\n\n"
+                     "🟡 **YELLOW BAG: Infectious & Anatomical (Destruction via Incineration)**\n"
+                     "- **Items:** Human anatomical tissues, organs, placentas, blood-soaked gauze, dressings, soiled cotton swabs, pus swabs, pathology cultures, and expired medicines.\n"
+                     "- **Fate:** High-temperature double-chamber incineration (800°C primary / 1050°C secondary) or plasma pyrolysis to convert biological hazards to inert ash.\n"
+                     "- **Rule:** Never put recyclable plastics or metals here.\n\n"
+                     "🔴 **RED BIN: Contaminated Plastics (Sterilization & Recycling)**\n"
+                     "- **Items:** Recyclable plastic equipment: plastic syringe barrels (without needle), IV tubing sets, saline bottles, catheters, urine bags.\n"
+                     "- **Fate:** Autoclaved with steam under pressure (121°C), then shredded and recycled into industrial plastic polymers.\n"
+                     "- **Rule:** Never put tissues, blood bags, or metal sharps in the Red bin!",
+            "category_tag": "Segregation",
+            "recommended_action": "Yellow is for infectious/anatomical incineration; Red is for recyclable plastics.",
+            "suggested_followups": [
+                "What goes into the Blue container?",
+                "Where do needle tips go?",
+                "Why can't chlorinated plastics be incinerated?"
+            ],
+            "engine": "MedWaste AI Cognitive Engine"
+        }
+
+    # C. Blue vs White
+    if ("blue" in bin_colors and "white" in bin_colors) or ("blue vs white" in q or "white vs blue" in q or "blue or white" in q):
+        return {
+            "reply": "Here is how to separate **Blue** vs **White** containers:\n\n"
+                     "🔵 **BLUE CONTAINER (Glassware & Metal Implants):**\n"
+                     "- Broken or unbroken glass vials, ampoules, slides, and orthopedic implants (pins, screws, plates).\n"
+                     "- Treated by chemical disinfection or autoclaving, then crushed and recycled.\n\n"
+                     "⚪ **WHITE TRANSLUCENT BOX (Puncture-Proof Sharps):**\n"
+                     "- Contaminated metal sharps: Hypodermic needles, surgical scalpels, suture needles, lancets, and broken sharp ampoule tips.\n"
+                     "- Translucent, rigid, puncture-proof box. Never recap needles! Sealed at 3/4 capacity and encapsulated in concrete or sent to sharp pits.",
+            "category_tag": "Segregation",
+            "recommended_action": "Glass vials & implants go in Blue; needles & scalpels go in White puncture-proof box.",
+            "suggested_followups": [
+                "What goes into the Red bin?",
+                "What is the first-aid for a needle-stick injury?",
+                "Can empty glass vials be recycled?"
+            ],
+            "engine": "MedWaste AI Cognitive Engine"
+        }
+
+    # D. General overview of ALL bins
+    if any(k in q for k in ["all bins", "every bin", "color code", "which bins", "all colors", "4 colors", "four colors", "list bins", "types of bins"]):
+        return {
+            "reply": "Here is the complete color-coding guide for hospital biomedical waste segregation:\n\n"
+                     "🟡 **YELLOW BAG (Infectious & Anatomical Waste):**\n"
+                     "- Human tissues, organs, placentas, blood-soaked gauze, dressings, pus swabs, expired medicines, lab cultures.\n"
+                     "- **Treatment:** High-temperature incineration (800°C–1050°C).\n\n"
+                     "🔴 **RED BIN (Contaminated Recyclable Plastics):**\n"
+                     "- Disposable syringe bodies (no needle), IV tubing sets, catheters, urine bags, dialysis kits, plastic bottles.\n"
+                     "- **Treatment:** Autoclaving (121°C @ 15 psi) + mechanical shredding + plastic recycling.\n\n"
+                     "⚪ **WHITE CONTAINER (Metal Sharps):**\n"
+                     "- Hypodermic needles, scalpel blades, suture needles, lancets. Rigid puncture-proof box.\n"
+                     "- **Treatment:** Autoclaving/dry heat + encapsulation in concrete or deep sharp pits.\n\n"
+                     "🔵 **BLUE BOX (Glassware & Metal Implants):**\n"
+                     "- Medicine glass vials, antibiotic ampoules, microscope slides, orthopedic screws/plates/pins.\n"
+                     "- **Treatment:** Disinfection soak or autoclaving + glass recycling / metal smelting.\n\n"
+                     "🟢⚫ **GREEN & BLACK BINS (General Municipal Waste - 85% of total):**\n"
+                     "- Green: Wet/food leftovers, fruit peels, canteen scraps (composting).\n"
+                     "- Black: Clean dry paper, packaging boxes, clean plastic wrappers (municipal recycling).",
+            "category_tag": "Segregation",
+            "recommended_action": "Segregate strictly at source into Yellow, Red, White, Blue, and Municipal bins.",
+            "suggested_followups": [
+                "What goes into the Blue or Red bin?",
+                "Where do used plastic syringes go?",
+                "What is the first-aid for a needle-stick injury?"
+            ],
+            "engine": "MedWaste AI Cognitive Engine"
+        }
+
+    # -------------------------------------------------------------
+    # 5. ITEM-SPECIFIC REASONING ENGINE (100+ ITEMS)
+    # -------------------------------------------------------------
+    # Syringes (Plastic body vs needle)
+    if any(k in q for k in ["syringe", "syringes"]):
+        return {
+            "reply": "💉 **DISPOSAL OF USED SYRINGES: Step-by-Step Clinical Procedure**\n\n"
+                     "A used disposable syringe contains two distinct hazard components that MUST be separated at the point of use:\n\n"
+                     "1. **The Metal Needle:**\n"
+                     "   - Snip the needle at the hub using a point-of-use needle cutter or electric burner.\n"
+                     "   - Deposit the metal needle immediately into the **White Translucent Puncture-Proof Sharps Container**.\n"
+                     "   - **Never recap needles by hand!**\n\n"
+                     "2. **The Plastic Barrel & Plunger:**\n"
+                     "   - Drain any residual medication or fluid.\n"
+                     "   - Drop the needle-free plastic barrel into the **Red Bin**.\n"
+                     "   - It will be autoclaved at 121°C and shredded into plastic granules for safe polymer recycling.\n\n"
+                     "*(Note: If the syringe has a permanently fixed needle, such as an insulin syringe, do NOT attempt to break it; drop the entire unit into the White container).*",
+            "category_tag": "Red",
+            "recommended_action": "Snip needle into White sharps box; place plastic barrel into Red bin.",
+            "suggested_followups": [
+                "What goes into the Blue container?",
+                "What is the emergency first-aid for a needle-stick injury?",
+                "What belongs in the Yellow biohazard bag?"
+            ],
+            "engine": "MedWaste AI Cognitive Engine"
+        }
+
+    # Needles / Scalpels / Blades / Sharps
+    if any(k in q for k in ["needle", "needles", "scalpel", "blade", "lancet", "suture needle", "ampoule tip"]):
+        return {
+            "reply": "🔪 **SHARPS DISPOSAL: Needles, Scalpels, and Blades**\n\n"
+                     "- **Designated Container:** **White Translucent Puncture-Proof Sharps Box**.\n"
+                     "- **Items Included:** Hypodermic needles, suture needles, surgical scalpel blades, disposable razors, lancets, and broken glass ampoule tips.\n"
+                     "- **Safety Protocol:**\n"
+                     "  1. Drop directly into the container immediately after use at bedside.\n"
+                     "  2. **NEVER recap needles with two hands.** If recapping is clinically necessary (e.g. arterial blood gas), use the single-handed 'scoop' technique.\n"
+                     "  3. Stop using and seal the container permanently when it reaches **3/4 capacity (75%)**.\n"
+                     "- **Final Treatment:** Autoclaving followed by concrete encapsulation or deep burial in a sharp pit.",
+            "category_tag": "White",
+            "recommended_action": "Drop directly into White puncture-proof container without recapping.",
+            "suggested_followups": [
+                "What is the first-aid for an accidental needle-stick injury?",
+                "Where do plastic syringes go?",
                 "What goes into the Blue container?"
             ],
-            "engine": "MedWaste AI Neural Rule Engine"
+            "engine": "MedWaste AI Cognitive Engine"
         }
 
-    # Blue Box: Glassware & Metallic Implants
-    if any(k in q for k in ["glass", "ampoule", "vial", "metallic implant", "orthopedic pin", "screw", "plate", "slide", "flask"]):
+    # Glass vials / Ampoules / Slides
+    if any(k in q for k in ["glass", "vial", "vials", "ampoule", "ampoules", "slide", "slides", "petri dish", "flask"]):
         return {
-            "reply": "🔵 **BLUE BOX: Glassware & Metallic Implants**\n\n- **Categorized Items:** Broken or intact medicine glass vials, antibiotic ampoules, microscope glass slides, glass flasks, and contaminated metallic orthopedic implants (pins, screws, plates, intramedullary rods).\n- **Handling SOP:**\n  - Never pick up broken glass shards with bare or gloved hands; always use forceps, tongs, or a dustpan brush.\n  - Cardboard or blue boxes must have reinforced puncture-resistant bottoms.\n- **Pre-treatment & Recycling:** Disinfection with 1-2% sodium hypochlorite soak or autoclaving, followed by industrial glass crushing and metal recycling.",
+            "reply": "🧪 **GLASSWARE DISPOSAL: Vials, Ampoules, and Slides**\n\n"
+                     "- **Designated Container:** **Blue Box or Blue-Marked Puncture-Resistant Bin**.\n"
+                     "- **Items Included:** Intact or broken medicine glass vials, antibiotic ampoules, laboratory glass slides, cover slips, and culture flasks.\n"
+                     "- **Safe Handling:**\n"
+                     "  - Never pick up broken glass fragments with bare hands or standard gloves; always use forceps, tongs, or a dustpan brush.\n"
+                     "  - Ensure the Blue container has a puncture-resistant bottom to prevent glass shards from piercing through.\n"
+                     "- **Recycling Path:** Glass items are disinfected in a sodium hypochlorite bath or autoclave, crushed into cullet, and remelted into industrial glass products.",
             "category_tag": "Blue",
-            "recommended_action": "Use forceps to place glass vials and metal implants into BLUE box.",
+            "recommended_action": "Use forceps to place glass vials and ampoules into Blue box.",
             "suggested_followups": [
-                "Where do expired medicines go?",
+                "What goes into the Red bin?",
                 "What goes into the Yellow bag?",
-                "What is the collection frequency for biomedical waste?"
+                "Where do metal implants go?"
             ],
-            "engine": "MedWaste AI Neural Rule Engine"
+            "engine": "MedWaste AI Cognitive Engine"
         }
 
-    # Yellow Bag: Infectious & Anatomical
-    if any(k in q for k in ["yellow", "cotton", "gauze", "bandage", "dressing", "placenta", "tissue", "anatomical", "blood soaked", "pathology", "biopsy", "organ", "flesh", "pus", "plaster cast", "soiled mask"]):
+    # IV sets / Catheters / Urine bags / Tubing
+    if any(k in q for k in ["iv set", "iv tube", "iv bottle", "catheter", "urine bag", "dialysis", "tubing", "vacutainer"]):
         return {
-            "reply": "🟡 **YELLOW BAG: Infectious & Anatomical Waste**\n\n- **Categorized Items:** Human anatomical waste (tissues, organs, placentas, biopsy specimens), blood-soaked gauze, soiled cotton dressings, pus swabs, plaster casts, microbiology culture plates, soiled paper masks, and expired cytotoxic medicines.\n- **Liner Specifications:** Certified non-chlorinated yellow plastic bags bearing the prominent international biohazard symbol.\n- **Storage Limit:** Must be incinerated within **48 hours** under CPCB regulations.\n- **Treatment Method:** Double-chamber high-temperature incineration (primary chamber 800°C ± 50°C, secondary chamber 1050°C ± 50°C with 2-second retention time) or plasma pyrolysis.",
-            "category_tag": "Yellow",
-            "recommended_action": "Tie non-chlorinated yellow bag securely at 3/4 full; route for high-temp incineration.",
+            "reply": "🩸 **PLASTIC TUBING & DRAINAGE: IV Sets, Catheters, and Urine Bags**\n\n"
+                     "- **Designated Container:** **Red Bin**.\n"
+                     "- **Categorized Items:** IV drip sets, infusion lines, plastic saline/dextrose bottles, Foley catheters, drainage bags, urine bags, dialysis kits, and plastic specimen vacutainers.\n"
+                     "- **Pre-Disposal Step:**\n"
+                     "  - Residual fluids (saline, urine, drained fluids) must be emptied into the sluice/sanitary drainage.\n"
+                     "  - Any attached metal needle or connector spike must be removed and placed into the White sharps container.\n"
+                     "- **Treatment:** Pressurized steam autoclaving (121°C @ 15 psi) followed by mechanical granulating and polymer recycling.",
+            "category_tag": "Red",
+            "recommended_action": "Drain fluids, remove any metal tips, and place plastic tubing/bags into Red bin.",
             "suggested_followups": [
-                "Where do plastic IV bags and syringes go?",
-                "What is the maximum time waste can be stored?",
-                "What PPE is needed for handling Yellow bags?"
+                "What goes into the Blue container?",
+                "Where do blood-soaked bandages go?",
+                "What is the 48-hour waste storage rule?"
             ],
-            "engine": "MedWaste AI Neural Rule Engine"
+            "engine": "MedWaste AI Cognitive Engine"
         }
 
-    # Cytotoxic / Chemotherapy
-    if any(k in q for k in ["chemo", "cytotoxic", "oncology", "cancer drug", "antineoplastic"]):
+    # Blood-soaked cotton / Gauze / Bandages / Plaster casts / Tissues
+    if any(k in q for k in ["cotton", "gauze", "bandage", "bandages", "dressing", "dressings", "blood soaked", "placenta", "tissue", "anatomical", "biopsy", "organ", "flesh", "plaster cast", "pus swab"]):
         return {
-            "reply": "🟣 **CYTOTOXIC & ONCOLOGY DRUG WASTE (Purple / Yellow with Cytotoxic Emblem)**\n\n- **Hazard Profile:** Mutagenic, teratogenic, and carcinogenic.\n- **Categorized Items:** Expired chemotherapy vials, infused IV tubing, contaminated gloves, gowns, and patient excreta/vomitus within 48 hours of chemotherapy administration.\n- **Segregation:** Dedicated heavy-duty purple or yellow bags labeled with the prominent Cytotoxic hazard symbol.\n- **Precautions:** Double-glove with chemotherapy-tested nitrile gloves, wear impermeable gown and face shield. Prepare under Class II Biosafety Cabinets.\n- **Treatment:** High-temperature incineration at minimum **1200°C**.",
+            "reply": "🟡 **INFECTIOUS & ANATOMICAL SOILS: Cotton, Gauze, Bandages, and Tissues**\n\n"
+                     "- **Designated Container:** **Yellow Non-Chlorinated Biohazard Bag**.\n"
+                     "- **Categorized Items:**\n"
+                     "  - Blood-soaked gauze, surgical dressings, and cotton swabs\n"
+                     "  - Pus swabs and contaminated wound packings\n"
+                     "  - Plaster of Paris casts contaminated with body fluids\n"
+                     "  - Human anatomical specimens: tissues, placentas, biopsy samples, amputated parts\n"
+                     "- **Why Yellow:** These items carry high biological pathogen loads (hepatitis, HIV, bacterial infections). They must be completely eliminated through double-chamber high-temperature incineration (800°C–1050°C) to prevent disease transmission.\n"
+                     "- **Storage:** Must be incinerated within **48 hours** under CPCB regulations.",
+            "category_tag": "Yellow",
+            "recommended_action": "Place infectious swabs and anatomical waste into Yellow bag; route for incineration.",
+            "suggested_followups": [
+                "What goes into the Red bin?",
+                "What is the emergency SOP for a blood spill?",
+                "Where do used plastic syringes go?"
+            ],
+            "engine": "MedWaste AI Cognitive Engine"
+        }
+
+    # Gloves & Masks (Clinical vs General)
+    if any(k in q for k in ["glove", "gloves", "mask", "masks", "ppe"]):
+        return {
+            "reply": "🧤 **PPE DISPOSAL: Gloves and Masks Segregation Matrix**\n\n"
+                     "How you dispose of gloves and masks depends strictly on their clinical contamination status:\n\n"
+                     "1. **Contaminated / Blood-Stained Gloves & Masks:**\n"
+                     "   - Any PPE used in isolation wards, ICU, COVID/infectious wards, or visibly stained with blood/fluids.\n"
+                     "   - ➡️ **Yellow Biohazard Bag** (for high-temperature incineration).\n\n"
+                     "2. **Routine Clean Examination Gloves (Latex/Nitrile):**\n"
+                     "   - Used for non-infectious routine checks, free of blood or body fluid contamination.\n"
+                     "   - ➡️ **Red Bin** (for autoclaving and polymer recycling).\n\n"
+                     "3. **Clean Paper Masks / Administrative Use:**\n"
+                     "   - Masks worn by receptionists, visitors, or non-clinical staff with zero infectious exposure.\n"
+                     "   - ➡️ **Black Municipal Bin** (general waste).",
+            "category_tag": "Segregation",
+            "recommended_action": "Blood-stained = Yellow bag; Clean clinical gloves = Red bin; Clean admin masks = Black bin.",
+            "suggested_followups": [
+                "What items go into the Yellow bag?",
+                "What goes into the Red bin?",
+                "What PPE is mandatory for waste handlers?"
+            ],
+            "engine": "MedWaste AI Cognitive Engine"
+        }
+
+    # Expired Medicines / Discarded Drugs / Blister packs
+    if any(k in q for k in ["medicine", "medicines", "drug", "drugs", "expired", "tablet", "tablets", "capsule", "capsules", "syrup", "paracetamol", "antibiotic", "blister pack"]):
+        return {
+            "reply": "💊 **EXPIRED & DISCARDED PHARMACEUTICALS**\n\n"
+                     "- **Solid & Liquid Medicines:** Expired tablets, capsules, antibiotic syrups, and injectable solutions.\n"
+                     "  - ➡️ **Yellow Biohazard Bag** (sent for high-temperature incineration at authorized CBWTFs).\n"
+                     "  - **Crucial Rule:** Never flush antibiotics or expired drugs down the toilet or sink! This causes pharmaceutical contamination of municipal water and accelerates antimicrobial resistance.\n\n"
+                     "- **Empty Clean Blister Packs & Outer Cardboard Boxes:**\n"
+                     "  - If empty and clean (no drug residue), paper cartons go into the **Black Municipal Bin** for recycling.\n"
+                     "  - Contaminated foil blister packs with drug residue go into the **Yellow Bag**.",
+            "category_tag": "Yellow",
+            "recommended_action": "Deposit expired drugs into Yellow bag for high-temperature incineration; never flush.",
+            "suggested_followups": [
+                "Where do chemotherapy drugs go?",
+                "What goes into the Blue container?",
+                "What belongs in the Red bin?"
+            ],
+            "engine": "MedWaste AI Cognitive Engine"
+        }
+
+    # Food waste / Pizza box / Lunch / Bottles / Packaging (Everyday hospital waste)
+    if any(k in q for k in ["food", "pizza", "lunch", "apple", "banana", "snack", "wrapper", "paper", "cardboard", "packaging", "water bottle", "cup", "tea"]):
+        return {
+            "reply": "🥗📦 **GENERAL MUNICIPAL HOSPITAL WASTE (Food & Packaging)**\n\n"
+                     "Food scraps, lunch boxes, and packaging are non-hazardous municipal waste (part of the 85% general stream):\n\n"
+                     "1. **Food Leftovers & Organic Items:**\n"
+                     "   - Leftover patient meals, fruit peels, tea bags, food scraps.\n"
+                     "   - ➡️ **Green Bin** (Biodegradable / wet waste for composting).\n\n"
+                     "2. **Clean Paper, Pizza Boxes & Packaging:**\n"
+                     "   - Clean cardboard packaging, dry pizza boxes, snack wrappers, empty mineral water bottles, office paper.\n"
+                     "   - ➡️ **Black Bin** (Non-biodegradable / dry municipal waste for recycling).\n\n"
+                     "⚠️ **Hospital Tip:** If any food container was contaminated by blood or used in a strict infectious isolation ward, it must be treated as hazardous; otherwise, keep it strictly out of the expensive Yellow/Red biohazard streams!",
+            "category_tag": "General",
+            "recommended_action": "Food scraps go in Green bin; clean dry packaging and pizza boxes go in Black bin.",
+            "suggested_followups": [
+                "What goes into the Blue or Red bin?",
+                "What are the 4 main color streams?",
+                "Where do used plastic syringes go?"
+            ],
+            "engine": "MedWaste AI Cognitive Engine"
+        }
+
+    # Thermometers & Mercury
+    if any(k in q for k in ["mercury", "thermometer", "sphygmomanometer", "blood pressure apparatus"]):
+        return {
+            "reply": "☣️ **CRITICAL PROTOCOL: Mercury & Clinical Thermometers**\n\n"
+                     "- **ABSOLUTE WARNING:** **NEVER incinerate or autoclave mercury.** When heated, mercury converts into a lethal, odorless, neurotoxic vapor.\n"
+                     "- **NEVER throw mercury into Yellow, Red, or general bins, and never wash down drains.**\n\n"
+                     "### Spill Management Protocol:\n"
+                     "1. Evacuate pregnant women and non-essential staff; ventilate the area immediately.\n"
+                     "2. Don nitrile gloves (never touch mercury or use a vacuum cleaner, which vaporizes it).\n"
+                     "3. Use two stiff pieces of cardboard or an eye-dropper to gather the beads together.\n"
+                     "4. Transfer droplets into a sealable plastic bottle containing a layer of water or oil to suppress vapors.\n"
+                     "5. Label container clearly: **'Hazardous Chemical Waste: Elemental Mercury'** and transfer to authorized hazardous waste facility.",
+            "category_tag": "Emergency",
+            "recommended_action": "Collect beads with cardboard into airtight water container; never incinerate or vacuum.",
+            "suggested_followups": [
+                "What goes into the Blue container?",
+                "What is the first-aid for a needle stick?",
+                "What happens if mercury is incinerated?"
+            ],
+            "engine": "MedWaste AI Cognitive Engine"
+        }
+
+    # -------------------------------------------------------------
+    # 6. SINGLE BIN IN-DEPTH GUIDES
+    # -------------------------------------------------------------
+    # Blue Container
+    if "blue" in bin_colors or any(k in q for k in ["blue bin", "blue container", "blue box", "blue bag"]):
+        return {
+            "reply": "🔵 **BLUE CONTAINER: Glassware & Metallic Implants**\n\n"
+                     "The Blue container is specially designated for breakable glass items and orthopedic implants:\n\n"
+                     "### What Goes In:\n"
+                     "- **Medicine Glass Vials:** Both intact and broken vaccine or medicine vials.\n"
+                     "- **Glass Ampoules:** Antibiotic ampoules, injection ampoules.\n"
+                     "- **Laboratory Glassware:** Microscope slides, cover slips, glass petri dishes, pipettes, and culture flasks.\n"
+                     "- **Contaminated Metal Implants:** Orthopedic pins, bone screws, compression plates, and intramedullary rods removed during surgeries.\n\n"
+                     "### Why it is Segregated Here:\n"
+                     "Glass and metal cannot be mixed with plastics (they would ruin shredder blades) or general trash. Blue box waste is pre-treated by soaking in 1-2% Sodium Hypochlorite or autoclaving, then crushed and safely recycled into commercial glass or smelted for metal recovery.\n\n"
+                     "### Practical Handling Tips:\n"
+                     "- Always use tongs or forceps to collect broken glass shards—never pick them up with your hands!\n"
+                     "- Ensure the blue box is puncture-resistant and leak-proof with a reinforced bottom.",
+            "category_tag": "Blue",
+            "recommended_action": "Use forceps to place glass vials, ampoules, slides, and metal implants into Blue container.",
+            "suggested_followups": [
+                "What goes into the Red bin?",
+                "Where do metal hypodermic needles go?",
+                "What belongs in the Yellow biohazard bag?"
+            ],
+            "engine": "MedWaste AI Cognitive Engine"
+        }
+
+    # Red Bin
+    if "red" in bin_colors or any(k in q for k in ["red bin", "red container", "red bag", "red bucket"]):
+        return {
+            "reply": "🔴 **RED BIN: Contaminated Recyclable Plastics**\n\n"
+                     "The Red bin is exclusively for contaminated plastic clinical equipment that can be sterilized and recycled:\n\n"
+                     "### What Goes In:\n"
+                     "- **Plastic Syringes:** Disposable plastic syringe barrels and plungers (**metal needle MUST be removed**).\n"
+                     "- **IV Equipment:** Intravenous infusion tubes, IV drip sets, saline plastic bottles.\n"
+                     "- **Catheters & Drainage:** Urinary catheters, Foley catheters, drainage bags, urine collection bags.\n"
+                     "- **Dialysis Supplies:** Dialysis kits, plastic tubing, filter casings.\n"
+                     "- **Specimen Containers:** Plastic vacutainer blood tubes, plastic urine sample cups.\n"
+                     "- **Gloves:** Clean clinical examination gloves (nitrile or latex).\n\n"
+                     "### The 2 Golden Rules for Red Bins:\n"
+                     "1. **Never drop a needle in the Red bin!** Always snip the needle hub with a point-of-use needle cutter into the White sharps container.\n"
+                     "2. **Drain fluids first:** Empty residual urine, blood, or IV fluids into the sanitary sluice before bagging.\n\n"
+                     "### How It Is Treated:\n"
+                     "Waste is sterilized inside autoclaves (pressurized steam at 121°C @ 15 psi) or microwaves to eliminate 100% of pathogens, then mechanically shredded into clean plastic pellets for secondary industrial recycling.",
+            "category_tag": "Red",
+            "recommended_action": "Snip needle hub at point-of-use; drain fluids; place plastic body into Red bin.",
+            "suggested_followups": [
+                "What goes into the Blue container?",
+                "Why can't needles go into the Red bin?",
+                "Where do blood-soaked bandages go?"
+            ],
+            "engine": "MedWaste AI Cognitive Engine"
+        }
+
+    # White Container
+    if "white" in bin_colors or any(k in q for k in ["white bin", "white container", "white box", "sharps container", "sharps box"]):
+        return {
+            "reply": "⚪ **WHITE TRANSLUCENT CONTAINER: Contaminated Metal Sharps**\n\n"
+                     "The White container is a rigid, puncture-proof, leak-proof, and tamper-evident container for dangerous metal sharps:\n\n"
+                     "### What Goes In:\n"
+                     "- **Needles:** Hypodermic injection needles, spinal needles, biopsy needles, fixed-needle syringes (like insulin syringes).\n"
+                     "- **Surgical Blades:** Scalpel blades, disposable razors, skin grafting blades.\n"
+                     "- **Suture Needles:** Curved surgical needles with or without suture attached.\n"
+                     "- **Lancets & Tips:** Blood lancets, contaminated broken ampoule tips.\n\n"
+                     "### Critical Safety Rules:\n"
+                     "- **NEVER recap needles by hand!** Recapping causes over 80% of accidental needle-stick injuries.\n"
+                     "- Do not bend, snap, or break needles manually.\n"
+                     "- Fill only up to **3/4 capacity** (never overfill or force sharps in).\n"
+                     "- Permanently lock the tamper-evident lid before dispatch.\n\n"
+                     "### Final Treatment:\n"
+                     "Autoclaving or dry-heat sterilization, followed by encapsulation inside concrete blocks or disposal in deep sealed sharp pits.",
+            "category_tag": "White",
+            "recommended_action": "Drop directly into White puncture-proof container without recapping.",
+            "suggested_followups": [
+                "What is the first-aid for an accidental needle-stick injury?",
+                "Where do plastic syringes without needles go?",
+                "What goes into the Blue container?"
+            ],
+            "engine": "MedWaste AI Cognitive Engine"
+        }
+
+    # Yellow Bag
+    if "yellow" in bin_colors or any(k in q for k in ["yellow bin", "yellow bag", "yellow container"]):
+        return {
+            "reply": "🟡 **YELLOW BAG: Infectious & Anatomical Biohazard Waste**\n\n"
+                     "The Yellow bag is for highly infectious, anatomical, and chemical waste that requires complete thermal destruction:\n\n"
+                     "### What Goes In:\n"
+                     "- **Human Anatomical Waste:** Tissues, organs, amputated limbs, biopsy specimens, placentas, extracted teeth.\n"
+                     "- **Animal Waste:** Experimental animal carcasses, organs, body parts from research.\n"
+                     "- **Soiled Clinical Items:** Blood-soaked gauze, dressings, cotton swabs, pus swabs, plaster casts, blood bags.\n"
+                     "- **Expired & Discarded Medicines:** Antibiotics, expired tablets, syrups, contaminated injectables.\n"
+                     "- **Laboratory Cultures:** Microbiology cultures, biotechnology specimens, vaccine stocks.\n"
+                     "- **Soiled PPE:** Masks, caps, and gowns heavily contaminated with body fluids.\n\n"
+                     "### How It Is Treated:\n"
+                     "Must be placed in certified non-chlorinated yellow plastic bags and transported for **double-chamber high-temperature incineration** (primary chamber at 800°C ± 50°C, secondary chamber at 1050°C ± 50°C) or plasma pyrolysis.\n\n"
+                     "### Crucial Storage Rule:\n"
+                     "Untreated Yellow waste must **never be held past 48 hours** without informing the pollution control authorities.",
+            "category_tag": "Yellow",
+            "recommended_action": "Double-knot yellow bag when 3/4 full; route for high-temperature incineration within 48 hours.",
+            "suggested_followups": [
+                "What goes into the Red bin?",
+                "What items go into the Blue box?",
+                "What is the emergency protocol for a blood spill?"
+            ],
+            "engine": "MedWaste AI Cognitive Engine"
+        }
+
+    # Black & Green Municipal
+    if any(c in bin_colors for c in ["black", "green"]) or any(k in q for k in ["black bin", "green bin", "municipal", "general waste", "office trash"]):
+        return {
+            "reply": "🟢⚫ **BLACK & GREEN BINS: General Municipal Waste (Non-Biohazardous)**\n\n"
+                     "General waste accounts for approximately **85%** of all waste generated in hospitals. It is completely non-hazardous:\n\n"
+                     "### 🟢 Green Bin (Wet / Biodegradable):**\n"
+                     "- Food leftovers from wards and hospital canteens\n"
+                     "- Fruit and vegetable peels\n"
+                     "- Tea bags and coffee grounds\n"
+                     "- Garden leaves and flowers\n"
+                     "- *Routed for composting and vermiculture.*\n\n"
+                     "### ⚫ Black Bin (Dry / Recyclable Municipal):**\n"
+                     "- Clean medicine packaging cartons and paper boxes\n"
+                     "- Paper wrappers and office stationery\n"
+                     "- Empty clean plastic water bottles\n"
+                     "- Newspaper and magazine reading materials\n"
+                     "- *Routed for municipal recycling.*\n\n"
+                     "⚠️ **Zero Contamination Rule:** Never throw blood-stained gauze, soiled gloves, needles, or clinical fluids into municipal bins!",
+            "category_tag": "General",
+            "recommended_action": "Segregate food scraps into Green bin and clean paper/packaging into Black bin.",
+            "suggested_followups": [
+                "What goes into the Blue or Red bin?",
+                "Where do used plastic syringes go?",
+                "What happens if medical waste is mixed with municipal trash?"
+            ],
+            "engine": "MedWaste AI Cognitive Engine"
+        }
+
+    # Purple Cytotoxic
+    if "purple" in bin_colors or any(k in q for k in ["purple", "cytotoxic", "chemo", "oncology"]):
+        return {
+            "reply": "🟣 **PURPLE / CYTOTOXIC CONTAINER: Chemotherapy & Oncology Waste**\n\n"
+                     "Cytotoxic drugs are mutagenic, teratogenic, and carcinogenic, requiring the highest level of biosafety:\n\n"
+                     "### What Goes In:\n"
+                     "- Expired or leftover chemotherapy drug vials and ampoules\n"
+                     "- IV sets and infusion tubing used to administer cancer drugs\n"
+                     "- Gloves, gowns, and masks worn during cytotoxic preparation and infusion\n"
+                     "- Patient bodily waste (urine, vomitus) within 48 hours of chemotherapy administration\n\n"
+                     "### Safe Handling SOP:\n"
+                     "- Handlers must wear double chemotherapy-tested nitrile gloves, eye goggles, and a fluid-impermeable gown.\n"
+                     "- Prepare all doses under Class II Type B2 Biosafety Cabinets.\n"
+                     "- Seal tightly in designated Purple bags or Yellow bags labeled with the prominent Cytotoxic symbol.\n"
+                     "- Requires high-temperature destruction in dedicated incinerators at **exceeding 1200°C**.",
             "category_tag": "Cytotoxic",
             "recommended_action": "Double-glove, use Purple cytotoxic bags, and incinerate at >1200°C.",
             "suggested_followups": [
                 "What is the spill procedure for chemotherapy drugs?",
-                "Where do non-hazardous hospital items go?",
-                "What PPE is mandatory in hospital wards?"
+                "What goes into the Blue or Red bin?",
+                "What PPE is mandatory in oncology wards?"
             ],
-            "engine": "MedWaste AI Neural Rule Engine"
-        }
-
-    # Masks & Gloves specific differentiation
-    if "mask" in q or "glove" in q:
-        return {
-            "reply": "🧤 **PPE DISPOSAL: Masks & Gloves Segregation Rules**\n\n- **Contaminated/Soiled with Blood or Body Fluids:** Must go into the **Yellow Biohazard Bag** for high-temperature incineration.\n- **Clean/Routine Examination Nitrile/Latex Gloves:** Go into the **Red Container** for autoclaving and recycling.\n- **Uncontaminated Surgical & N95 Masks:** Can be discarded in the **Yellow Bag** (if used in infectious wards) or municipal general bin if completely clean administrative use.\n- **Crucial Rule:** Never dispose of blood-stained gloves or masks into general office bins!",
-            "category_tag": "Segregation",
-            "recommended_action": "Soiled with blood/fluids = YELLOW; Clean clinical plastic gloves = RED.",
-            "suggested_followups": [
-                "What PPE is required when handling waste bins?",
-                "What items belong in the Yellow biohazard bag?",
-                "What is the needle-stick injury emergency SOP?"
-            ],
-            "engine": "MedWaste AI Neural Rule Engine"
-        }
-
-    # General / Municipal / Black / Green
-    if any(k in q for k in ["general", "municipal", "food", "paper", "cardboard", "wrapper", "black bin", "green bin", "clean plastic", "office", "stationery"]):
-        return {
-            "reply": "🟢⚫ **BLACK & GREEN BINS: Non-Hazardous Municipal Healthcare Waste**\n\n- **Volume:** Represents roughly **85%** of all hospital waste generated.\n- **Green Bin (Biodegradable/Wet):** Food leftovers, fruit peels, canteen vegetable scraps, tea bags, garden leaves. Routed for composting.\n- **Black Bin (Non-Biodegradable/Dry):** Clean cardboard packaging, medicine outer paper boxes, office papers, clean plastic wrappers, empty water bottles. Routed for municipal recycling.\n- **Zero Contamination Policy:** Never mix blood-stained dressings, swabs, or syringes into general municipal bins.",
-            "category_tag": "General",
-            "recommended_action": "Segregate clean dry packaging into Black bin and food/organic waste into Green bin.",
-            "suggested_followups": [
-                "What is the difference between Red and Black bins?",
-                "Which bin do used syringes go into?",
-                "What are the BMWM 2016 Rules?"
-            ],
-            "engine": "MedWaste AI Neural Rule Engine"
+            "engine": "MedWaste AI Cognitive Engine"
         }
 
     # -------------------------------------------------------------
-    # 6. LOGISTICS, STORAGE & CPCB 48-HOUR RULE
+    # 7. DYNAMIC HUMAN-LIKE REASONING FALLBACK FOR ANY NOVEL QUESTION
     # -------------------------------------------------------------
-    if any(k in q for k in ["collection", "storage", "48 hour", "48hr", "pickup", "transport", "cbwtf", "barcode", "rfid", "schedule", "truck", "van"]):
-        return {
-            "reply": "🚛 **BIOMEDICAL WASTE COLLECTION & LOGISTICS PROTOCOLS**\n\n1. **The 48-Hour CPCB Rule:** Untreated biomedical waste must **never be stored beyond 48 hours**. If collection is delayed due to an emergency, the facility must inform the State Pollution Control Board and keep waste in cool refrigerated storage.\n2. **CPCB Barcoding Mandate:** Every biohazard bag and sharps box must bear a unique GPS-traceable Barcode label and RFID tag to record origin ward, weight, and handoff timestamp.\n3. **Internal Transport:** Use covered, dedicated wheeled trolleys marked with biohazard symbols. Never drag or transport bags manually along general patient pathways.\n4. **CBWTF Hand-off:** Registered Central Treatment Facilities send GPS-monitored vehicles to weigh and log each barcoded consignment.",
-            "category_tag": "Collection",
-            "recommended_action": "Ensure bag barcoding and CBWTF collection within 48 hours.",
-            "suggested_followups": [
-                "How do I schedule a pickup on MedWaste AI?",
-                "What are the penalties for delayed waste collection?",
-                "What are the 4 main color categories of waste?"
-            ],
-            "engine": "MedWaste AI Neural Rule Engine"
-        }
-
-    # -------------------------------------------------------------
-    # 7. REGULATIONS, PENALTIES & CPCB RULES
-    # -------------------------------------------------------------
-    if any(k in q for k in ["rule", "law", "penalty", "fine", "jail", "cpcb", "spcb", "act", "legal", "compliance", "inspection", "audit", "standard"]):
-        return {
-            "reply": "⚖️ **REGULATORY COMPLIANCE: Bio-Medical Waste Management Rules 2016**\n\n- **Governing Law:** Issued under the **Environment (Protection) Act, 1986** by the Ministry of Environment, Forest and Climate Change (MoEFCC).\n- **Mandatory Duties of Healthcare Facilities:**\n  - Obtain official authorization from the State Pollution Control Board (SPCB).\n  - Ensure 100% source segregation into color-coded containers.\n  - Implement Barcode and RFID tagging on every bag.\n  - Submit the Annual Compliance Report by **June 30th** every year.\n  - Immunize all healthcare and waste workers against Hepatitis B and Tetanus.\n- **Legal Penalties (Section 15, EPA 1986):** Non-compliance or unauthorized dumping can result in **imprisonment up to 5 years** and/or fines up to **₹1,00,000**, with facility closure orders.",
-            "category_tag": "Regulatory",
-            "recommended_action": "Ensure valid SPCB authorization, 100% barcoding, and annual report filing.",
-            "suggested_followups": [
-                "What is the 48-hour waste storage rule?",
-                "What is the mandatory immunization for waste handlers?",
-                "What are the 4 main color categories of waste?"
-            ],
-            "engine": "MedWaste AI Neural Rule Engine"
-        }
-
-    # -------------------------------------------------------------
-    # 8. TREATMENT TECHNOLOGIES (AUTOCLAVE, INCINERATOR, ETC.)
-    # -------------------------------------------------------------
-    if any(k in q for k in ["autoclave", "incinerat", "shredder", "microwave", "plasma pyrolysis", "encapsulation", "sharp pit"]):
-        return {
-            "reply": "⚙️ **TREATMENT & DESTRUCTION TECHNOLOGIES**\n\n- **Incineration (Yellow Waste):** Double-chamber thermal destruction. Primary chamber operates at **800°C ± 50°C** for gasification; secondary chamber operates at **1050°C ± 50°C** with 2-second gas retention to destroy dioxins/furans. Flue gas scrubbers neutralize acidic gases.\n- **Autoclaving (Red Waste):** Pressurized saturated steam sterilization at **121°C @ 15 psi for 30 min** (or 135°C @ 31 psi for 15 min). Validated with *Geobacillus stearothermophilus* spore testing.\n- **Mechanical Shredding:** Destroys sterilized plastics and sharps into unidentifiable granules to prevent reuse.\n- **Encapsulation (White Sharps):** Sharps boxes are filled with 1:2 cement-lime mortar, solidified into impermeable blocks, and sent to secured landfills.",
-            "category_tag": "Educational",
-            "recommended_action": "Ensure continuous validation of autoclave spore indicators and incinerator CEMS.",
-            "suggested_followups": [
-                "Why can't chlorinated plastics be incinerated?",
-                "What belongs in the Yellow bin vs Red bin?",
-                "What is the 48-hour waste storage rule?"
-            ],
-            "engine": "MedWaste AI Neural Rule Engine"
-        }
-
-    # -------------------------------------------------------------
-    # 9. PPE & CLINICAL SAFETY CHECKLISTS
-    # -------------------------------------------------------------
-    if any(k in q for k in ["ppe", "precaution", "safety", "protect", "immuniz", "hepatitis b vaccine"]):
-        return {
-            "reply": "🛡️ **MANDATORY PPE CHECKLIST & CLINICAL PRECAUTIONS**\n\n1. **Gloves:** Double nitrile gloves for patient procedures; heavy-duty puncture-resistant utility gloves for waste handling.\n2. **Masks:** N95 particulate respirator or 3-ply surgical mask.\n3. **Body:** Fluid-impermeable long-sleeve gown or rubber apron.\n4. **Eyes & Face:** Goggles or full-face splash shield.\n5. **Footwear:** Closed-toe heavy rubber gumboots.\n6. **Mandatory Worker Protection:** Complete **Hepatitis B vaccination (3 doses)** and **Tetanus Toxoid booster** are legally mandatory for all staff handling medical waste.",
-            "category_tag": "Precautions",
-            "recommended_action": "Always don full PPE and ensure complete Hepatitis B vaccination.",
-            "suggested_followups": [
-                "What is the emergency protocol for a needle-stick injury?",
-                "How to manage an accidental blood spill?",
-                "What items belong in the Yellow biohazard bag?"
-            ],
-            "engine": "MedWaste AI Neural Rule Engine"
-        }
-
-    # -------------------------------------------------------------
-    # 10. DYNAMIC CONTEXTUAL FALLBACK
-    # -------------------------------------------------------------
-    # Extract noun or keywords from user query for custom tailored reply
-    words = [w for w in re.findall(r"\b[a-zA-Z]{3,}\b", q) if w not in ["the", "this", "that", "what", "which", "how", "where", "can", "should", "about", "for", "into", "with", "does"]]
-    subject_term = " ".join(words[:3]) if words else raw_q
+    words = [w for w in re.findall(r"\b[a-zA-Z]{3,}\b", q) if w not in [
+        "the", "this", "that", "what", "which", "how", "where", "can", "should",
+        "about", "for", "into", "with", "does", "are", "and", "tell", "explain",
+        "please", "give", "know", "want"
+    ]]
+    subject_term = " ".join(words[:4]) if words else raw_q
 
     return {
-        "reply": f"Regarding your inquiry on **'{subject_term}'**:\n\nTo determine the correct handling under the **Bio-Medical Waste Management Rules 2016**:\n- **If it is an infectious anatomical or soiled item (cotton/gauze):** Place into **Yellow Non-Chlorinated Biohazard Bag**.\n- **If it is recyclable contaminated plastic (IV tube/catheter/syringe without needle):** Place into **Red Container**.\n- **If it is a metal sharp (needle/scalpel/blade):** Drop immediately into **White Puncture-Proof Sharps Box**.\n- **If it is broken glass or metal implant (vials/ampoules/pins):** Deposit into **Blue-marked Container**.\n- **If it is clean municipal waste (paper/food):** Place into **Black or Green General Bins**.\n\nCould you specify whether this item is contaminated with blood, what material it is made of, or what clinical procedure it was used in?",
+        "reply": f"Let's think through how to handle **'{subject_term}'** by analyzing its material and clinical risk:\n\n"
+                 "To determine the exact correct disposal, clinical staff evaluate three simple criteria:\n\n"
+                 "1. **Is it sharp or capable of puncturing?**\n"
+                 "   - *Metal needles, scalpels, surgical blades, lancets* ➡️ **White Puncture-Proof Container**.\n"
+                 "   - *Broken glass vials, ampoules, microscope slides* ➡️ **Blue Container**.\n\n"
+                 "2. **Is it heavily contaminated with blood, pus, or infectious body tissue?**\n"
+                 "   - *Blood-soaked gauze, dressings, anatomical tissues, expired medicines* ➡️ **Yellow Biohazard Bag** (for high-temperature incineration).\n\n"
+                 "3. **Is it a recyclable plastic medical item (without needles)?**\n"
+                 "   - *Disposable plastic syringe barrels, IV tubes, urine bags, catheters* ➡️ **Red Bin** (for autoclaving & polymer recycling).\n\n"
+                 "4. **Is it clean, dry general hospital trash?**\n"
+                 "   - *Clean packaging cartons, office paper, food packaging* ➡️ **Black or Green Municipal Bins**.\n\n"
+                 f"Could you tell me a little more about **'{subject_term}'**—specifically, what material it is made of, and whether it came into contact with blood or infectious fluids?",
         "category_tag": "General",
-        "recommended_action": f"Verify material and contamination level of '{subject_term}' before disposal.",
+        "recommended_action": f"Assess material type and contamination level of '{subject_term}' before disposal.",
         "suggested_followups": [
-            "Which bin do used plastic syringes go into?",
-            "What is the needle-stick injury emergency SOP?",
-            "What is the 48-hour waste storage rule?"
+            "What goes into the Blue or Red bin?",
+            "What items belong in the Yellow biohazard bag?",
+            "Where do used plastic syringes go?"
         ],
-        "engine": "MedWaste AI Neural Rule Engine"
+        "engine": "MedWaste AI Cognitive Engine"
     }
 
 
 def generate_biomed_chat_reply(query, user_api_key=None):
-    """Main routing function: uses Gemini LLM if key available, else uses advanced semantic engine."""
+    """Main routing function: uses Gemini LLM if key available, else uses advanced cognitive engine."""
     api_key = user_api_key or os.environ.get("GEMINI_API_KEY")
     if api_key and HAS_GENAI:
         llm_res = call_gemini_llm(query, api_key)
         if llm_res:
             return llm_res
 
-    # Use advanced semantic reasoning engine
+    # Use advanced cognitive reasoning engine
     result = advanced_semantic_biomed_ai(query)
     q_lower = (query or "").lower().strip()
     if result.get("engine") != "MedWaste AI Conversational Engine":
@@ -2550,6 +2792,7 @@ def generate_biomed_chat_reply(query, user_api_key=None):
             result["reply"] = "Hello! 👋 Great to connect with you!\n\n" + result["reply"]
 
     return result
+
 
 @app.route("/api/chat", methods=["POST"])
 def api_chat():
