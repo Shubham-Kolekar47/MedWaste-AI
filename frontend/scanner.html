@@ -245,14 +245,24 @@
                                 <small>Infectious • Incineration</small>
                             </div>
 
-                            <!-- Red Category Preset -->
+                            <!-- Red Category Preset: Single Syringe -->
                             <div class="preset-stream-card red-stream-card"
-                                onclick="selectSampleWaste('Red', 'plastic_syringe_tubing.jpg', 'Plastic Syringe & IV Tubing')">
-                                <div class="preset-badge red-badge">Red Category</div>
+                                onclick="selectSampleWaste('Red', 'single_used_syringe.jpg', '1x Single Disposable Syringe')">
+                                <div class="preset-badge red-badge">Red (Single)</div>
                                 <div class="preset-name">
-                                    <i class="fa-solid fa-syringe"></i> Syringes & IV Tubing
+                                    <i class="fa-solid fa-syringe"></i> 1x Single Syringe
                                 </div>
-                                <small>Contaminated Recyclable Plastics</small>
+                                <small>Single Unit • ~0.03 kg</small>
+                            </div>
+
+                            <!-- Red Category Preset: Bag of Syringes -->
+                            <div class="preset-stream-card red-stream-card"
+                                onclick="selectSampleWaste('Red', 'bag_of_syringes_bulk.jpg', 'Biohazard Bag Full of Syringes (~80 Units)')">
+                                <div class="preset-badge red-badge" style="background: rgba(220, 38, 38, 0.15); border: 1px solid #ef4444; color: #dc2626;">Red (Bulk Bag)</div>
+                                <div class="preset-name">
+                                    <i class="fa-solid fa-boxes-stacked"></i> Bag Full of Syringes
+                                </div>
+                                <small>Bulk Bag • ~2.5 kg</small>
                             </div>
 
                             <!-- White/Blue Category Preset -->
@@ -513,6 +523,10 @@
                                         <div class="data-row">
                                             <span>Deposit Weight:</span>
                                             <strong id="recordWeight">1.8 kg</strong>
+                                        </div>
+                                        <div class="data-row">
+                                            <span>Visual Item Scale:</span>
+                                            <strong id="recordItemScale" style="color: #0c8c66; font-size: 13px;">1x Single Item (1 Unit)</strong>
                                         </div>
                                         <div class="data-row">
                                             <span>Logged Timestamp:</span>

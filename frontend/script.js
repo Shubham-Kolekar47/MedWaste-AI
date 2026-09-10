@@ -1208,15 +1208,29 @@ async function selectSampleWaste(category, filename, displayName) {
     ctx.textAlign = "center";
     ctx.fillText(`CLINICAL INSPECTION SPECIMEN: ${cfg.label}`, 250, 42);
 
+    const isBag = displayName.toLowerCase().includes("bag") || filename.toLowerCase().includes("bag");
+    const isSingle = displayName.toLowerCase().includes("single") || filename.toLowerCase().includes("single") || displayName.toLowerCase().includes("1x");
+
     // Center symbol
-    ctx.font = "bold 80px Inter, sans-serif";
+    ctx.font = isBag ? "bold 60px Inter, sans-serif" : "bold 80px Inter, sans-serif";
     ctx.fillStyle = cfg.accent;
-    ctx.fillText(cfg.symbol, 250, 160);
+    if (isBag) {
+        ctx.fillText("☣ ♳ ♳ ☣", 250, 155);
+    } else if (isSingle && category === "Red") {
+        ctx.fillText("💉", 250, 155);
+    } else {
+        ctx.fillText(cfg.symbol, 250, 160);
+    }
+
+    // Scale badge indicator
+    ctx.fillStyle = isBag ? "#991b1b" : "#047857";
+    ctx.font = "bold 13px Inter, sans-serif";
+    ctx.fillText(isBag ? "BULK SCALE: BIOHAZARD COLLECTION BAG (~80 UNITS)" : "SINGLE SCALE: INDIVIDUAL CLINICAL SPECIMEN (1 UNIT)", 250, 185);
 
     // Display Name
     ctx.fillStyle = "#0f172a";
     ctx.font = "bold 20px Inter, sans-serif";
-    ctx.fillText(displayName, 250, 215);
+    ctx.fillText(displayName, 250, 218);
 
     // Description
     ctx.fillStyle = "#475569";
@@ -1677,19 +1691,27 @@ function renderClassificationResult(classification, imageUrl, shouldSave = true)
     const meterText = document.getElementById("segMeterText");
 
     const st4 = classification.stage_4_segregation || {};
-    const weightVal = st4.deposit_weight_kg || (classification.fulfillment ? classification.fulfillment.deposit_weight_kg : 0.035);
+    const st5 = classification.stage_5_digital_record || {};
+    const weightVal = st4.deposit_weight_kg || st5.weight_kg || (classification.fulfillment ? classification.fulfillment.deposit_weight_kg : 0.035);
     const impactVal = st4.impact_pct !== undefined ? st4.impact_pct : (classification.fulfillment ? classification.fulfillment.deposit_impact_pct : 0.07);
     const curFill = st4.current_bin_fill_pct || (classification.fulfillment ? classification.fulfillment.current_level_pct : 78);
     const projFill = st4.projected_fill_pct || (classification.fulfillment ? classification.fulfillment.projected_level_pct : 78.1);
     const thresholdCap = (classification.stage_6_collection_alert && classification.stage_6_collection_alert.threshold_pct) || 80.0;
 
-    const weightDisplay = weightVal < 0.1 
+    const scaleLabel = st4.scale_label || st5.scale_label || classification.scale_label || "";
+    const weightDisplay = st4.weight_display || st5.weight_display || (weightVal < 0.1 
         ? `${weightVal} kg (${Math.round(weightVal * 1000)}g)` 
-        : `${weightVal} kg`;
+        : `${weightVal} kg`);
 
     if (segTarget) segTarget.innerText = st4.target_bin || classification.target_bin || "Designated Smart Receptacle";
     if (segTreat) segTreat.innerText = st4.treatment_method || classification.treatment_method || "High-Temperature Thermal Treatment";
-    if (segWeight) segWeight.innerText = `${weightDisplay} (+${impactVal}% Bin Fill Impact)`;
+    if (segWeight) {
+        if (scaleLabel) {
+            segWeight.innerText = `${weightDisplay} • ${scaleLabel} (+${impactVal}% Fill Impact)`;
+        } else {
+            segWeight.innerText = `${weightDisplay} (+${impactVal}% Bin Fill Impact)`;
+        }
+    }
     if (segRule) segRule.innerText = st4.regulatory_standard || "Bio-Medical Waste Management Rules 2016 - Schedule II";
 
     if (meterFill) meterFill.style.width = `${Math.min(projFill, 100)}%`;
@@ -1698,11 +1720,11 @@ function renderClassificationResult(classification, imageUrl, shouldSave = true)
     // ==========================================
     // STAGE 5: DIGITAL RECORD
     // ==========================================
-    const st5 = classification.stage_5_digital_record || {};
     const barcodeEl = document.getElementById("recordBarcode");
     const manifestEl = document.getElementById("recordManifestId");
     const categoryEl = document.getElementById("recordCategory");
     const weightEl = document.getElementById("recordWeight");
+    const scaleEl = document.getElementById("recordItemScale");
     const timeEl = document.getElementById("recordTimestamp");
     const chipEl = document.getElementById("recordStatusChip");
     const commitBtn = document.getElementById("commitRecordBtn");
@@ -1713,7 +1735,26 @@ function renderClassificationResult(classification, imageUrl, shouldSave = true)
     if (barcodeEl) barcodeEl.innerText = barcodeNum;
     if (manifestEl) manifestEl.innerText = manifestId;
     if (categoryEl) categoryEl.innerText = (classification.stage_3_waste_type && classification.stage_3_waste_type.category_title) || classification.category_name;
-    if (weightEl) weightEl.innerText = `${weightVal} kg`;
+    
+    // Format Digital Record Weight and Scale
+    if (weightEl) {
+        if (weightVal < 0.05) {
+            weightEl.innerText = `${weightVal} kg (${Math.round(weightVal * 1000)}g Single Item)`;
+        } else if (scaleLabel && scaleLabel.toLowerCase().includes("bag")) {
+            weightEl.innerText = `${weightVal} kg (Bag Full / Bulk Batch)`;
+        } else if (scaleLabel && scaleLabel.toLowerCase().includes("pile")) {
+            weightEl.innerText = `${weightVal} kg (Pile of Items)`;
+        } else if (scaleLabel && scaleLabel.toLowerCase().includes("multiple")) {
+            weightEl.innerText = `${weightVal} kg (Multiple Units)`;
+        } else {
+            weightEl.innerText = `${weightVal} kg`;
+        }
+    }
+
+    if (scaleEl) {
+        scaleEl.innerText = scaleLabel || (weightVal < 0.05 ? "1x Single Syringe (1 Unit)" : "Bulk Clinical Waste Bag");
+    }
+
     if (timeEl) timeEl.innerText = st5.timestamp || new Date().toLocaleString();
 
     const isUnder10 = (weightVal < 10.0);

@@ -8,7 +8,7 @@
 const PRECAUTION_TRANSCRIPTS = {
     master: {
         title: "Master Clinical Safety & Biomedical Waste Overview",
-        summary: "Welcome to the MedWaste AI Clinical Safety and Waste Handling Guide. All healthcare workers, cleaning staff, and waste handlers must follow strict Bio-Medical Waste Management Rules. Always wear category-specific Personal Protective Equipment, including double nitrile gloves, N95 respirators, fluid-impermeable aprons, and eye protection. Segregate waste strictly at source using the four color-coded streams: Yellow for anatomical and infectious soiled waste; Red for recyclable contaminated plastics like IV sets and syringes; White translucent for sharp needles and scalpels in puncture-proof containers; and Blue for broken glass and metallic implants. In chemotherapy units, use dedicated purple cytotoxic bags. Never recap needles with bare hands, never compress waste bags, and report any accidental needle-stick injury immediately for post-exposure prophylaxis within two hours. Segregation saves lives.",
+        summary: "Welcome to the MedWaste AI Clinical Safety and Waste Handling Guide. All healthcare workers, cleaning staff, and waste handlers must follow strict Bio-Medical Waste Management Rules. Segregate waste strictly at source using the four color-coded streams: Yellow for anatomical and infectious soiled waste; Red for recyclable contaminated plastics like IV sets and syringes; White translucent for sharp needles and scalpels in puncture-proof containers; and Blue for broken glass and metallic implants. In chemotherapy units, use dedicated purple cytotoxic bags. Always wear category-specific Personal Protective Equipment, never recap needles with bare hands, never compress waste bags, and report any accidental needle-stick injury immediately within two hours. Segregation saves lives.",
         steps: [
             "Always wear category-specific Personal Protective Equipment before touching any medical waste.",
             "Segregate waste strictly at point of generation into Yellow, Red, White, and Blue containers.",
@@ -18,84 +18,86 @@ const PRECAUTION_TRANSCRIPTS = {
         ]
     },
     yellow: {
-        title: "Yellow Category: Infectious & Anatomical Waste Precautions",
-        summary: "Yellow category waste contains high-risk biohazardous items such as human tissues, organs, body parts, placentas, biopsy specimens, blood-soaked gauze, dressings, cotton swabs, plaster casts, microbiology culture plates, expired cytotoxic medicines, and chemical waste. Always use non-chlorinated yellow bags bearing the international biohazard symbol. Wear double nitrile gloves, an N95 respirator, fluid-impermeable gown, and protective goggles. Never compress or squeeze yellow bags by hand. Securely tie and seal bags using zip-ties when three-quarters full. Never store infectious waste in ward corridors; transfer immediately to a designated cool waste storage room for maximum forty-eight hours prior to high-temperature incineration or autoclaving.",
+        title: "Yellow Bin Guide: Infectious & Anatomical Waste",
+        summary: "The Yellow Bin is exclusively designated for infectious, anatomical, and pathological biomedical waste. Items that come under the Yellow Bin include: human anatomical tissues, organs, body parts, and placentas; soiled dressings, cotton swabs, bandages, and plaster casts with blood; expired or discarded pharmaceutical medicines; and microbiology specimens, lab culture plates, and discarded live vaccines. Items that must never go into the Yellow Bin: never place needles, scalpels, blades, glass bottles, or recyclable plastics in yellow bags. Always use non-chlorinated yellow bags with the biohazard symbol, wear double nitrile gloves and an N95 mask, seal the bag at 75% capacity, and send for high-temperature incineration at 1050 degrees Celsius.",
         steps: [
+            "Deposit only infectious, anatomical, and soiled items into certified non-chlorinated yellow biohazard bags.",
+            "Include human tissues, organs, blood-soaked gauze, expired drugs, and microbiology cultures.",
+            "Never place needles, sharps, glass bottles, or plastic syringes into yellow bags.",
             "Don full PPE: heavy-duty nitrile gloves, N95 mask, fluid-resistant apron, and eye protection.",
-            "Use only certified non-chlorinated yellow plastic bags bearing the biohazard symbol.",
-            "Never pack bags beyond three-quarters capacity to ensure an airtight neck seal.",
-            "Never compress, knead, or sit on waste bags to create more space.",
-            "Transport bags in dedicated enclosed wheeled bins directly to the bio-waste holding room.",
-            "Ensure incineration or authorized deep burial occurs within forty-eight hours."
+            "Tie and seal yellow bags with swan-neck knots strictly when they reach three-quarters capacity.",
+            "Ensure transfer for high-temperature incineration at 1050°C within forty-eight hours."
         ]
     },
     red: {
-        title: "Red Category: Contaminated Recyclable Plastics Precautions",
-        summary: "Red category waste comprises recyclable plastic clinical items contaminated with bodily fluids. This includes disposable plastic syringes without needles, intravenous tubing and sets, catheters, urine bags, dialysis kits, rubber gloves, and vacutainer tubes. All syringes must have their needle hubs destroyed using a needle cutter at point of use before dropping into the red bin to prevent illicit reuse. Empty all residual fluids before disposal. Autoclave, microwave, or soak in freshly prepared one to two percent sodium hypochlorite solution before shredding and sending to registered recyclers. Wear puncture-resistant utility gloves and a face shield. Never place needles, scalpels, or glass items into red bins.",
+        title: "Red Bin Guide: Contaminated Recyclable Plastics",
+        summary: "The Red Bin is strictly reserved for contaminated recyclable plastic clinical items. Items that come under the Red Bin include: disposable plastic syringes with needles removed; intravenous IV bottles, infusion sets, and tubing; catheters, drainage tubes, and emptied urine bags; hemodialysis tubing kits; contaminated examination gloves; and blood collection vacutainer tubes. Items that must never go into the Red Bin: never throw needles, scalpels, blades, glass ampoules, or municipal trash in the red bin. Syringes must always have needle hubs cut at point of use, and all liquids must be completely drained before bagging. Disinfect with 1 to 2 percent sodium hypochlorite or autoclave before registered shredding and recycling.",
         steps: [
-            "Cut syringe needle hubs or tips using a mechanical cutter before disposing into the red bin.",
-            "Completely drain urine bags, IV lines, and suction canisters into sanitary sewers before bagging.",
+            "Cut syringe needle hubs using a point-of-use mechanical cutter before dropping into the red bin.",
+            "Completely drain urine bags, IV lines, and suction canisters into sanitary drainage before disposal.",
+            "Deposit IV bottles, tubing, catheters, rubber gloves, and vacutainer sample tubes.",
+            "Never throw hypodermic needles, surgical blades, or glass vials into red bags.",
             "Wear heavy-duty puncture-resistant utility gloves and a splash-proof face shield.",
-            "Never drop hypodermic needles, blades, or glass vials into red bags.",
-            "Disinfect with one to two percent sodium hypochlorite or autoclave prior to shredding.",
-            "Hand over shredded plastic only to authorized state pollution control board recyclers."
+            "Disinfect with 1 to 2 percent sodium hypochlorite or autoclave prior to registered plastic recycling."
         ]
     },
     white: {
-        title: "White Category: Sharps, Needles & Blades Precautions",
-        summary: "White category waste contains contaminated sharps that pose severe puncture, cut, and blood-borne virus risks. This includes hypodermic needles, scalpel blades, lancets, surgical suture needles, contaminated broken ampoule tips, and fixed-needle syringes. Always use rigid, puncture-proof, tamper-proof, and translucent white containers. Never attempt to recap, bend, break, or manually strip needles from syringes with bare hands. Use point-of-use electric needle burners or manual hub cutters immediately upon injection. Never fill sharp containers beyond three-quarters full. Once full, lock the tamper-proof lid permanently. Containers undergo autoclaving or dry-heat sterilization followed by encapsulation in concrete or sharp-pit disposal.",
+        title: "White Container Guide: Sharps, Needles & Blades",
+        summary: "The White translucent container is strictly designated for contaminated metal sharps and needles that can cause puncture wounds. Items that come under the White Container include: hypodermic injection needles and fixed-needle syringes; surgical scalpel blades and handles; curved suture needles, blood lancets, and contaminated stylets; needles sheared by electric burners or hub cutters; and broken contaminated glass ampoule tips. Items that must never go into the White Container: never put soft gauze, bandages, plastic IV tubing, or general garbage here. Never recap needles using both hands. Lock the tamper-evident puncture-proof container permanently when three-quarters full for autoclaving and concrete encapsulation in a sharps pit.",
         steps: [
-            "Immediately discard sharps at point of generation into a white puncture-proof container.",
-            "Never recap needles by hand. If mandatory, use the single-handed scoop technique.",
-            "Use electric needle burners or hub cutters directly at the bedside or nursing station.",
-            "Do not exceed the three-quarters fill line marked on the container.",
-            "Permanently lock the tamper-evident lid before handing over for final disposal.",
-            "Ensure dry heat sterilization and encapsulation to permanently immobilize metal sharps."
+            "Discard all metal sharps directly at point of use into a rigid, translucent, puncture-proof white container.",
+            "Include hypodermic needles, scalpel blades, suture needles, lancets, and broken glass ampoule tips.",
+            "Never recap needles by hand. If unavoidable, use the single-handed scoop technique.",
+            "Use bedside electric needle burners or hub cutters immediately after injection.",
+            "Never put soft cotton, gauze, plastic tubing, or non-sharp waste into white containers.",
+            "Permanently lock the lid at three-quarters fill line for autoclaving and concrete pit encapsulation."
         ]
     },
     blue: {
-        title: "Blue Category: Glassware & Metallic Implants Precautions",
-        summary: "Blue category waste consists of broken or intact medicine ampoules, glass vials, microscope slides, glass culture flasks, and contaminated metallic orthopedic implants such as pins, plates, and screws. Store in rigid, puncture-resistant cardboard boxes or blue-coded plastic bins with blue biohazard markings. Always handle broken glassware using forceps, tongs, or a dustpan brush; never collect glass fragments with gloved hands. Disinfect glassware with sodium hypochlorite disinfectant or autoclaving before crushing. Return intact pharmaceutical glass bottles to licensed glass recycling facilities after thorough decontamination.",
+        title: "Blue Bin Guide: Glassware & Metallic Implants",
+        summary: "The Blue container or cardboard box is specifically designated for clean or contaminated glassware and metallic surgical hardware. Items that come under the Blue Bin include: empty glass medicine ampoules and pharmaceutical vials; broken laboratory glassware, beakers, and test tubes; microscope glass slides and coverslips; and orthopedic metallic bone plates, screws, pins, rods, and surgical prosthetics. Items that must never go into the Blue Bin: never place needles, plastic syringes, blood-soaked cotton, or cytotoxic chemotherapy vials in the blue stream. Always handle broken glass with tongs or forceps, never with bare hands. Decontaminate with 1 percent sodium hypochlorite or autoclave before glass crushing and metal smelting.",
         steps: [
-            "Segregate all glass vials, ampoules, and orthopedic metal implants into blue-labeled boxes.",
-            "Never pick up shattered glass vials with bare hands or thin exam gloves; always use tongs.",
-            "Pre-treat with one percent sodium hypochlorite disinfectant soak or autoclave sterilization.",
-            "Ensure boxes have robust bottom reinforcement to prevent glass puncturing during transit.",
-            "Route cleaned and crushed glass safely to approved industrial glass recyclers."
+            "Segregate all intact or broken medicine ampoules, glass vials, and metallic orthopedic implants into blue containers.",
+            "Include microscope slides, lab beakers, titanium bone plates, screws, and pins.",
+            "Never pick up broken glass fragments with bare hands or thin gloves; always use forceps or tongs.",
+            "Never mix needles, plastic syringes, soiled dressings, or cytotoxic chemo vials into the blue stream.",
+            "Pre-treat with 1 percent sodium hypochlorite disinfectant soak or autoclave sterilization.",
+            "Route decontaminated glass to authorized glass recyclers and metal implants to smelting foundries."
         ]
     },
     purple: {
-        title: "Cytotoxic & Chemotherapy Oncology Waste Precautions",
-        summary: "Cytotoxic waste includes expired or residual chemotherapy drugs, contaminated intravenous lines, gloves, gowns, tubing, and patient bodily waste within forty-eight hours of chemotherapy administration. Cytotoxic agents are mutagens, teratogens, and carcinogens. Always use heavy-duty purple or yellow bags labeled with the prominent cytotoxic warning symbol. Oncology staff must double-glove using chemotherapy-tested nitrile gloves, an impermeable gown, and a full face shield. Prepare drugs only inside certified biological safety cabinets. In case of spills, immediately deploy the chemotherapy spill kit with neutralizing absorbent pads. Cytotoxic waste must be destroyed by high-temperature incineration at minimum twelve hundred degrees Celsius.",
+        title: "Purple Stream Guide: Cytotoxic & Chemotherapy Waste",
+        summary: "The Purple container or dedicated yellow cytotoxic bag is exclusively for hazardous cancer chemotherapy and antineoplastic waste. Items that come under the Purple Stream include: expired or leftover chemotherapy drug vials; contaminated cytotoxic IV infusion sets, bags, and tubing; gowns, masks, and gloves worn during chemo drug reconstitution; absorbent pads used for chemo spills; and patient bodily excreta within 48 hours of chemotherapy administration. Items that must never go into the Purple Stream: never discard in municipal trash or red bins, and never autoclave cytotoxic waste. Staff must double-glove with chemotherapy-rated nitrile gloves, prepare drugs in Class II biosafety cabinets, and incinerate at extreme temperatures above 1200 degrees Celsius.",
         steps: [
-            "Wear double chemotherapy-rated nitrile gloves, impermeable gown, and face shield.",
-            "Place all chemotherapy-contaminated items into designated purple cytotoxic containers.",
-            "Prepare all intravenous antineoplastic drugs inside Class II Biological Safety Cabinets.",
-            "Keep dedicated cytotoxic spill kits immediately accessible in oncology wards and labs.",
-            "Incinerate all cytotoxic waste at extreme temperatures exceeding twelve hundred degrees Celsius."
+            "Place all chemotherapy drugs, contaminated IV tubing, and patient excreta into purple cytotoxic bags.",
+            "Wear double chemotherapy-tested nitrile gloves, an impermeable gown, and full face shield.",
+            "Reconstitute all antineoplastic chemotherapy agents only inside certified Class II Biosafety Cabinets.",
+            "Never autoclave cytotoxic waste, as heating volatilizes dangerous carcinogenic chemical fumes.",
+            "Keep dedicated cytotoxic spill kits with neutralizing absorbent pads immediately accessible.",
+            "Destroy all cytotoxic waste by high-temperature incineration exceeding 1200 degrees Celsius."
         ]
     },
     general: {
-        title: "General Non-Hazardous Healthcare Waste Precautions",
-        summary: "General healthcare waste represents eighty to eighty-five percent of all hospital waste and is non-hazardous. It includes clean packaging, paper cartons, administrative paperwork, food leftovers, disposable paper cups, and plastic wrappers. Segregate in green or black municipal bins. Strictly inspect that no infectious dressings, gloves, or needles contaminate general waste. Clean cardboard and office paper should be compacted and routed for municipal recycling. Proper pre-sorting prevents unnecessary and expensive biohazard incineration for safe municipal trash.",
+        title: "General Waste Guide: Non-Hazardous Municipal Waste",
+        summary: "General healthcare waste represents eighty to eighty-five percent of hospital waste and is non-hazardous. Items that come under General Waste include: clean cardboard, packaging boxes, paper stationery, food leftovers, disposable paper cups, and clean plastic wrappers. Segregate in green or black municipal bins. Strictly ensure no infectious dressings, gloves, needles, or blood-stained items enter general waste. Clean paper and cardboard should be compacted and sent for municipal recycling.",
         steps: [
-            "Deposit clean cardboard, food waste, wrappers, and paper towels into green or black bins.",
-            "Never dispose of contaminated patient dressings, cotton, or gloves into general bins.",
-            "Keep recycling bins cleanly separated at ward reception, administrative desks, and cafeterias.",
-            "Conduct routine spot audits on general bins to ensure complete absence of clinical waste.",
-            "Partner with municipal circular recycling initiatives for paper, clean bottles, and organic waste."
+            "Deposit clean cardboard, food waste, paper cups, and clean packaging into green or black bins.",
+            "Never dispose of contaminated patient dressings, cotton swabs, or needles into general bins.",
+            "Keep clean recycling bins separated at nursing stations, administrative offices, and cafeterias.",
+            "Conduct routine spot checks to guarantee total absence of infectious clinical waste.",
+            "Partner with authorized municipal recyclers for clean paper, cardboard, and compostable waste."
         ]
     },
     emergency: {
-        title: "Emergency Needle-Stick & Blood Spill Incident Protocol",
-        summary: "In the event of an accidental needle-stick or sharp injury: Immediately wash the wound under cool running tap water with mild soap for five minutes. Do not squeeze, press, suck, or scrub the puncture site violently. Cover with a sterile waterproof dressing. Immediately notify the ward sister or Infection Control Officer. Initiate Post-Exposure Prophylaxis for HIV and Hepatitis B within two hours. For blood or body fluid spills: Cordon off the area, wear full PPE, cover the liquid spill with absorbent paper towels, pour freshly prepared one percent sodium hypochlorite solution with ten thousand ppm available chlorine over the towels, allow twenty minutes contact time, scoop into a yellow bag with tongs, and mop with hospital disinfectant.",
+        title: "Emergency Protocol Guide: Needle-Stick & Blood Spills",
+        summary: "Immediate emergency response protocols. For Needle-Stick Injury: Step 1, immediately wash the puncture wound under cool running tap water with soap for five minutes; Step 2, do not squeeze, press, or suck the wound, and apply a sterile waterproof dressing; Step 3, immediately notify your supervisor and the infection control officer; Step 4, begin Post-Exposure Prophylaxis PEP evaluation within two hours. For Blood Spills: Step 1, cordon off the area and don full PPE; Step 2, cover the spill with absorbent towels working from outside inward; Step 3, pour freshly prepared 1 percent sodium hypochlorite and wait 20 minutes; Step 4, collect towels with tongs into a yellow bag and mop the floor with disinfectant.",
         steps: [
-            "Needle-Stick Step 1: Wash puncture wound immediately under running tap water with soap for 5 minutes.",
-            "Needle-Stick Step 2: Do NOT suck, squeeze, or scrub the wound harshly. Apply sterile bandage.",
+            "Needle-Stick Step 1: Immediately wash puncture wound under running tap water with soap for 5 minutes.",
+            "Needle-Stick Step 2: Do NOT suck, squeeze, or scrub the wound harshly. Apply a sterile waterproof bandage.",
             "Needle-Stick Step 3: Report incident immediately to supervisor and receive PEP evaluation within 2 hours.",
-            "Spill Step 1: Cordon off spill area and don full PPE including nitrile gloves and shoe covers.",
-            "Spill Step 2: Cover liquid spill with absorbent towels and soak with 1% sodium hypochlorite solution.",
-            "Spill Step 3: Wait 20 minutes contact time, scoop towels with tongs into yellow bag, and mop thoroughly."
+            "Spill Step 1: Cordon off spill area and don full PPE including nitrile gloves, gown, and shoe covers.",
+            "Spill Step 2: Cover liquid spill with absorbent towels and soak with freshly prepared 1% sodium hypochlorite.",
+            "Spill Step 3: Wait 20 minutes contact time, scoop towels with tongs into a yellow bag, and mop thoroughly."
         ]
     }
 };
@@ -370,7 +372,8 @@ function playSectionAudio(sectionId) {
 }
 
 function playWithHighFidelityAudio(sectionId, textToSpeak, lang, config, data) {
-    const primaryUrl = `http://localhost:5000/api/tts?lang=${encodeURIComponent(lang)}&text=${encodeURIComponent(textToSpeak)}`;
+    const apiHost = (window.location && window.location.hostname) ? window.location.hostname : "127.0.0.1";
+    const primaryUrl = `http://${apiHost}:5000/api/tts?lang=${encodeURIComponent(lang)}&text=${encodeURIComponent(textToSpeak)}`;
     const fallbackUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(lang)}&client=tw-ob&q=${encodeURIComponent(textToSpeak)}`;
 
     if (!AudioState.audioElement) {

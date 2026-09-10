@@ -80,7 +80,7 @@ const PRECAUTION_TRANSCRIPTS_I18N = {
     "en": {
         "master": {
             "title": "Master Clinical Safety & Biomedical Waste Overview",
-            "summary": "Welcome to the MedWaste AI Clinical Safety and Waste Handling Guide. All healthcare workers, cleaning staff, and waste handlers must follow strict Bio-Medical Waste Management Rules. Always wear category-specific Personal Protective Equipment, including double nitrile gloves, N95 respirators, fluid-impermeable aprons, and eye protection. Segregate waste strictly at source using the four color-coded streams: Yellow for anatomical and infectious soiled waste; Red for recyclable contaminated plastics like IV sets and syringes; White translucent for sharp needles and scalpels in puncture-proof containers; and Blue for broken glass and metallic implants. In chemotherapy units, use dedicated purple cytotoxic bags. Never recap needles with bare hands, never compress waste bags, and report any accidental needle-stick injury immediately for post-exposure prophylaxis within two hours. Segregation saves lives.",
+            "summary": "Welcome to the MedWaste AI Clinical Safety and Waste Handling Guide. All healthcare workers, cleaning staff, and waste handlers must follow strict Bio-Medical Waste Management Rules. Segregate waste strictly at source using the four color-coded streams: Yellow for anatomical and infectious soiled waste; Red for recyclable contaminated plastics like IV sets and syringes; White translucent for sharp needles and scalpels in puncture-proof containers; and Blue for broken glass and metallic implants. In chemotherapy units, use dedicated purple cytotoxic bags. Always wear category-specific Personal Protective Equipment, never recap needles with bare hands, never compress waste bags, and report any accidental needle-stick injury immediately within two hours. Segregation saves lives.",
             "steps": [
                 "Always wear category-specific Personal Protective Equipment before touching any medical waste.",
                 "Segregate waste strictly at point of generation into Yellow, Red, White, and Blue containers.",
@@ -90,91 +90,93 @@ const PRECAUTION_TRANSCRIPTS_I18N = {
             ]
         },
         "yellow": {
-            "title": "Yellow Category: Infectious & Anatomical Waste Precautions",
-            "summary": "Yellow category waste contains high-risk biohazardous items such as human tissues, organs, body parts, placentas, biopsy specimens, blood-soaked gauze, dressings, cotton swabs, plaster casts, microbiology culture plates, expired cytotoxic medicines, and chemical waste. Always use non-chlorinated yellow bags bearing the international biohazard symbol. Wear double nitrile gloves, an N95 respirator, fluid-impermeable gown, and protective goggles. Never compress or squeeze yellow bags by hand. Securely tie and seal bags using zip-ties when three-quarters full. Never store infectious waste in ward corridors; transfer immediately to a designated cool waste storage room for maximum forty-eight hours prior to high-temperature incineration or autoclaving.",
+            "title": "Yellow Bin Guide: Infectious & Anatomical Waste",
+            "summary": "The Yellow Bin is exclusively designated for infectious, anatomical, and pathological biomedical waste. Items that come under the Yellow Bin include: human anatomical tissues, organs, body parts, and placentas; soiled dressings, cotton swabs, bandages, and plaster casts with blood; expired or discarded pharmaceutical medicines; and microbiology specimens, lab culture plates, and discarded live vaccines. Items that must never go into the Yellow Bin: never place needles, scalpels, blades, glass bottles, or recyclable plastics in yellow bags. Always use non-chlorinated yellow bags with the biohazard symbol, wear double nitrile gloves and an N95 mask, seal the bag at 75% capacity, and send for high-temperature incineration at 1050 degrees Celsius.",
             "steps": [
+                "Deposit only infectious, anatomical, and soiled items into certified non-chlorinated yellow biohazard bags.",
+                "Include human tissues, organs, blood-soaked gauze, expired drugs, and microbiology cultures.",
+                "Never place needles, sharps, glass bottles, or plastic syringes into yellow bags.",
                 "Don full PPE: heavy-duty nitrile gloves, N95 mask, fluid-resistant apron, and eye protection.",
-                "Use only certified non-chlorinated yellow plastic bags bearing the biohazard symbol.",
-                "Never pack bags beyond three-quarters capacity to ensure an airtight neck seal.",
-                "Never compress, knead, or sit on waste bags to create more space.",
-                "Transport bags in dedicated enclosed wheeled bins directly to the bio-waste holding room.",
-                "Ensure incineration or authorized deep burial occurs within forty-eight hours."
+                "Tie and seal yellow bags with swan-neck knots strictly when they reach three-quarters capacity.",
+                "Ensure transfer for high-temperature incineration at 1050°C within forty-eight hours."
             ]
         },
         "red": {
-            "title": "Red Category: Contaminated Recyclable Plastics Precautions",
-            "summary": "Red category waste comprises recyclable plastic clinical items contaminated with bodily fluids. This includes disposable plastic syringes without needles, intravenous tubing and sets, catheters, urine bags, dialysis kits, rubber gloves, and vacutainer tubes. All syringes must have their needle hubs destroyed using a needle cutter at point of use before dropping into the red bin to prevent illicit reuse. Empty all residual fluids before disposal. Autoclave, microwave, or soak in freshly prepared one to two percent sodium hypochlorite solution before shredding and sending to registered recyclers. Wear puncture-resistant utility gloves and a face shield. Never place needles, scalpels, or glass items into red bins.",
+            "title": "Red Bin Guide: Contaminated Recyclable Plastics",
+            "summary": "The Red Bin is strictly reserved for contaminated recyclable plastic clinical items. Items that come under the Red Bin include: disposable plastic syringes with needles removed; intravenous IV bottles, infusion sets, and tubing; catheters, drainage tubes, and emptied urine bags; hemodialysis tubing kits; contaminated examination gloves; and blood collection vacutainer tubes. Items that must never go into the Red Bin: never throw needles, scalpels, blades, glass ampoules, or municipal trash in the red bin. Syringes must always have needle hubs cut at point of use, and all liquids must be completely drained before bagging. Disinfect with 1 to 2 percent sodium hypochlorite or autoclave before registered shredding and recycling.",
             "steps": [
-                "Cut syringe needle hubs or tips using a mechanical cutter before disposing into the red bin.",
-                "Completely drain urine bags, IV lines, and suction canisters into sanitary sewers before bagging.",
+                "Cut syringe needle hubs using a point-of-use mechanical cutter before dropping into the red bin.",
+                "Completely drain urine bags, IV lines, and suction canisters into sanitary drainage before disposal.",
+                "Deposit IV bottles, tubing, catheters, rubber gloves, and vacutainer sample tubes.",
+                "Never throw hypodermic needles, surgical blades, or glass vials into red bags.",
                 "Wear heavy-duty puncture-resistant utility gloves and a splash-proof face shield.",
-                "Never drop hypodermic needles, blades, or glass vials into red bags.",
-                "Disinfect with one to two percent sodium hypochlorite or autoclave prior to shredding.",
-                "Hand over shredded plastic only to authorized state pollution control board recyclers."
+                "Disinfect with 1 to 2 percent sodium hypochlorite or autoclave prior to registered plastic recycling."
             ]
         },
         "white": {
-            "title": "White Category: Sharps, Needles & Blades Precautions",
-            "summary": "White category waste contains contaminated sharps that pose severe puncture, cut, and blood-borne virus risks. This includes hypodermic needles, scalpel blades, lancets, surgical suture needles, contaminated broken ampoule tips, and fixed-needle syringes. Always use rigid, puncture-proof, tamper-proof, and translucent white containers. Never attempt to recap, bend, break, or manually strip needles from syringes with bare hands. Use point-of-use electric needle burners or manual hub cutters immediately upon injection. Never fill sharp containers beyond three-quarters full. Once full, lock the tamper-proof lid permanently. Containers undergo autoclaving or dry-heat sterilization followed by encapsulation in concrete or sharp-pit disposal.",
+            "title": "White Container Guide: Sharps, Needles & Blades",
+            "summary": "The White translucent container is strictly designated for contaminated metal sharps and needles that can cause puncture wounds. Items that come under the White Container include: hypodermic injection needles and fixed-needle syringes; surgical scalpel blades and handles; curved suture needles, blood lancets, and contaminated stylets; needles sheared by electric burners or hub cutters; and broken contaminated glass ampoule tips. Items that must never go into the White Container: never put soft gauze, bandages, plastic IV tubing, or general garbage here. Never recap needles using both hands. Lock the tamper-evident puncture-proof container permanently when three-quarters full for autoclaving and concrete encapsulation in a sharps pit.",
             "steps": [
-                "Immediately discard sharps at point of generation into a white puncture-proof container.",
-                "Never recap needles by hand. If mandatory, use the single-handed scoop technique.",
-                "Use electric needle burners or hub cutters directly at the bedside or nursing station.",
-                "Do not exceed the three-quarters fill line marked on the container.",
-                "Permanently lock the tamper-evident lid before handing over for final disposal.",
-                "Ensure dry heat sterilization and encapsulation to permanently immobilize metal sharps."
+                "Discard all metal sharps directly at point of use into a rigid, translucent, puncture-proof white container.",
+                "Include hypodermic needles, scalpel blades, suture needles, lancets, and broken glass ampoule tips.",
+                "Never recap needles by hand. If unavoidable, use the single-handed scoop technique.",
+                "Use bedside electric needle burners or hub cutters immediately after injection.",
+                "Never put soft cotton, gauze, plastic tubing, or non-sharp waste into white containers.",
+                "Permanently lock the lid at three-quarters fill line for autoclaving and concrete pit encapsulation."
             ]
         },
         "blue": {
-            "title": "Blue Category: Glassware & Metallic Implants Precautions",
-            "summary": "Blue category waste consists of broken or intact medicine ampoules, glass vials, microscope slides, glass culture flasks, and contaminated metallic orthopedic implants such as pins, plates, and screws. Store in rigid, puncture-resistant cardboard boxes or blue-coded plastic bins with blue biohazard markings. Always handle broken glassware using forceps, tongs, or a dustpan brush; never collect glass fragments with gloved hands. Disinfect glassware with sodium hypochlorite disinfectant or autoclaving before crushing. Return intact pharmaceutical glass bottles to licensed glass recycling facilities after thorough decontamination.",
+            "title": "Blue Bin Guide: Glassware & Metallic Implants",
+            "summary": "The Blue container or cardboard box is specifically designated for clean or contaminated glassware and metallic surgical hardware. Items that come under the Blue Bin include: empty glass medicine ampoules and pharmaceutical vials; broken laboratory glassware, beakers, and test tubes; microscope glass slides and coverslips; and orthopedic metallic bone plates, screws, pins, rods, and surgical prosthetics. Items that must never go into the Blue Bin: never place needles, plastic syringes, blood-soaked cotton, or cytotoxic chemotherapy vials in the blue stream. Always handle broken glass with tongs or forceps, never with bare hands. Decontaminate with 1 percent sodium hypochlorite or autoclave before glass crushing and metal smelting.",
             "steps": [
-                "Segregate all glass vials, ampoules, and orthopedic metal implants into blue-labeled boxes.",
-                "Never pick up shattered glass vials with bare hands or thin exam gloves; always use tongs.",
-                "Pre-treat with one percent sodium hypochlorite disinfectant soak or autoclave sterilization.",
-                "Ensure boxes have robust bottom reinforcement to prevent glass puncturing during transit.",
-                "Route cleaned and crushed glass safely to approved industrial glass recyclers."
+                "Segregate all intact or broken medicine ampoules, glass vials, and metallic orthopedic implants into blue containers.",
+                "Include microscope slides, lab beakers, titanium bone plates, screws, and pins.",
+                "Never pick up broken glass fragments with bare hands or thin gloves; always use forceps or tongs.",
+                "Never mix needles, plastic syringes, soiled dressings, or cytotoxic chemo vials into the blue stream.",
+                "Pre-treat with 1 percent sodium hypochlorite disinfectant soak or autoclave sterilization.",
+                "Route decontaminated glass to authorized glass recyclers and metal implants to smelting foundries."
             ]
         },
         "purple": {
-            "title": "Cytotoxic & Chemotherapy Oncology Waste Precautions",
-            "summary": "Cytotoxic waste includes expired or residual chemotherapy drugs, contaminated intravenous lines, gloves, gowns, tubing, and patient bodily waste within forty-eight hours of chemotherapy administration. Cytotoxic agents are mutagens, teratogens, and carcinogens. Always use heavy-duty purple or yellow bags labeled with the prominent cytotoxic warning symbol. Oncology staff must double-glove using chemotherapy-tested nitrile gloves, an impermeable gown, and a full face shield. Prepare drugs only inside certified biological safety cabinets. In case of spills, immediately deploy the chemotherapy spill kit with neutralizing absorbent pads. Cytotoxic waste must be destroyed by high-temperature incineration at minimum twelve hundred degrees Celsius.",
+            "title": "Purple Stream Guide: Cytotoxic & Chemotherapy Waste",
+            "summary": "The Purple container or dedicated yellow cytotoxic bag is exclusively for hazardous cancer chemotherapy and antineoplastic waste. Items that come under the Purple Stream include: expired or leftover chemotherapy drug vials; contaminated cytotoxic IV infusion sets, bags, and tubing; gowns, masks, and gloves worn during chemo drug reconstitution; absorbent pads used for chemo spills; and patient bodily excreta within 48 hours of chemotherapy administration. Items that must never go into the Purple Stream: never discard in municipal trash or red bins, and never autoclave cytotoxic waste. Staff must double-glove with chemotherapy-rated nitrile gloves, prepare drugs in Class II biosafety cabinets, and incinerate at extreme temperatures above 1200 degrees Celsius.",
             "steps": [
-                "Wear double chemotherapy-rated nitrile gloves, impermeable gown, and face shield.",
-                "Place all chemotherapy-contaminated items into designated purple cytotoxic containers.",
-                "Prepare all intravenous antineoplastic drugs inside Class II Biological Safety Cabinets.",
-                "Keep dedicated cytotoxic spill kits immediately accessible in oncology wards and labs.",
-                "Incinerate all cytotoxic waste at extreme temperatures exceeding twelve hundred degrees Celsius."
+                "Place all chemotherapy drugs, contaminated IV tubing, and patient excreta into purple cytotoxic bags.",
+                "Wear double chemotherapy-tested nitrile gloves, an impermeable gown, and full face shield.",
+                "Reconstitute all antineoplastic chemotherapy agents only inside certified Class II Biosafety Cabinets.",
+                "Never autoclave cytotoxic waste, as heating volatilizes dangerous carcinogenic chemical fumes.",
+                "Keep dedicated cytotoxic spill kits with neutralizing absorbent pads immediately accessible.",
+                "Destroy all cytotoxic waste by high-temperature incineration exceeding 1200 degrees Celsius."
             ]
         },
         "general": {
-            "title": "General Non-Hazardous Healthcare Waste Precautions",
-            "summary": "General healthcare waste represents eighty to eighty-five percent of all hospital waste and is non-hazardous. It includes clean packaging, paper cartons, administrative paperwork, food leftovers, disposable paper cups, and plastic wrappers. Segregate in green or black municipal bins. Strictly inspect that no infectious dressings, gloves, or needles contaminate general waste. Clean cardboard and office paper should be compacted and routed for municipal recycling. Proper pre-sorting prevents unnecessary and expensive biohazard incineration for safe municipal trash.",
+            "title": "General Waste Guide: Non-Hazardous Municipal Waste",
+            "summary": "General healthcare waste represents eighty to eighty-five percent of hospital waste and is non-hazardous. Items that come under General Waste include: clean cardboard, packaging boxes, paper stationery, food leftovers, disposable paper cups, and clean plastic wrappers. Segregate in green or black municipal bins. Strictly ensure no infectious dressings, gloves, needles, or blood-stained items enter general waste. Clean paper and cardboard should be compacted and sent for municipal recycling.",
             "steps": [
-                "Deposit clean cardboard, food waste, wrappers, and paper towels into green or black bins.",
-                "Never dispose of contaminated patient dressings, cotton, or gloves into general bins.",
-                "Keep recycling bins cleanly separated at ward reception, administrative desks, and cafeterias.",
-                "Conduct routine spot audits on general bins to ensure complete absence of clinical waste.",
-                "Partner with municipal circular recycling initiatives for paper, clean bottles, and organic waste."
+                "Deposit clean cardboard, food waste, paper cups, and clean packaging into green or black bins.",
+                "Never dispose of contaminated patient dressings, cotton swabs, or needles into general bins.",
+                "Keep clean recycling bins separated at nursing stations, administrative offices, and cafeterias.",
+                "Conduct routine spot checks to guarantee total absence of infectious clinical waste.",
+                "Partner with authorized municipal recyclers for clean paper, cardboard, and compostable waste."
             ]
         },
         "emergency": {
-            "title": "Emergency Needle-Stick & Blood Spill Incident Protocol",
-            "summary": "In the event of an accidental needle-stick or sharp injury: Immediately wash the wound under cool running tap water with mild soap for five minutes. Do not squeeze, press, suck, or scrub the puncture site violently. Cover with a sterile waterproof dressing. Immediately notify the ward sister or Infection Control Officer. Initiate Post-Exposure Prophylaxis for HIV and Hepatitis B within two hours. For blood or body fluid spills: Cordon off the area, wear full PPE, cover the liquid spill with absorbent paper towels, pour freshly prepared one percent sodium hypochlorite solution with ten thousand ppm available chlorine over the towels, allow twenty minutes contact time, scoop into a yellow bag with tongs, and mop with hospital disinfectant.",
+            "title": "Emergency Protocol Guide: Needle-Stick & Blood Spills",
+            "summary": "Immediate emergency response protocols. For Needle-Stick Injury: Step 1, immediately wash the puncture wound under cool running tap water with soap for five minutes; Step 2, do not squeeze, press, or suck the wound, and apply a sterile waterproof dressing; Step 3, immediately notify your supervisor and the infection control officer; Step 4, begin Post-Exposure Prophylaxis PEP evaluation within two hours. For Blood Spills: Step 1, cordon off the area and don full PPE; Step 2, cover the spill with absorbent towels working from outside inward; Step 3, pour freshly prepared 1 percent sodium hypochlorite and wait 20 minutes; Step 4, collect towels with tongs into a yellow bag and mop the floor with disinfectant.",
             "steps": [
-                "Needle-Stick Step 1: Wash puncture wound immediately under running tap water with soap for 5 minutes.",
-                "Needle-Stick Step 2: Do NOT suck, squeeze, or scrub the wound harshly. Apply sterile bandage.",
+                "Needle-Stick Step 1: Immediately wash puncture wound under running tap water with soap for 5 minutes.",
+                "Needle-Stick Step 2: Do NOT suck, squeeze, or scrub the wound harshly. Apply a sterile waterproof bandage.",
                 "Needle-Stick Step 3: Report incident immediately to supervisor and receive PEP evaluation within 2 hours.",
-                "Spill Step 1: Cordon off spill area and don full PPE including nitrile gloves and shoe covers.",
-                "Spill Step 2: Cover liquid spill with absorbent towels and soak with 1% sodium hypochlorite solution.",
-                "Spill Step 3: Wait 20 minutes contact time, scoop towels with tongs into yellow bag, and mop thoroughly."
+                "Spill Step 1: Cordon off spill area and don full PPE including nitrile gloves, gown, and shoe covers.",
+                "Spill Step 2: Cover liquid spill with absorbent towels and soak with freshly prepared 1% sodium hypochlorite.",
+                "Spill Step 3: Wait 20 minutes contact time, scoop towels with tongs into a yellow bag, and mop thoroughly."
             ]
         }
     },
     "hi": {
         "master": {
             "title": "मास्टर क्लिनिकल सुरक्षा और बायोमेडिकल कचरा प्रबंधन सारांश",
-            "summary": "बायोमेडिकल कचरा प्रबंधन और क्लिनिकल सुरक्षा गाइड में आपका स्वागत है। सभी स्वास्थ्य कर्मियों, सफाई कर्मचारियों और कचरा उठाने वालों को भारत सरकार के बायोमेडिकल वेस्ट मैनेजमेंट नियमों का कड़ाई से पालन करना चाहिए। हमेशा उपयुक्त पीपीई किट पहनें, जिसमें डबल नाइट्राइल दस्ताने, एन-95 मास्क, वाटरप्रूफ एप्रन और सुरक्षात्मक चश्मा शामिल है। कचरे को चार रंगों में अलग करें: पीले बैग में मानव अंग और संक्रामक पट्टियां; लाल डिब्बे में प्लास्टिक जैसे सिरिंज और आईवी पाइप; सफेद कंटेनर में नुकीली सुइयां और ब्लेड; और नीले डिब्बे में कांच की दवा की शीशियां। कीमोथेरेपी कचरे के लिए बैंगनी थैली का इस्तेमाल करें। सुई को कभी न मोड़ें और सुई चुभने पर दो घंटे के भीतर तुरंत रिपोर्ट करें। कचरे का सही अलगाव जान बचाता है।",
+            "summary": "बायोमेडिकल कचरा प्रबंधन और क्लिनिकल सुरक्षा गाइड में आपका स्वागत है। सभी स्वास्थ्य कर्मियों, सफाई कर्मचारियों और कचरा उठाने वालों को भारत सरकार के बायोमेडिकल वेस्ट मैनेजमेंट नियमों का कड़ाई से पालन करना चाहिए। कचरे को चार रंगों में अलग करें: पीले बैग में मानव अंग और संक्रामक पट्टियां; लाल डिब्बे में प्लास्टिक जैसे सिरिंज और आईवी पाइप; सफेद कंटेनर में नुकीली सुइयां और ब्लेड; और नीले डिब्बे में कांच की दवा की शीशियां व धातु। कीमोथेरेपी कचरे के लिए बैंगनी थैली का इस्तेमाल करें। सुई को कभी न मोड़ें और सुई चुभने पर दो घंटे के भीतर तुरंत रिपोर्ट करें। कचरे का सही अलगाव जान बचाता है।",
             "steps": [
                 "कचरा छूने से पहले हमेशा डबल दस्ताने, एन-95 मास्क और सुरक्षात्मक एप्रन पहनें।",
                 "कचरे को स्रोत पर ही पीले, लाल, सफेद और नीले डिब्बों में अलग करें।",
@@ -184,73 +186,78 @@ const PRECAUTION_TRANSCRIPTS_I18N = {
             ]
         },
         "yellow": {
-            "title": "पीला वर्ग: संक्रामक और शारीरिक कचरा सावधानियां",
-            "summary": "पीले वर्ग में मानव अंग, ऊतक, खून से सनी पट्टियां, रूई, एक्सपायर्ड दवाएं और रासायनिक कचरा शामिल है। हमेशा बायोहाजार्ड चिन्ह वाली गैर-क्लोरीनेटेड पीली थैलियों का उपयोग करें। डबल नाइट्राइल दस्ताने, एन-95 मास्क और गाउन पहनें। पीली थैलियों को कभी हाथ से न दबाएं। तीन-चौथाई भरने पर सील करें। संक्रामक कचरे को 48 घंटे के भीतर इनसिनेरेशन के लिए भेजें।",
+            "title": "पीला डिब्बा गाइड: संक्रामक और मानव शारीरिक कचरा",
+            "summary": "पीला डिब्बा केवल संक्रामक, शारीरिक और पैथोलॉजिकल बायोमेडिकल कचरे के लिए निर्धारित है। पीले डिब्बे में आने वाली चीजें हैं: मानव अंग, ऊतक, कटे हुए अंग और प्लेसेंटा; खून से सनी पट्टियां, रूई, गॉज और प्लास्टर कास्ट; एक्सपायर्ड या पुरानी दवाइयां; और माइक्रोबायोलॉजी लैब कल्चर व जीवित टीके। पीले डिब्बे में कभी भी सुई, नुकीले ब्लेड, कांच की शीशियां या प्लास्टिक की सिरिंज न डालें। हमेशा पीली गैर-क्लोरीनेटेड बायोहाजार्ड थैली का उपयोग करें, डबल दस्ताने और एन-95 मास्क पहनें, थैली को 75% भरने पर सील करें और 1050 डिग्री पर इनसिनेरेशन के लिए भेजें।",
             "steps": [
+                "केवल संक्रामक और शारीरिक कचरे को पीली गैर-क्लोरीनेटेड बायोहाजार्ड थैली में डालें।",
+                "मानव अंग, ऊतक, खून से सनी पट्टियां, पुरानी दवाइयां और लैब कल्चर शामिल हैं।",
+                "पीले बैग में कभी भी सुई, ब्लेड, कांच या प्लास्टिक सिरिंज न डालें।",
                 "डबल नाइट्राइल दस्ताने, एन-95 मास्क और वाटरप्रूफ एप्रन पहनें।",
-                "केवल बायोहाजार्ड चिन्ह वाली प्रमाणित पीली थैलियों का उपयोग करें।",
-                "थैली को कभी भी तीन-चौथाई से अधिक न भरें।",
-                "थैली को हाथ या पैर से दबाकर जगह बनाने की कोशिश न करें।",
-                "कचरे को बंद पहियों वाले डिब्बों में ही स्टोरेज रूम तक ले जाएं।",
-                "48 घंटे के भीतर इनसिनेरेशन या अधिकृत निस्तारण सुनिश्चित करें।"
+                "थैली तीन-चौथाई भरने पर स्वान-नेक गांठ लगाकर सुरक्षित रूप से सील करें।",
+                "48 घंटे के भीतर 1050 डिग्री तापमान पर इनसिनेरेशन सुनिश्चित करें।"
             ]
         },
         "red": {
-            "title": "लाल वर्ग: दूषित पुनर्चक्रण योग्य प्लास्टिक सावधानियां",
-            "summary": "लाल वर्ग में शरीर के तरल पदार्थों से दूषित प्लास्टिक कचरा जैसे बिना सुई की प्लास्टिक सिरिंज, आईवी सेट, कैथेटर, यूरिन बैग और रबर दस्ताने आते हैं। सुई को निडिल कटर से काटकर ही सिरिंज लाल डिब्बे में डालें। आईवी और यूरिन बैग को पूरी तरह खाली करें। प्लास्टिक को ऑटोक्लेव या एक प्रतिशत सोडियम हाइपोक्लोराइट में कीटाणुरहित करें।",
+            "title": "लाल डिब्बा गाइड: दूषित पुनर्चक्रण योग्य प्लास्टिक",
+            "summary": "लाल डिब्बा केवल दूषित पुनर्चक्रण योग्य प्लास्टिक मेडिकल कचरे के लिए है। लाल डिब्बे में आने वाली चीजें हैं: बिना सुई वाली प्लास्टिक सिरिंज; आईवी की बोतलें, आईवी सेट और नलियां; कैथेटर और खाली किए गए यूरिन बैग; हेमोडायलिसिस किट; दूषित रबर के दस्ताने; और ब्लड सैंपल ट्यूब। लाल डिब्बे में कभी भी सुई, सर्जिकल ब्लेड, कांच या सामान्य कचरा न डालें। सिरिंज की सुई को कटर से काटकर और सारा तरल निकालकर ही डालें। 1 से 2 प्रतिशत सोडियम हाइपोक्लोराइट या ऑटोक्लेव से कीटाणुरहित करके रीसाइक्लिंग के लिए भेजें।",
             "steps": [
                 "सिरिंज की सुई को कटर से काटकर ही लाल डिब्बे में डालें।",
                 "यूरिन बैग और आईवी नली से सारा तरल पदार्थ पूरी तरह निकालें।",
+                "आईवी बोतलें, कैथेटर, रबर दस्ताने और सैंपल ट्यूब लाल बैग में डालें।",
+                "लाल बैग में कभी भी सुई, सर्जिकल ब्लेड या कांच की शीशी न डालें।",
                 "मजबूत पंचर-प्रतिरोधी दस्ताने और फेस शील्ड पहनें।",
-                "लाल बैग में कभी भी कांच या सुई न डालें।",
-                "एक से दो प्रतिशत सोडियम हाइपोक्लोराइट या ऑटोक्लेव से कीटाणुरहित करें।",
-                "पुनर्चक्रण के लिए केवल अधिकृत रीसाइक्लर्स को ही प्लास्टिक सौंपें।"
+                "एक से दो प्रतिशत सोडियम हाइपोक्लोराइट या ऑटोक्लेव से कीटाणुरहित करें।"
             ]
         },
         "white": {
-            "title": "सफेद वर्ग: नुकीले कचरे, सुई और सर्जिकल ब्लेड",
-            "summary": "सफेद वर्ग में इस्तेमाल की गई सुइयां, सर्जिकल ब्लेड, लैंसेट और कांच की टूटी एम्प्यूल शामिल हैं। हमेशा सख्त और पंचर-प्रूफ सफेद डिब्बों का उपयोग करें। सुई को कभी हाथ से दोबारा कैप न करें और न ही मोड़ें। बेडसाइड पर इलेक्ट्रिक निडिल बर्नर का उपयोग करें। डिब्बा तीन-चौथाई भरने पर ढक्कन स्थायी रूप से लॉक कर दें।",
+            "title": "सफेद डिब्बा गाइड: नुकीले कचरे, सुई और सर्जिकल ब्लेड",
+            "summary": "सफेद पारभासी कंटेनर केवल धातु के नुकीले कचरे के लिए है जिससे चुभने या कटने का खतरा होता है। सफेद डिब्बे में आने वाली चीजें हैं: इंजेक्शन की सुइयां और फिक्स्ड-निडिल सिरिंज; सर्जिकल स्कैल्पल, डिस्पोजेबल ब्लेड और हैंडल; टांके लगाने की सुइयां, लैंसिट और स्टाइलट्स; इलेक्ट्रिक बर्नर से काटी गई सुइयां; और कांच की टूटी एम्प्यूल के नुकीले सिरे। इसमें कभी भी रूई, पट्टी, प्लास्टिक पाइप या सामान्य कचरा न डालें। सुई को हाथ से कभी न ढकें। तीन-चौथाई भरने पर ढक्कन स्थायी रूप से लॉक कर दें।",
             "steps": [
                 "उपयोग के तुरंत बाद सुई को सफेद पंचर-प्रूफ डिब्बे में डालें।",
+                "इंजेक्शन सुइयां, सर्जिकल ब्लेड, टांके की सुइयां और लैंसिट शामिल करें।",
                 "सुई को हाथ से कभी न ढकें; केवल सुरक्षित स्कूप तकनीक अपनाएं।",
                 "बेडसाइड पर इलेक्ट्रिक निडिल बर्नर का उपयोग करें।",
-                "डिब्बे पर बनी तीन-चौथाई सीमा से अधिक कभी न भरें।",
-                "भर जाने पर डिब्बे का ढक्कन हमेशा के लिए लॉक कर दें।",
-                "कचरे का ड्राई हीट स्टरलाइजेशन और कंक्रीट एनकैप्सुलेशन कराएं।"
+                "कंटेनर में कभी भी रूई, पट्टी या प्लास्टिक पाइप न डालें।",
+                "तीन-चौथाई भरने पर डिब्बे का ढक्कन हमेशा के लिए लॉक कर दें।"
             ]
         },
         "blue": {
-            "title": "नीला वर्ग: कांच का सामान और धातु के इम्प्लांट",
-            "summary": "नीले वर्ग में दवा की कांच की शीशियां, एम्प्यूल, स्लाइड और ऑर्थोपेडिक धातु के पेंच या प्लेट शामिल हैं। इन्हें नीले कार्डबोर्ड बॉक्स या नीले डिब्बे में रखें। टूटे कांच को कभी हाथ से न उठाएं, हमेशा चिमटे का उपयोग करें। एक प्रतिशत सोडियम हाइपोक्लोराइट या ऑटोक्लेव से कीटाणुरहित करें।",
+            "title": "नीला डिब्बा गाइड: कांच का सामान और धातु के इम्प्लांट",
+            "summary": "नीला डिब्बा या कार्डबोर्ड बॉक्स केवल कांच के सामान और ऑर्थोपेडिक धातु के सामान के लिए है। नीले डिब्बे में आने वाली चीजें हैं: खाली कांच की दवा की शीशियां और एम्प्यूल; प्रयोगशाला के टूटे बीकर और टेस्ट ट्यूब; माइक्रोस्कोप की कांच की स्लाइड और कवरस्लिप; और ऑर्थोपेडिक धातु की प्लेटें, पेंच, पिन और प्रोस्थेटिक्स। नीले डिब्बे में कभी भी सुई, प्लास्टिक सिरिंज, खून से सनी रूई या कीमोथेरेपी दवाएं न डालें। टूटे कांच को कभी हाथ से न उठाएं, हमेशा चिमटे का उपयोग करें।",
             "steps": [
-                "सभी कांच की शीशियों और धातु के इम्प्लांट को नीले बॉक्स में रखें।",
+                "सभी कांच की शीशियों, एम्प्यूल और धातु के इम्प्लांट को नीले बॉक्स में रखें।",
+                "माइक्रोस्कोप स्लाइड, टेस्ट ट्यूब, धातु की प्लेट और स्क्रू शामिल करें।",
                 "टूटे कांच को कभी नंगे हाथों से न छुएं; हमेशा चिमटा इस्तेमाल करें।",
-                "एक प्रतिशत सोडियम हाइपोक्लोराइट से कीटाणुरहित करें।",
-                "कांच को सुरक्षित रूप से रीसाइक्लिंग के लिए भेजें।"
+                "नीले डिब्बे में कभी भी सुई, प्लास्टिक सिरिंज या कीमो दवाएं न मिलाएं।",
+                "एक प्रतिशत सोडियम हाइपोक्लोराइट या ऑटोक्लेव से कीटाणुरहित करें।",
+                "कांच को रीसाइक्लिंग और धातु को पिघलाने के लिए अधिकृत केंद्रों को भेजें।"
             ]
         },
         "purple": {
-            "title": "साइटोटॉक्सिक और कीमोथेरेपी कैंसर कचरा",
-            "summary": "साइटोटॉक्सिक कचरे में बची हुई कीमोथेरेपी दवाएं, दूषित आईवी लाइन और मरीज का शारीरिक कचरा शामिल है। हमेशा बैंगनी बायोहाजार्ड बैग का उपयोग करें। डबल कीमो-रेटेड दस्ताने और फेस शील्ड पहनें। रिसाव होने पर तुरंत कीमो स्पिल किट का उपयोग करें। बारह सौ डिग्री से अधिक तापमान पर इनसिनेरेशन करें।",
+            "title": "बैंगनी वर्ग गाइड: साइटोटॉक्सिक और कीमोथेरेपी कैंसर कचरा",
+            "summary": "बैंगनी डिब्बा या थैली केवल कीमोथेरेपी कैंसर दवाओं और जहरीले कचरे के लिए है। बैंगनी डिब्बे में आने वाली चीजें हैं: बची हुई या एक्सपायर्ड कीमोथेरेपी दवाइयां और शीशियां; कीमोथेरेपी में प्रयुक्त आईवी बैग और पाइप; कीमो दवा बनाते समय पहने गए गाउन, मास्क और दस्ताने; और कीमो स्पिल किट के सोखने वाले पैड व मरीज का शारीरिक कचरा। इसे कभी भी सामान्य कचरे या लाल डिब्बे में न डालें और ऑटोक्लेव न करें। हमेशा डबल कीमो-रेटेड दस्ताने पहनें और 1200 डिग्री से अधिक तापमान पर इनसिनेरेशन करें।",
             "steps": [
-                "डबल कीमो-रेटेड नाइट्राइल दस्ताने और फेस शील्ड पहनें।",
-                "सभी कीमोथेरेपी कचरे को निर्धारित बैंगनी डिब्बे में डालें।",
+                "सभी कीमोथेरेपी कचरे और आईवी सेट को निर्धारित बैंगनी डिब्बे में डालें।",
+                "डबल कीमो-रेटेड नाइट्राइल दस्ताने, विशेष गाउन और फेस शील्ड पहनें।",
+                "कीमो दवाएं केवल क्लास 2 बायोसेफ्टी कैबिनेट के अंदर ही तैयार करें।",
+                "कीमो कचरे को कभी भी ऑटोक्लेव न करें, इससे जहरीली गैसें निकलती हैं।",
                 "कीमो स्पिल किट को हमेशा वार्ड में तैयार रखें।",
                 "बारह सौ डिग्री सेल्सियस से ऊपर उच्च तापमान पर इनसिनेरेशन करें।"
             ]
         },
         "general": {
-            "title": "सामान्य गैर-खतरनाक अस्पताल कचरा",
-            "summary": "अस्पताल का अस्सी प्रतिशत कचरा गैर-खतरनाक होता है, जैसे साफ कागज, गत्ता, खाने का बचा हुआ हिस्सा और प्लास्टिक रैपर। इसे हरे या काले नगरपालिका डिब्बे में डालें। इसमें कभी भी संक्रामक कचरा या सुई न मिलाएं।",
+            "title": "सामान्य कचरा गाइड: गैर-खतरनाक अस्पताल कचरा",
+            "summary": "अस्पताल का अस्सी प्रतिशत कचरा गैर-खतरनाक होता है। सामान्य कचरे में आने वाली चीजें हैं: साफ कागज, गत्ता, पैकिंग बॉक्स, खाने का बचा हुआ हिस्सा, पानी के डिस्पोजेबल कप और साफ प्लास्टिक रैपर। इसे हरे या काले नगरपालिका डिब्बे में डालें। इसमें कभी भी संक्रामक पट्टियां, खून, दस्ताने या सुइयां न मिलाएं। साफ कागज और गत्ते को अलग रखकर रीसाइक्लिंग के लिए भेजें।",
             "steps": [
                 "साफ कागज, खाने का कचरा और रैपर हरे या काले डिब्बे में डालें।",
-                "संक्रामक पट्टियां या सुइयां इसमें कभी न डालें।",
-                "वार्ड में रीसाइक्लिंग डिब्बे अलग रखें।"
+                "संक्रामक पट्टियां, खून या सुइयां इसमें कभी न डालें।",
+                "वार्ड और रिसेप्शन पर रीसाइक्लिंग डिब्बे अलग रखें।",
+                "नियमित जांच करें कि इसमें कोई क्लिनिकल कचरा न मिले।"
             ]
         },
         "emergency": {
-            "title": "आपातकालीन सुई चुभने और रक्त रिसाव प्रोटोकॉल",
-            "summary": "सुई चुभने पर: घाव को तुरंत बहते पानी और साबुन से पांच मिनट तक धोएं। घाव को दबाएं या चूसे नहीं। वाटरप्रूफ पट्टी लगाएं और दो घंटे के भीतर पीईपी उपचार के लिए रिपोर्ट करें। रक्त रिसाव होने पर: क्षेत्र को सुरक्षित करें, पीपीई पहनें, सोखने वाले तौलिए बिछाएं और एक प्रतिशत सोडियम हाइपोक्लोराइट डालकर बीस मिनट बाद साफ करें।",
+            "title": "आपातकालीन प्रोटोकॉल गाइड: सुई चुभने और रक्त रिसाव के नियम",
+            "summary": "सुई चुभने और रक्त रिसाव पर तुरंत उठाए जाने वाले कदम। सुई चुभने पर: पहला कदम, घाव को तुरंत बहते पानी और साबुन से 5 मिनट धोएं; दूसरा कदम, घाव को दबाएं, निचोड़ें या मुंह से न चूसें, साफ वाटरप्रूफ पट्टी लगाएं; तीसरा कदम, तुरंत वार्ड इंचार्ज और संक्रमण नियंत्रण टीम को सूचित करें; चौथा कदम, दो घंटे के भीतर पीईपी (PEP) मूल्यांकन और दवा शुरू करें। रक्त रिसाव पर: पहला कदम, क्षेत्र की घेराबंदी करें और पीपीई पहनें; दूसरा कदम, सोखने वाले तौलिए बिछाएं; तीसरा कदम, 1% सोडियम हाइपोक्लोराइट डालकर 20 मिनट छोड़ें; चौथा कदम, चिमटे से तौलिए उठाकर पीली थैली में डालें और फर्श को पोंछें।",
             "steps": [
                 "सुई चुभने पर घाव को साबुन और बहते पानी से पांच मिनट धोएं।",
                 "घाव को बिल्कुल न दबाएं; साफ पट्टी लगाएं।",
@@ -262,7 +269,7 @@ const PRECAUTION_TRANSCRIPTS_I18N = {
     "mr": {
         "master": {
             "title": "मास्टर क्लिनिकल सुरक्षा आणि बायोमेडिकल कचरा व्यवस्थापन",
-            "summary": "बायोमेडिकल कचरा व्यवस्थापन आणि क्लिनिकल सुरक्षा मार्गदर्शिकेत आपले स्वागत आहे. सर्व आरोग्य कर्मचारी आणि कचरा हाताळणाऱ्यांनी नियमांचे काटेकोरपणे पालन केले पाहिजे. पीपीई किट, दुहेरी नायट्रिल हातमोजे आणि एन-95 मास्क नेहमी वापरा. कचरा उत्पत्तीच्या ठिकाणी चार रंगांमध्ये वेगळा करा: पिवळा - संसर्गजन्य कचरा; लाल - पुनर्वापरयोग्य प्लास्टिक; पांढरा - टोकदार सुया आणि ब्लेड; आणि निळा - काचेच्या बाटल्या व धातू. सुई टोचल्यास दोन तासांत नोंद करा.",
+            "summary": "बायोमेडिकल कचरा व्यवस्थापन आणि क्लिनिकल सुरक्षा मार्गदर्शिकेत आपले स्वागत आहे. सर्व आरोग्य कर्मचारी आणि कचरा हाताळणाऱ्यांनी नियमांचे काटेकोरपणे पालन केले पाहिजे. कचरा चार रंगांमध्ये वेगळा करा: पिवळा - संसर्गजन्य व अवयव कचरा; लाल - पुनर्वापरयोग्य प्लास्टिक; पांढरा - टोकदार सुया आणि ब्लेड; आणि निळा - काचेच्या बाटल्या व धातू. कीमोथेरपीसाठी जांभळी पिशवी वापरा. पीपीई किट नेहमी वापरा, सुईला हाताने टोपण लावू नका आणि सुई टोचल्यास दोन तासांत नोंद करा.",
             "steps": [
                 "कचऱ्याला स्पर्श करण्यापूर्वी पूर्ण पीपीई आणि दुहेरी हातमोजे वापरा.",
                 "कचरा चार रंगांच्या डब्यांमध्ये त्वरित वेगळा करा.",
@@ -272,65 +279,77 @@ const PRECAUTION_TRANSCRIPTS_I18N = {
             ]
         },
         "yellow": {
-            "title": "पिवळा वर्ग: संसर्गजन्य व अवयव कचरा खबरदारी",
-            "summary": "पिवळ्या कचऱ्यामध्ये मानवी अवयव, रक्त लागलेले कापूस, मलमपट्टी आणि मुदत संपलेली औषधे येतात. बायोहॅझार्ड चिन्ह असलेली पिवळी पिशवी वापरा. पिशवी तीन चतुर्थांश भरल्यावर घट्ट बांधा. संसर्गजन्य कचरा ४८ तासांच्या आत इन्सिनरेशनसाठी पाठवा.",
+            "title": "पिवळा डबा मार्गदर्शक: संसर्गजन्य व अवयव कचरा",
+            "summary": "पिवळा डबा हा केवळ संसर्गजन्य, शारीरिक आणि पॅथॉलॉजिकल कचऱ्यासाठी राखीव आहे. पिवळ्या डब्यात येणाऱ्या वस्तू आहेत: मानवी अवयव, उती, शरीराचे भाग आणि वार (प्लेसेंटा); रक्ताने माखलेला कापूस, मलमपट्टी, गॉझ आणि प्लास्टर कास्ट; मुदत संपलेली किंवा जुनी औषधे; आणि मायक्रोबायोलॉजी लॅब कल्चर्स व जिवंत लस. पिवळ्या डब्यात सुया, ब्लेड, काचेच्या बाटल्या किंवा प्लास्टिक सिरिंज कधीही टाकू नका. नेहमी पिवळी बायोहॅझार्ड पिशवी वापरा, दुहेरी नायट्रिल हातमोजे घाला, पिशवी पाऊण भरल्यावर सील करा आणि १०५० अंश तापमानावर इन्सिनरेशनसाठी पाठवा.",
             "steps": [
-                "दुहेरी नायट्रिल हातमोजे आणि एन-९५ मास्क वापरा.",
-                "बायोहॅझार्ड चिन्ह असलेली पिवळी पिशवीच वापरा.",
-                "पिशवी पाऊणपेक्षा जास्त भरू नका.",
-                "पिशवी हाताने किंवा पायाने दाबू नका.",
-                "४८ तासांच्या आत कचऱ्याची विल्हेवाट लावा."
+                "फक्त संसर्गजन्य आणि शारीरिक कचरा पिवळ्या बायोहॅझार्ड पिशवीत टाका.",
+                "मानवी अवयव, रक्ताने माखलेला कापूस, मुदत संपलेली औषधे आणि लॅब कल्चर समाविष्ट करा.",
+                "पिवळ्या डब्यात सुया, ब्लेड, काच किंवा प्लास्टिक सिरिंज कधीही टाकू नका.",
+                "दुहेरी नायट्रिल हातमोजे, एन-९५ मास्क आणि वॉटरप्रूफ एप्रन वापरा.",
+                "पिशवी पाऊण भरल्यावर घट्ट बांधा आणि सील करा.",
+                "४८ तासांच्या आत १०५० अंशांवर इन्सिनरेशन करा."
             ]
         },
         "red": {
-            "title": "लाल वर्ग: दूषित पुनर्वापरयोग्य प्लास्टिक कचरा",
-            "summary": "लाल कचऱ्यामध्ये सुई नसलेली प्लास्टिक सिरिंज, आयव्ही नळ्या, कॅथेटर आणि रबरी हातमोजे येतात. सुई कटरने कापूनच सिरिंज लाल डब्यात टाका. प्लास्टिकचे निर्जंतुकीकरण सोडियम हायपोक्लोराइटने किंवा ऑटोक्लेव्हने करा.",
+            "title": "लाल डबा मार्गदर्शक: दूषित पुनर्वापरयोग्य प्लास्टिक",
+            "summary": "लाल डबा फक्त प्लास्टिकच्या पुनर्वापरयोग्य मेडिकल कचऱ्यासाठी आहे. लाल डब्यात येणाऱ्या वस्तू आहेत: सुई नसलेली प्लास्टिक सिरिंज; आयव्ही बाटल्या, आयव्ही सेट आणि नळ्या; कॅथेटर आणि रिकाम्या केलेल्या लघवीच्या पिशव्या; डायलिसिस किट; दूषित रबरी हातमोजे; आणि रक्त नमुन्यांच्या व्हॅक्यूटेनर नळ्या. लाल डब्यात सुया, ब्लेड, काच किंवा सामान्य कचरा टाकू नका. सिरिंजची सुई कटरने कापून आणि सर्व द्रव रिकामे करूनच टाका. सोडियम हायपोक्लोराइटने किंवा ऑटोक्लेव्हने निर्जंतुक करून रीसायकलिंगला पाठवा.",
             "steps": [
                 "सिरिंजची सुई कटरने कापूनच लाल डब्यात टाका.",
                 "आयव्ही आणि लघवीच्या पिशव्यांमधील द्रव पूर्णपणे रिकामे करा.",
+                "आयव्ही बाटल्या, कॅथेटर, रबरी हातमोजे आणि सॅम्पल ट्यूब लाल डब्यात टाका.",
+                "लाल पिशवीत सुया, ब्लेड किंवा काच टाकू नका.",
                 "मजबूत हातमोजे आणि फेस शील्ड वापरा.",
-                "लाल पिशवीत काच किंवा सुई टाकू नका."
+                "सोडियम हायपोक्लोराइटने किंवा ऑटोक्लेव्हने निर्जंतुक करा."
             ]
         },
         "white": {
-            "title": "पांढरा वर्ग: टोकदार सुया, ब्लेड आणि धातू कचरा",
-            "summary": "पांढऱ्या वर्गात इंजेक्शनच्या सुया, ब्लेड आणि टोकदार धातू येतात. नेहमी छिद्र-प्रतिरोधक पांढरा डबा वापरा. सुईला हाताने पुन्हा टोपण लावू नका. डबा भरल्यावर कायमस्वरूपी बंद करा.",
+            "title": "पांढरा डबा मार्गदर्शक: टोकदार सुया, ब्लेड आणि धातू कचरा",
+            "summary": "पांढरा छिद्र-प्रतिरोधक डबा हा फक्त टोकदार सुया, ब्लेड आणि धातूच्या कचऱ्यासाठी आहे ज्यामुळे इजा होऊ शकते. पांढऱ्या डब्यात येणाऱ्या वस्तू आहेत: इंजेक्शनच्या सुया आणि फिक्स्ड सिरिंज; सर्जिकल स्कॅल्पल, ब्लेड आणि हँडल्स; टाके घालण्याच्या सुया आणि लॅन्सेट; इलेक्ट्रिक बर्नरने कापलेल्या सुया; आणि फुटलेल्या अँप्युल्सचे टोकदार तुकडे. यात कापूस, मलमपट्टी किंवा प्लास्टिक नळ्या टाकू नका. सुईला हाताने टोपण लावू नका. डबा पाऊण भरल्यावर कायमस्वरूपी लॉक करा.",
             "steps": [
                 "सुई त्वरित पांढऱ्या छिद्र-प्रतिरोधक डब्यात टाका.",
+                "इंजेक्शन सुया, सर्जिकल ब्लेड, टाके घालण्याच्या सुया समाविष्ट करा.",
                 "सुई हाताने कधीही झाकू नका किंवा वाकवू नका.",
-                "बेडजवळ इलेक्ट्रिक बर्नर वापरा.",
-                "डबा भरल्यावर कायमस्वरूपी लॉक करा."
+                "बेडजवळ इलेक्ट्रिक बर्नर किंवा कटर वापरा.",
+                "यात कापूस, मलमपट्टी किंवा प्लास्टिक नळ्या टाकू नका.",
+                "डबा पाऊण भरल्यावर कायमस्वरूपी लॉक करा."
             ]
         },
         "blue": {
-            "title": "निळा वर्ग: काचेच्या बाटल्या आणि धातूचे रोपण",
-            "summary": "निळ्या कचऱ्यामध्ये काचेच्या बाटल्या, अँप्युल्स आणि ऑर्थोपेडिक धातूच्या प्लेट्स येतात. फुटलेली काच कधीही हाताने उचलू नका, चिमटा वापरा. १% सोडियम हायपोक्लोराइटने निर्जंतुक करा.",
+            "title": "निळा डबा मार्गदर्शक: काचेच्या वस्तू आणि धातूचे रोपण",
+            "summary": "निळा डबा किंवा बॉक्स हा फक्त काचेच्या वस्तू आणि ऑर्थोपेडिक धातूच्या रोपणासाठी आहे. निळ्या डब्यात येणाऱ्या वस्तू आहेत: रिकाम्या काचेच्या बाटल्या आणि अँप्युल्स; प्रयोगशाळेतील फुटलेले काचेचे बीकर आणि टेस्ट ट्यूब; मायक्रोस्कोपच्या काचेच्या स्लाइड्स; आणि ऑर्थोपेडिक धातूच्या प्लेट्स, स्क्रू, पिना व प्रोस्थेटिक्स. यात सुया, प्लास्टिक सिरिंज किंवा केमो औषधे टाकू नका. फुटलेली काच हाताळण्यासाठी नेहमी चिमटा वापरा.",
             "steps": [
-                "काचेच्या सर्व बाटल्या निळ्या डब्यात गोळा करा.",
+                "काचेच्या सर्व बाटल्या आणि धातूचे रोपण निळ्या डब्यात गोळा करा.",
+                "मायक्रोस्कोप स्लाइड्स, लॅब बीकर आणि धातूच्या प्लेट्स समाविष्ट करा.",
                 "फुटलेली काच हाताने न उचलता चिमट्याने उचला.",
-                "सोडियम हायपोक्लोराइटने निर्जंतुक करा."
+                "यात सुया, प्लास्टिक सिरिंज किंवा केमो औषधे टाकू नका.",
+                "१% सोडियम हायपोक्लोराइटने निर्जंतुक करा.",
+                "काच रीसायकलिंगला आणि धातू वितळवण्यासाठी पाठवा."
             ]
         },
         "purple": {
-            "title": "सायटोटॉक्सिक आणि केमोथेरपी कर्करोग कचरा",
-            "summary": "सायटोटॉक्सिक कचऱ्यात केमोथेरपी औषधे आणि दूषित नळ्या येतात. जांभळ्या बायोहॅझार्ड पिशवीत कचरा ठेवा. केमो-प्रमाणित हातमोजे वापरा. गळती झाल्यास स्पिल किट वापरा.",
+            "title": "जांभळा वर्ग मार्गदर्शक: सायटोटॉक्सिक आणि केमोथेरपी कर्करोग कचरा",
+            "summary": "जांभळा डबा हा फक्त सायटोटॉक्सिक आणि केमोथेरपी कर्करोग कचऱ्यासाठी आहे. जांभळ्या डब्यात येणाऱ्या वस्तू आहेत: मुदत संपलेली किंवा उरलेली केमो औषधे आणि बाटल्या; केमोथेरपीचे आयव्ही बॅग्स आणि नळ्या; केमो औषध तयार करताना वापरलेले गाऊन, मास्क आणि हातमोजे; आणि केमो स्पिल किटचे पॅड्स व रुग्णाचे शारीरिक उत्सर्जन. हा कचरा सामान्य कचऱ्यात टाकू नका आणि ऑटोक्लेव करू नका. दुहेरी केमो हातमोजे वापरा आणि १२०० अंशांपेक्षा जास्त तापमानावर इन्सिनरेशन करा.",
             "steps": [
-                "केमो-प्रमाणित दुहेरी हातमोजे वापरा.",
-                "जांभळ्या पिशवीत सर्व केमो कचरा ठेवा.",
-                "उच्च तापमानावर इन्सिनरेशन करा."
+                "जांभळ्या पिशवीत सर्व केमो कचरा आणि आयव्ही सेट ठेवा.",
+                "केमो-प्रमाणित दुहेरी हातमोजे, गाऊन आणि फेस शील्ड वापरा.",
+                "केमो औषधे फक्त क्लास २ बायोसेफ्टी कॅबिनेटमध्ये तयार करा.",
+                "केमो कचरा ऑटोक्लेव करू नका, विषारी वायू तयार होतात.",
+                "स्पिल किट नेहमी वॉर्डमध्ये उपलब्ध ठेवा.",
+                "१२०० अंश सेल्सिअसपेक्षा जास्त तापमानावर इन्सिनरेशन करा."
             ]
         },
         "general": {
-            "title": "सामान्य बिनधोकादायक रुग्णालय कचरा",
-            "summary": "स्वच्छ कागद, पुठ्ठा, उरलेले अन्न आणि पाण्याचे कप हिरव्या किंवा काळ्या डब्यात टाका. यात कोणताही संसर्गजन्य कचरा किंवा सुया मिसळू नका.",
+            "title": "सामान्य कचरा मार्गदर्शक: बिनधोकादायक रुग्णालय कचरा",
+            "summary": "स्वच्छ कागद, पुठ्ठा, पॅकिंग बॉक्स, उरलेले अन्न आणि पाण्याचे डिस्पोजेबल कप हिरव्या किंवा काळ्या डब्यात टाका. यात कोणताही संसर्गजन्य कचरा, मलमपट्टी, रक्त किंवा सुया मिसळू नका. स्वच्छ कागद आणि पुठ्ठा महानगरपालिकेच्या रीसायकलिंगला पाठवा.",
             "steps": [
                 "स्वच्छ कागद आणि उरलेले अन्न हिरव्या डब्यात टाका.",
-                "संसर्गजन्य कचरा यात अजिबात टाकू नका."
+                "संसर्गजन्य कचरा यात अजिबात टाकू नका.",
+                "रीसायकलिंग डबे वेगळे ठेवा."
             ]
         },
         "emergency": {
-            "title": "तातडीची सुई टोचणे आणि रक्त गळती नियमावली",
-            "summary": "सुई टोचल्यास: जखम वाहत्या पाण्याखाली साबणाने पाच मिनिटे धुवा. जखम दाबू नका. निर्जंतुक पट्टी बांधा आणि २ तासांच्या आत डॉक्टरांना कळवून पीईपी सुरू करा. रक्त सांडल्यास १% सोडियम हायपोक्लोराइट टाकून २० मिनिटांनी पुसून घ्या.",
+            "title": "तातडीची नियमावली मार्गदर्शक: सुई टोचणे आणि रक्त सांडण्यावर उपाय",
+            "summary": "सुई टोचल्यास: १. जखम त्वरित नळाच्या वाहत्या पाण्याखाली साबणाने ५ मिनिटे धुवा; २. जखम दाबू नका किंवा चोळू नका, निर्जंतुक पट्टी लावा; ३. त्वरित वॉर्ड प्रमुखांना कळवा; ४. २ तासांच्या आत पीईपी उपचार सुरू करा. रक्त सांडल्यास: १. जागा सुरक्षित करा आणि पीपीई वापरा; २. सांडलेल्या रक्तावर टॉवेल टाकून १% सोडियम हायपोक्लोराइट टाका आणि २० मिनिटे थांबा; ३. चिमट्याने ते पिवळ्या पिशवीत भरा आणि फरशी स्वच्छ पुसा.",
             "steps": [
                 "सुई टोचल्यास वाहत्या पाण्याखाली ५ मिनिटे साबणाने धुवा.",
                 "जखम दाबू नका; स्वच्छ मलमपट्टी लावा.",
@@ -342,7 +361,7 @@ const PRECAUTION_TRANSCRIPTS_I18N = {
     "ta": {
         "master": {
             "title": "மருத்துவ கழிவு பாதுகாப்பு மற்றும் மேலாண்மை சுருக்கம்",
-            "summary": "மருத்துவக் கழிவு மேலாண்மை வழிகாட்டிக்கு வரவேற்கிறோம். மருத்துவப் பணியாளர்கள் அனைவரும் பிபிஇ கவச உடைகள், இரட்டை கையுறைகள் மற்றும் முகக்கவசங்களை கட்டாயம் அணிய வேண்டும். கழிவுகளை நான்கு வண்ணங்களில் பிரிக்கவும்: மஞ்சள் - தொற்று மற்றும் உடல் திசு கழிவுகள்; சிவப்பு - மறுசுழற்சி பிளாஸ்டிக்; வெள்ளை - ஊசிகள் மற்றும் பிளேடுகள்; நீலம் - கண்ணாடி பாட்டில்கள் மற்றும் உலோகங்கள். ஊசி குத்தினால் 2 மணி நேரத்திற்குள் மருத்துவரை அணுகவும்.",
+            "summary": "மருத்துவக் கழிவு மேலாண்மை வழிகாட்டிக்கு வரவேற்கிறோம். கழிவுகளை நான்கு வண்ணங்களில் பிரிக்கவும்: மஞ்சள் - தொற்று மற்றும் உடல் திசு கழிவுகள்; சிவப்பு - மறுசுழற்சி பிளாஸ்டிக்; வெள்ளை - ஊசிகள் மற்றும் பிளேடுகள்; நீலம் - கண்ணாடி பாட்டில்கள் மற்றும் உலோகங்கள். பிபிஇ கவச உடைகளை கட்டாயம் அணியவும். ஊசிகளுக்கு கையால் மூடி போட வேண்டாம். ஊசி குத்தினால் 2 மணி நேரத்திற்குள் மருத்துவரை அணுகவும்.",
             "steps": [
                 "கழிவுகளை தொடுவதற்கு முன் முழு பிபிஇ கவச உடை அணியவும்.",
                 "நான்கு வண்ண தொட்டிகளில் கழிவுகளை பிரிக்கவும்.",
@@ -352,520 +371,555 @@ const PRECAUTION_TRANSCRIPTS_I18N = {
             ]
         },
         "yellow": {
-            "title": "மஞ்சள் பிரிவு: தொற்று மற்றும் உடற்கூறு கழிவுகள்",
-            "summary": "மஞ்சள் பிரிவில் மனித திசுக்கள், ரத்தம் படிந்த பஞ்சு, கட்டுகள் மற்றும் காலாவதியான மருந்துகள் அடங்கும். மஞ்சள் நிற பைகளை பயன்படுத்தவும். முக்கால் பங்கு நிறைந்தவுடன் சீல் செய்து 48 மணி நேரத்திற்குள் அப்புறப்படுத்தவும்.",
+            "title": "மஞ்சள் தொட்டி வழிகாட்டி: தொற்று மற்றும் உடற்கூறு கழிவுகள்",
+            "summary": "மஞ்சள் தொட்டி தொற்று மற்றும் மனித உடற்கூறு கழிவுகளுக்கு மட்டுமே உரியது. மஞ்சள் தொட்டியில் போட வேண்டிய பொருட்கள்: மனித திசுக்கள், உறுப்புகள் மற்றும் நஞ்சுக்கொடி; ரத்தம் படிந்த பஞ்சு, கட்டுகள், கசிவு துணிகள் மற்றும் பிளாஸ்டர்; காலாவதியான மருந்துகள்; மைக்ரோபயாலஜி கலாச்சார தட்டுகள் மற்றும் தடுப்பூசிகள். மஞ்சள் பைகளில் ஊசிகள், கத்திகள், கண்ணாடி அல்லது பிளாஸ்டிக் போடக்கூடாது. மஞ்சள் பயோஹசார்ட் பைகளை பயன்படுத்தி 1050 டிகிரியில் எரிக்க வேண்டும்.",
             "steps": [
+                "தொற்று மற்றும் உடல் கழிவுகளை மஞ்சள் பைகளில் போடவும்.",
+                "மனித உறுப்புகள், ரத்தக் கட்டுகள் மற்றும் காலாவதி மருந்துகளை சேர்க்கவும்.",
+                "ஊசிகள் அல்லது கண்ணாடியை இதில் போடக்கூடாது.",
                 "இரட்டை நைட்ரைல் கையுறைகள் அணியவும்.",
-                "மஞ்சள் பைகளை மட்டுமே பயன்படுத்தவும்.",
-                "48 மணி நேரத்திற்குள் அப்புறப்படுத்தவும்."
+                "முக்கால் பங்கு நிறைந்தவுடன் சீல் செய்யவும்."
             ]
         },
         "red": {
-            "title": "சிவப்பு பிரிவு: மறுசுழற்சி செய்யக்கூடிய பிளாஸ்டிக் கழிவுகள்",
-            "summary": "ஊசி இல்லாத சிரின்ஞ்கள், ஐ.வி குழாய்கள் மற்றும் சிறுநீர் பைகள் சிவப்பு தொட்டியில் போடப்பட வேண்டும். ஊசியை கட்டர் கொண்டு வெட்டிய பின்பே சிரின்ஞ்களை போடவும். ஒரு சதவீத சோடியம் ஹைபோகுளோரைட் கொண்டு கிருமி நீக்கம் செய்யவும்.",
+            "title": "சிவப்பு தொட்டி வழிகாட்டி: மறுசுழற்சி பிளாஸ்டிக் கழிவுகள்",
+            "summary": "சிவப்பு தொட்டி மறுசுழற்சி செய்யக்கூடிய பிளாஸ்டிக் மருத்துவ கழிவுகளுக்கு மட்டுமே. இதில் போட வேண்டிய பொருட்கள்: ஊசி இல்லாத பிளாஸ்டிக் சிரிஞ்ச்கள், ஐவி பாட்டில்கள் மற்றும் குழாய்கள், சிறுநீர் பைகள், டயாலிசிஸ் குழாய்கள் மற்றும் ரப்பர் கையுறைகள். ஊசிகள் அல்லது கண்ணாடிகளை இதில் போடக்கூடாது. சிரிஞ்ச் முனையை வெட்டி, திரவங்களை முழுமையாக அகற்றி கிருமி நீக்கம் செய்து மறுசுழற்சிக்கு அனுப்பவும்.",
             "steps": [
-                "ஊசியை வெட்டிய பின்பே சிரின்ஞ்களை போடவும்.",
-                "திரவங்களை முழுமையாக வெளியேற்றவும்.",
+                "ஊசியை வெட்டிய பின்பே சிரிஞ்ச்களை போடவும்.",
+                "சிறுநீர் மற்றும் ஐவி திரவங்களை முழுமையாக வெளியேற்றவும்.",
+                "ஐவி பாட்டில்கள், குழாய்கள் மற்றும் கையுறைகளை போடவும்.",
                 "கிருமி நீக்கம் செய்து மறுசுழற்சிக்கு அனுப்பவும்."
             ]
         },
         "white": {
-            "title": "வெள்ளை பிரிவு: கூர்மையான ஊசிகள் மற்றும் பிளேடுகள்",
-            "summary": "ஊசிகள், அறுவை சிகிச்சை பிளேடுகள் ஆகியவற்றை துளையிட முடியாத வெள்ளை கொள்கலனில் போடவும். ஊசிகளுக்கு கையால் மூடி போட வேண்டாம். கொள்கலன் முக்கால் பங்கு நிறைந்ததும் நிரந்தரமாக மூடவும்.",
+            "title": "வெள்ளை தொட்டி வழிகாட்டி: கூர்மையான ஊசிகள் மற்றும் பிளேடுகள்",
+            "summary": "வெள்ளை ஒளிபுகும் கொள்கலன் கூர்மையான ஊசிகள் மற்றும் அறுவை சிகிச்சை பிளேடுகளுக்கு மட்டுமே. இதில் போட வேண்டியவை: ஊசிகள், சிரிஞ்ச்கள், அறுவை சிகிச்சை பிளேடுகள், தையல் ஊசிகள் மற்றும் உடைந்த கண்ணாடி துண்டுகள். இதில் பஞ்சு அல்லது பிளாஸ்டிக் போடக்கூடாது. ஊசிகளுக்கு கையால் ரீகேப் செய்யக்கூடாது. முக்கால் பங்கு நிறைந்தவுடன் கொள்கலனை நிரந்தரமாக மூடவும்.",
             "steps": [
-                "வெள்ளை பஞ்சர்-ப்ரூப் தொட்டியில் போடவும்.",
+                "வெள்ளை பஞ்சர்-ப்ரூப் தொட்டியில் ஊசிகளை போடவும்.",
+                "ஊசிகள், பிளேடுகள் மற்றும் தையல் ஊசிகளை சேர்க்கவும்.",
                 "கையால் ரீகேப் செய்யக்கூடாது.",
-                "முழுமையாக லாக் செய்யவும்."
+                "முக்கால் பங்கு நிறைந்ததும் நிரந்தரமாக லாக் செய்யவும்."
             ]
         },
         "blue": {
-            "title": "நீல பிரிவு: கண்ணாடி மற்றும் உலோகப் பொருட்கள்",
-            "summary": "மருந்து கண்ணாடி பாட்டில்கள் மற்றும் உலோக தகடுகள் நீலப் பெட்டியில் சேகரிக்கப்படும். உடைந்த கண்ணாடியை கைகளால் தொடாமல் இடுக்கிகள் மூலம் எடுக்கவும்.",
+            "title": "நீல தொட்டி வழிகாட்டி: கண்ணாடி மற்றும் உலோகப் பொருட்கள்",
+            "summary": "நீலப் பெட்டி கண்ணாடி பாட்டில்கள் மற்றும் உலோக எலும்பு தகடுகளுக்கு உரியது. இதில் போட வேண்டியவை: மருந்து ஆம்பூல்கள், கண்ணாடி பாட்டில்கள், ஆய்வக கண்ணாடி குடுவைகள் மற்றும் ஆர்த்தோபெடிக் உலோக தகடுகள் மற்றும் திருகுகள். உடைந்த கண்ணாடியை கையால் தொடாமல் இடுக்கிகள் மூலம் எடுக்கவும். கிருமி நீக்கம் செய்து மறுசுழற்சிக்கு அனுப்பவும்.",
             "steps": [
-                "நீல பெட்டியில் கண்ணாடியை சேகரிக்கவும்.",
-                "இடுக்கிகளை மட்டுமே பயன்படுத்தவும்."
+                "நீல பெட்டியில் கண்ணாடி மற்றும் உலோகங்களை சேகரிக்கவும்.",
+                "உடைந்த கண்ணாடியை இடுக்கிகள் மூலம் மட்டுமே எடுக்கவும்.",
+                "கிருமி நீக்கம் செய்து மறுசுழற்சிக்கு அனுப்பவும்."
             ]
         },
         "purple": {
             "title": "சைட்டோடாக்சிக் கீமோதெரபி புற்றுநோய் கழிவுகள்",
-            "summary": "கீமோதெரபி மருந்துகள் மற்றும் கழிவுகளுக்கு ஊதா நிற பைகளை பயன்படுத்தவும். இரட்டை கையுறைகள் அணியவும். 1200 டிகிரிக்கு மேல் எரிக்கப்பட வேண்டும்.",
+            "summary": "கீமோதெரபி மருந்துகள், பயன்படுத்தப்பட்ட ஐவி பைகள் மற்றும் புற்றுநோய் மருந்து கழிவுகளுக்கு ஊதா நிற பைகளை பயன்படுத்தவும். இரட்டை கையுறைகள் அணியவும். 1200 டிகிரிக்கு மேல் எரிக்கப்பட வேண்டும்.",
             "steps": [
+                "ஊதா பைகளில் கீமோ கழிவுகளை சேகரிக்கவும்.",
                 "இரட்டை கையுறைகள் அணியவும்.",
-                "ஊதா பைகளில் சேகரிக்கவும்."
+                "1200 டிகிரிக்கு மேல் எரிக்கவும்."
             ]
         },
         "general": {
             "title": "பொதுவான ஆபத்தில்லாத மருத்துவமனை கழிவுகள்",
             "summary": "காகித அட்டை, உணவு கழிவுகள் மற்றும் பிளாஸ்டிக் உறைகளை பச்சை அல்லது கருப்பு தொட்டியில் போடவும். மருத்துவ தொற்று கழிவுகளை இதில் கலக்காதீர்கள்.",
             "steps": [
-                "உணவு மற்றும் காகித கழிவுகளை பச்சை தொட்டியில் போடவும்."
+                "காகிதம் மற்றும் உணவு கழிவுகளை பச்சை தொட்டியில் போடவும்.",
+                "தொற்று கழிவுகளை இதில் கலக்காதீர்கள்."
             ]
         },
         "emergency": {
-            "title": "அவசர ஊசி குத்துதல் மற்றும் ரத்தக் கசிவு நெறிமுறை",
-            "summary": "ஊசி குத்தினால்: 5 நிமிடங்கள் ஓடும் நீரில் சோப்பு போட்டு கழுவவும். காயத்தை அழுத்தவோ உறிஞ்சவோ கூடாது. 2 மணி நேரத்திற்குள் பிஇபி பரிசோதனை செய்யவும். ரத்தம் சிதறினால் 1% சோடியம் ஹைபோகுளோரைட் ஊற்றி 20 நிமிடங்கள் கழித்து சுத்தம் செய்யவும்.",
+            "title": "அவசர ஊசி குத்துதல் மற்றும் ரத்த கசிவு வழிகாட்டி",
+            "summary": "ஊசி குத்தினால்: 5 நிமிடங்கள் சோப்பு மற்றும் ஓடும் நீரில் கழுவவும். காயத்தை அழுத்தவோ உறிஞ்சவோ கூடாது. 2 மணி நேரத்திற்குள் பிஇபி சிகிச்சை தொடங்கவும். ரத்தம் சிந்தினால்: 1% சோடியம் ஹைபோகுளோரைட் ஊற்றி 20 நிமிடங்கள் கழித்து துடைக்கவும்.",
             "steps": [
-                "ஓடும் நீரில் 5 நிமிடங்கள் கழுவவும்.",
-                "2 மணி நேரத்திற்குள் பிஇபி தொடங்கவும்."
+                "5 நிமிடங்கள் ஓடும் நீரில் கழுவவும்.",
+                "காயத்தை அழுத்த வேண்டாம்.",
+                "2 மணி நேரத்தில் மருத்துவரை அணுகவும்."
             ]
         }
     },
     "te": {
         "master": {
-            "title": "మాస్టర్ క్లినికల్ భద్రత & బయోమెడికల్ వ్యర్థాల నిర్వహణ",
-            "summary": "బయోమెడికల్ వ్యర్థాల నిర్వహణ మరియు సేఫ్టీ గైడ్‌కు స్వాగతం. ఆరోగ్య కార్యకర్తలు తప్పనిసరిగా పీపీఈ కిట్లు, డబుల్ గ్లోవ్స్ ధరించాలి. వ్యర్థాలను నాలుగు రంగులలో వేరు చేయండి: పసుపు - ఇన్ఫెక్షియస్ వ్యర్థాలు; ఎరుపు - రీసైకిల్ ప్లాస్టిక్స్; తెలుపు - సూదులు మరియు బ్లేడ్లు; నీలం - గాజు సీసాలు. సూది గుచ్చుకుంటే 2 గంటల్లో రిపోర్ట్ చేయండి.",
+            "title": "మాస్టర్ క్లినికల్ సేఫ్టీ మరియు బయోమెడికల్ వ్యర్థాల నిర్వహణ",
+            "summary": "బయోమెడికల్ వ్యర్థాల నిర్వహణ గైడ్‌కు స్వాగతం. వ్యర్థాలను నాలుగు రంగుల్లో వేరు చేయండి: పసుపు - ఇన్ఫెక్షియస్ మరియు అవయవ వ్యర్థాలు; ఎరుపు - రీసైకిల్ ప్లాస్టిక్; తెలుపు - పదునైన సూదులు మరియు బ్లేడ్లు; నీలం - గాజు సీసాలు మరియు లోహాలు. పీపీఈ కిట్లు తప్పనిసరిగా ధరించండి. సూది గుచ్చుకుంటే 2 గంటల్లో రిపోర్ట్ చేయండి.",
             "steps": [
-                "కచరాను తాకే ముందు పీపీఈ కిట్ ధరించండి.",
-                "నాలుగు రంగుల డబ్బాలలో వ్యర్థాలను వేరు చేయండి.",
-                "సూదులను చేతులతో రీక్యాప్ చేయవద్దు.",
-                "మూడు వంతులు నిండాక సీల్ చేయండి.",
+                "వ్యర్థాలను ముట్టుకునే ముందు పీపీఈ ధరించండి.",
+                "నాలుగు రంగుల డబ్బాల్లో వ్యర్థాలను వేరు చేయండి.",
+                "సూదులకు చేత్తో క్యాప్ పెట్టవద్దు.",
                 "సూది గుచ్చుకుంటే 5 నిమిషాలు కడిగి 2 గంటల్లో తెలపండి."
             ]
         },
         "yellow": {
-            "title": "పసుపు విభాగం: ఇన్ఫెక్షియస్ & అనాటమికల్ వ్యర్థాలు",
-            "summary": "పసుపు రంగులో మానవ కణజాలాలు, రక్తపు పట్టీలు, దూది మరియు కాలం చెల్లిన మందులు వేయాలి. పసుపు సంచులను మాత్రమే వాడండి. మూడు వంతులు నిండాక సీల్ చేసి 48 గంటల్లో ఇన్సిలరేషన్‌కు పంపండి.",
+            "title": "పసుపు డబ్బా గైడ్: ఇన్ఫెక్షియస్ మరియు అవయవ వ్యర్థాలు",
+            "summary": "పసుపు డబ్బా కేవలం ఇన్ఫెక్షన్ మరియు మానవ శరీర వ్యర్థాల కోసం మాత్రమే. ఇందులో వేయవలసిన వస్తువులు: మానవ కణజాలం, అవయవాలు మరియు మాయ (ప్లాసెంటా); రక్తంతో తడిసిన దూది, బ్యాండేజీలు మరియు ప్లాస్టర్ కాస్ట్‌లు; గడువు ముగిసిన మందులు; ల్యాబ్ కల్చర్స్ మరియు టీకాలు. ఇందులో సూదులు, బ్లేడ్లు లేదా గాజు వేయకూడదు. నాన్-క్లోరినేటెడ్ పసుపు బ్యాగులు ఉపయోగించి 1050 డిగ్రీల వద్ద దహనం చేయాలి.",
             "steps": [
-                "డబుల్ గ్లోవ్స్ ధరించండి.",
-                "పసుపు సంచులలోనే వేయండి.",
-                "48 గంటల్లో విలేవారీ చేయండి."
+                "ఇన్ఫెక్షన్ మరియు మానవ శరీర వ్యర్థాలను పసుపు బ్యాగులో వేయండి.",
+                "రక్తంతో తడిసిన దూది, అవయవాలు మరియు గడువు ముగిసిన మందులు వేయండి.",
+                "ఇందులో సూదులు లేదా ప్లాస్టిక్ వేయకూడదు.",
+                "డబుల్ గ్లౌవ్స్ మరియు ఎన్-95 మాస్క్ ధరించండి."
             ]
         },
         "red": {
-            "title": "ఎరుపు విభాగం: పునర్వినియోగ ప్లాస్టిక్ వ్యర్థాలు",
-            "summary": "సూది లేని సిరంజీలు, ఐవీ ట్యూబ్‌లు ఎరుపు డబ్బాలో వేయాలి. సూది కట్టర్‌తో కట్ చేసి మాత్రమే సిరంజీ వేయండి. సోడియం హైపోక్లోరైట్‌తో క్రిమిసంహారక చేయండి.",
+            "title": "ఎరుపు డబ్బా గైడ్: కలుషిత రీసైకిల్ ప్లాస్టిక్",
+            "summary": "ఎరుపు డబ్బా కేవలం రీసైకిల్ చేయగల ప్లాస్టిక్ వ్యర్థాల కోసం. ఇందులో వేయవలసినవి: సూది లేని ప్లాస్టిక్ సిరంజిలు; ఐవి బాటిళ్లు, పైపులు; క్యాథెటర్లు మరియు యూరిన్ బ్యాగులు; రబ్బరు గ్లౌవ్స్. ఇందులో సూదులు లేదా గాజు వేయరాదు. సిరంజి సూదిని కట్టర్‌తో కట్ చేసి, ద్రవాలను పూర్తిగా తొలగించి రీసైక్లింగ్‌కు పంపండి.",
             "steps": [
-                "సూదిని కత్తిరించి మాత్రమే వేయండి.",
-                "ద్రవాలను పూర్తిగా తొలగించండి."
+                "సిరంజి సూదిని కట్ చేసి మాత్రమే ఎరుపు డబ్బాలో వేయండి.",
+                "యూరిన్ మరియు ఐవి ద్రవాలను పూర్తిగా ఖాళీ చేయండి.",
+                "ఐవి బాటిళ్లు మరియు రబ్బరు గ్లౌవ్స్ వేయండి.",
+                "శుద్ధి చేసిన తర్వాత రీసైక్లింగ్‌కు పంపండి."
             ]
         },
         "white": {
-            "title": "తెలుపు విభాగం: పదునైన సూదులు & బ్లేడ్లు",
-            "summary": "సూదులు, స్కాల్పెల్ బ్లేడ్లను పంక్చర్-ప్రూఫ్ తెల్లటి డబ్బాలో వేయాలి. సూదులకు చేతులతో క్యాప్ పెట్టవద్దు. డబ్బా నిండాక శాశ్వతంగా లాక్ చేయండి.",
+            "title": "తెలుపు డబ్బా గైడ్: పదునైన సూదులు మరియు బ్లేడ్లు",
+            "summary": "తెలుపు పంచర్-ప్రూఫ్ కంటైనర్ పదునైన సూదులు మరియు బ్లేడ్ల కోసం మాత్రమే. ఇందులో వేయవలసినవి: ఇంజెక్షన్ సూదులు, సర్జికల్ బ్లేడ్లు, కుట్ల సూదులు మరియు విరిగిన గాజు ముక్కలు. ఇందులో దూది లేదా ప్లాస్టిక్ వేయకూడదు. సూదికి చేత్తో క్యాప్ పెట్టవద్దు. ముప్పావు వంతు నిండిన తర్వాత మూత లాక్ చేయండి.",
             "steps": [
-                "తెల్లటి డబ్బాలోనే సూదులు వేయండి.",
-                "చేత్తో క్యాప్ పెట్టవద్దు."
+                "సూదులను వెంటనే తెలుపు పంచర్-ప్రూఫ్ డబ్బాలో వేయండి.",
+                "ఇంజెక్షన్ సూదులు మరియు సర్జికల్ బ్లేడ్లు వేయండి.",
+                "చేత్తో సూదికి క్యాప్ పెట్టవద్దు.",
+                "నిండిన తర్వాత శాశ్వతంగా లాక్ చేయండి."
             ]
         },
         "blue": {
-            "title": "నీలం విభాగం: గాజుసామాను & లోహపు ఇంప్లాంట్లు",
-            "summary": "గాజు సీసాలు, యాంప్యూల్స్ మరియు మెటల్ ప్లేట్లను నీలి పెట్టెలో వేయాలి. పగిలిన గాజును చేతులతో తాకవద్దు, ఫోర్సెప్స్ వాడండి.",
+            "title": "నీలం డబ్బా గైడ్: గాజు సామాగ్రి మరియు లోహాలు",
+            "summary": "నీలం డబ్బా గాజు సీసాలు మరియు ఆర్థోపెడిక్ లోహాల కోసం. ఇందులో మందు గాజు సీసాలు, ల్యాబ్ బీకర్లు, స్లైడ్లు మరియు లోహపు ప్లేట్లు వేయండి. విరిగిన గాజును చేత్తో తాకకుండా పట్టుకారుతో తీయండి. శుద్ధి చేసి రీసైక్లింగ్‌కు పంపండి.",
             "steps": [
-                "గాజు సామానును నీలి పెట్టెలో వేయండి.",
-                "ఇక్కళతో మాత్రమే ఎత్తండి."
+                "గాజు సీసాలు మరియు లోహాలను నీలం డబ్బాలో వేయండి.",
+                "విరిగిన గాజును పట్టుకారుతో మాత్రమే ఎత్తండి.",
+                "డిసిన్‌ఫెక్ట్ చేసి రీసైక్లింగ్‌కు పంపండి."
             ]
         },
         "purple": {
-            "title": "సైటోటాక్సిక్ కీమోథెరపీ వ్యర్థాలు",
-            "summary": "కీమోథెరపీ మందుల వ్యర్థాల కోసం ఊదా రంగు బ్యాగులను వాడండి. డబుల్ గ్లోవ్స్ ధరించాలి. పన్నెండు వందల డిగ్రీల వద్ద దహనం చేయండి.",
+            "title": "సైటోటాక్సిక్ కీమోథెరపీ క్యాన్సర్ వ్యర్థాలు",
+            "summary": "కీమోథెరపీ మందులు, ఐవి బ్యాగులు మరియు వ్యర్థాలను ఊదా రంగు బ్యాగులో వేయండి. డబుల్ గ్లౌవ్స్ ధరించండి మరియు 1200 డిగ్రీల వద్ద దహనం చేయండి.",
             "steps": [
-                "ఊదా రంగు సంచులను వాడండి.",
-                "అధిక ఉష్ణోగ్రత వద్ద దహనం చేయండి."
+                "ఊదా బ్యాగులో కీమో వ్యర్థాలు వేయండి.",
+                "డబుల్ గ్లౌవ్స్ ధరించండి.",
+                "1200 డిగ్రీల వద్ద కాల్చండి."
             ]
         },
         "general": {
-            "title": "సాధారణ ప్రమాదకరం కాని ఆసుపత్రి వ్యర్థాలు",
-            "summary": "కాగితాలు, ఆహార వ్యర్థాలను ఆకుపచ్చ లేదా నల్ల డబ్బాల్లో వేయాలి. బయోమెడికల్ వ్యర్థాలను ఇందులో కలపవద్దు.",
+            "title": "సాధారణ ప్రమాదకరం కాని వ్యర్థాలు",
+            "summary": "కాగితం, ఆహార వ్యర్థాలు మరియు ప్లాస్టిక్ కవర్లను ఆకుపచ్చ లేదా నలుపు డబ్బాలో వేయండి.",
             "steps": [
-                "సాధారణ చెత్తను ఆకుపచ్చ డబ్బాలో వేయండి."
+                "ఆకుపచ్చ డబ్బాలో కాగితం మరియు ఆహారం వేయండి."
             ]
         },
         "emergency": {
-            "title": "అత్యవసర సూది గుచ్చుకోవడం & రక్తపు చిందటం నిబంధనలు",
-            "summary": "సూది గుచ్చుకుంటే: 5 నిమిషాలు ప్రవహించే నీటితో సబ్బుతో కడగాలి. గాయాన్ని నొక్కవద్దు. 2 గంటల్లో వైద్యుడిని సంప్రదించి పెప్ చికిత్స పొందండి.",
+            "title": "అత్యవసర సూది గుచ్చుకోవడం మరియు రక్తపు చిందుల నియమావళి",
+            "summary": "సూది గుచ్చుకుంటే: 5 నిమిషాలు ప్రవహించే నీరు మరియు సబ్బుతో కడగండి. గాయాన్ని నొక్కవద్దు. 2 గంటల్లో పెప్ చికిత్స ప్రారంభించండి. రక్తం చిందితే: 1% బ్లీచ్ పోసి 20 నిమిషాల తర్వాత తుడవండి.",
             "steps": [
-                "5 నిమిషాలు నీటితో కడగాలి.",
-                "2 గంటల్లో పెప్ చికిత్స తీసుకోండి."
+                "5 నిమిషాలు నీటితో కడగండి.",
+                "గాయాన్ని నొక్కవద్దు.",
+                "2 గంటల్లో పెప్ తీసుకోండి."
             ]
         }
     },
     "bn": {
         "master": {
-            "title": "বায়োমেডিকেল বর্জ্য ও ক্লিনিকাল সুরক্ষা নির্দেশিকা",
-            "summary": "মেডওয়েস্ট এআই ক্লিনিকাল সেফটি গাইডে স্বাগতম। সমস্ত স্বাস্থ্যকর্মীদের পিপিই কিট এবং গ্লাভস পরা বাধ্যতামূলক। চারটি রঙে বর্জ্য পৃথক করুন: হলুদ - সংক্রামক বর্জ্য; লাল - পুনর্ব্যবহারযোগ্য প্লাস্টিক; সাদা - সূঁচ ও ধারালো ব্লেড; নীল - কাঁচের শিশি ও ধাতু। সূঁচ ফুটলে ২ ঘণ্টার মধ্যে রিপোর্ট করুন।",
+            "title": "মাস্টার ক্লিনিক্যাল সুরক্ষা এবং বায়োমেডিকেল বর্জ্য নির্দেশিকা",
+            "summary": "বায়োমেডিকেল বর্জ্য ব্যবস্থাপনা নির্দেশিকায় স্বাগতম। চারটি রঙে বর্জ্য আলাদা করুন: হলুদ - সংক্রামক ও শারীরিক বর্জ্য; লাল - পুনর্ব্যবহারযোগ্য প্লাস্টিক; সাদা - ধারালো সূঁচ ও ব্লেড; নীল - কাচের বোতল ও ধাতু। সম্পূর্ণ পিপিই পরুন এবং সূঁচ ফুটলে ২ ঘণ্টার মধ্যে জানান।",
             "steps": [
-                "বর্জ্য ছোঁয়ার আগে সম্পূর্ণ পিপিই পরুন।",
-                "চারটি রঙের বাক্সে বর্জ্য আলাদা করুন।",
-                "খালি হাতে সূঁচে ক্যাপ লাগাবেন না।",
-                "তিন-চতুর্থাংশ পূর্ণ হলে ব্যাগ সিল করুন।",
-                "সূঁচ ফুটলে ৫ মিনিট ধুয়ে ২ ঘণ্টায় রিপোর্ট করুন।"
+                "পিপিই পরুন।",
+                "চারটি রঙে বর্জ্য আলাদা করুন।",
+                "সূঁচ ফুটলে ২ ঘণ্টায় রিপোর্ট করুন।"
             ]
         },
         "yellow": {
-            "title": "হলুদ বিভাগ: সংক্রামক ও অঙ্গপ্রত্যঙ্গ বর্জ্য",
-            "summary": "হলুদ ব্যাগে মানব অঙ্গ, রক্তমাখা গজ, ব্যান্ডেজ এবং মেয়াদোত্তীর্ণ ওষুধ ফেলতে হবে। নন-ক্লোরিনেটেড হলুদ ব্যাগ ব্যবহার করুন এবং তিন-চতুর্থাংশ পূর্ণ হলে বন্ধ করে ৪৮ ঘণ্টার মধ্যে বিনষ্ট করুন।",
+            "title": "হলুদ বিন নির্দেশিকা: সংক্রামক ও মানব শারীরিক বর্জ্য",
+            "summary": "হলুদ বিন কেবল সংক্রামক, শারীরিক ও প্যাথলজিক্যাল বর্জ্যের জন্য। এতে ফেলতে হবে: মানব অঙ্গ, টিস্যু ও প্ল্যাসেন্টা; রক্তমাখা গজ, তুলো ও ব্যান্ডেজ; মেয়াদোত্তীর্ণ ওষুধ; এবং মাইক্রোবায়োলজি কালচার প্লেট ও টিকা। এতে সূঁচ, ব্লেড বা কাচ ফেলা যাবে না। হলুদ ব্যাগে রেখে ১০৫০ ডিগ্রিতে পুড়িয়ে ফেলতে হবে।",
             "steps": [
-                "ডাবল গ্লাভস ব্যবহার করুন।",
-                "হলুদ ব্যাগেই সংক্রামক বর্জ্য ফেলুন।",
-                "৪৮ ঘণ্টায় বিনষ্ট করুন।"
+                "সংক্রামক ও শারীরিক বর্জ্য হলুদ ব্যাগে ফেলুন।",
+                "মানব অঙ্গ ও রক্তমাখা তুলো অন্তর্ভুক্ত।",
+                "সূঁচ বা কাচ ফেলবেন না।"
             ]
         },
         "red": {
-            "title": "লাল বিভাগ: দূষিত পুনর্ব্যবহারযোগ্য প্লাস্টিক",
-            "summary": "সূঁচ ছাড়া প্লাস্টিক সিরিঞ্জ, আইভি টিউব লাল বাক্সে ফেলতে হবে। নিডল কাটার দিয়ে সুঁই কাটার পরেই সিরিঞ্জ ফেলুন। সোডিয়াম হাইপোক্লোরাইট দিয়ে জীবাণুমুক্ত করুন।",
+            "title": "লাল বিন নির্দেশিকা: দূষিত পুনর্ব্যবহারযোগ্য প্লাস্টিক",
+            "summary": "লাল বিন কেবল প্লাস্টিকের পুনর্ব্যবহারযোগ্য বর্জ্যের জন্য। এতে ফেলতে হবে: সূঁচহীন প্লাস্টিক সিরিঞ্জ, আইভি বোতল ও পাইপ, ক্যাথেটার, ইউরিন ব্যাগ এবং গ্লাভস। সূঁচ বা কাচ এতে ফেলবেন না। তরল সম্পূর্ণ বের করে এবং সূঁচ কেটে রিসাইক্লিংয়ে পাঠান।",
             "steps": [
-                "সূঁচ কেটে সিরিঞ্জ লাল বাক্সে ফেলুন।",
-                "তরল সম্পূর্ণ খালি করুন।"
+                "সূঁচ কেটে সিরিঞ্জ লাল বিনে ফেলুন।",
+                "আইভি বোতল ও ক্যাথেটার ফেলুন।",
+                "জীবাণুমুক্ত করে রিসাইক্লিংয়ে পাঠান।"
             ]
         },
         "white": {
-            "title": "সাদা বিভাগ: ধারালো সূঁচ এবং ব্লেড সতর্কতা",
-            "summary": "ইনজেকশন সূঁচ ও সার্জিকাল ব্লেড শক্ত সাদা বাক্সে ফেলতে হবে। খালি হাতে সূঁচে ক্যাপ লাগাবেন না। বাক্স পূর্ণ হলে সিল করে দিন।",
+            "title": "সাদা পাত্র নির্দেশিকা: ধারালো সূঁচ ও ব্লেড",
+            "summary": "সাদা পাংচার-প্রুফ পাত্র ধারালো সূঁচ, সার্জিক্যাল ব্লেড, সেলাইয়ের সূঁচ এবং কাচের ভাঙা অ্যাম্পুলের জন্য। এতে তুলো বা প্লাস্টিক ফেলবেন না। হাত দিয়ে সূঁচে ক্যাপ লাগাবেন না। পাত্রটি পূর্ণ হলে স্থায়ীভাবে লক করুন।",
             "steps": [
-                "শক্ত সাদা পাত্রে সূঁচ রাখুন।",
-                "কখনো হাত দিয়ে সূঁচ ঢাকবেন না।"
+                "সাদা পাত্রে ধারালো সূঁচ ফেলুন।",
+                "হাতে ক্যাপ লাগাবেন না।",
+                "পূর্ণ হলে লক করুন।"
             ]
         },
         "blue": {
-            "title": "নীল বিভাগ: কাঁচের পাত্র এবং ধাতব ইমপ্লান্ট",
-            "summary": "ওষুধের কাঁচের অ্যাম্পুল এবং ধাতব প্লেট নীল বাক্সে রাখতে হবে। ভাঙা কাঁচ কখনো হাত দিয়ে তুলবেন না, চিমটা ব্যবহার করুন।",
+            "title": "নীল বিন নির্দেশিকা: কাচের সামগ্রী ও ধাতু",
+            "summary": "নীল বাক্সে ওষুধের কাচের শিশি, অ্যাম্পুল, টেস্ট টিউব এবং অর্থোপেডিক ধাতব প্লেট ও স্ক্রু রাখুন। ভাঙা কাচ হাত দিয়ে না ধরে চিমটা দিয়ে তুলুন। জীবাণুমুক্ত করে রিসাইক্লিংয়ে পাঠান।",
             "steps": [
-                "কাঁচের শিশি নীল বক্সে রাখুন।",
-                "চিমটা দিয়ে ভাঙা কাঁচ তুলুন।"
+                "নীল বিনে কাচ ও ধাতু রাখুন।",
+                "ভাঙা কাচ চিমটা দিয়ে তুলুন।"
             ]
         },
         "purple": {
-            "title": "সাইটোটক্সিক ও কেমোথেরাপি ক্যান্সার বর্জ্য",
-            "summary": "কেমোথেরাপি ওষুধের বর্জ্যের জন্য বেগুনি ব্যাগ ব্যবহার করুন। ডাবল গ্লাভস পরুন এবং অতি উচ্চ তাপমাত্রায় পুড়িয়ে ফেলুন।",
+            "title": "কেমোথেরাপির সাইটোটক্সিক ক্যান্সার বর্জ্য",
+            "summary": "কেমোথেরাপির ওষুধ ও বর্জ্যের জন্য বেগুনি ব্যাগ ব্যবহার করুন। ডাবল গ্লাভস পরুন এবং ১২০০ ডিগ্রির বেশি তাপমাত্রায় পুড়িয়ে ফেলুন।",
             "steps": [
-                "বেগুনি ব্যাগ ব্যবহার করুন।",
-                "উচ্চ তাপমাত্রায় বিনষ্ট করুন।"
+                "বেগুনি ব্যাগে কেমো বর্জ্য ফেলুন।",
+                "১২০০ ডিগ্রিতে পুড়িয়ে ফেলুন।"
             ]
         },
         "general": {
-            "title": "সাধারণ অ-বিপজ্জনক হাসপাতাল বর্জ্য",
-            "summary": "কাগজ, খাবারের উচ্ছিষ্ট এবং প্যাকেট সবুজ বা কালো বিনে ফেলুন। কোনো ক্লিনিকাল বর্জ্য এতে মেশাবেন না।",
+            "title": "সাধারণ নিরাপদ বর্জ্য",
+            "summary": "পরিষ্কার কাগজ, খাদ্য বর্জ্য ও মোড়ক সবুজ বা কালো বিনে ফেলুন। এতে সংক্রামক বর্জ্য মেশাবেন না।",
             "steps": [
-                "সবুজ বা কালো বিনে সাধারণ বর্জ্য ফেলুন।"
+                "সবুজ বিনে পরিষ্কার কাগজ ফেলুন।"
             ]
         },
         "emergency": {
-            "title": "জরুরি সূঁচ ফোটা এবং রক্ত ছিটকে পড়ার প্রটোকল",
-            "summary": "সূঁচ ফুটলে: সাবান ও জল দিয়ে ৫ মিনিট ক্ষতস্থান ধোবেন। ক্ষত চিপবেন না। ২ ঘণ্টার মধ্যে পেপ মূল্যায়ন করান। রক্ত ছিটকে পড়লে ১% সোডিয়াম হাইপোক্লোরাইট দিয়ে ২০ মিনিট ভিজিয়ে পরিষ্কার করুন।",
+            "title": "জরুরি সূঁচ ফোটা এবং রক্ত পড়ার নিয়ম",
+            "summary": "সূঁচ ফুটলে: ৫ মিনিট ধরে সাবান ও জলে ধুয়ে ফেলুন। ক্ষতস্থান চাপবেন না। ২ ঘণ্টার মধ্যে পেপ চিকিৎসা শুরু করুন। রক্ত পড়লে: ১% ব্লিচ দিয়ে ২০ মিনিট পর মুছুন।",
             "steps": [
-                "৫ মিনিট সাবান জলে ধোন।",
-                "২ ঘণ্টার মধ্যে পেপ চিকিৎসা নিন।"
+                "৫ মিনিট জলে ধুয়ে নিন।",
+                "২ ঘণ্টায় পেপ নিন।"
             ]
         }
     },
     "gu": {
         "master": {
-            "title": "ક્લિનિકલ સલામતી અને બાયોમેડિકલ કચરો વ્યવસ્થાપન માર્ગદર્શિકા",
-            "summary": "બાયોમેડિકલ વેસ્ટ મેનેજમેન્ટ ગાઇડમાં આપનું સ્વાગત છે. હંમેશા પીપીઈ કિટ અને નાઇટ્રાઇલ ગ્લોવ્ઝ પહેરો. કચરાને ચાર રંગોમાં અલગ કરો: પીળો - ચેપી કચરો; લાલ - પ્લાસ્ટિક સિરીંજ અને આઈવી સેટ; સફેદ - સોય અને બ્લેડ; વાદળી - કાચની શીશીઓ. સોય વાગે તો બે કલાકમાં જાણ કરો.",
+            "title": "ક્લિનિકલ સલામતી અને બાયોમેડિકલ કચરો વ્યવસ્થાપન",
+            "summary": "બાયોમેડિકલ કચરા વ્યવસ્થાપન માર્ગદર્શિકામાં આપનું સ્વાગત છે. કચરાને ચાર રંગોમાં અલગ કરો: પીળો - ચેપી અને શારીરિક કચરો; લાલ - રિસાયકલ પ્લાસ્ટિક; સફેદ - તીક્ષ્ણ સોય અને બ્લેડ; વાદળી - કાચની બોટલ અને ધાતુ. પીપીઈ કીટ પહેરો અને સોય વાગે તો ૨ કલાકમાં જાણ કરો.",
             "steps": [
-                "કચરો અડતાં પહેલાં પીપીઈ અને ગ્લોવ્ઝ પહેરો.",
-                "ચાર રંગના ડબ્બાઓમાં કચરો અલગ કરો.",
-                "સોયને હાથથી રીકેપ ન કરો.",
-                "પોણી થેલી ભરાય ત્યારે સીલ કરો.",
-                "સોય વાગે તો ૫ મિનિટ ધોઈ ૨ કલાકમાં જાણ કરો."
+                "પીપીઈ પહેરો.",
+                "ચાર રંગોમાં કચરો અલગ કરો.",
+                "સોય વાગે તો ૨ કલાકમાં જાણ કરો."
             ]
         },
         "yellow": {
-            "title": "પીળો વર્ગ: ચેપી અને એનાટોમિકલ કચરો",
-            "summary": "પીળી થેલીમાં માનવ અંગો, લોહીવાળા પાટા અને દબાયેલી દવાઓ નાખો. થેલી પોણી ભરાય ત્યારે સીલ કરી ૪૮ કલાકમાં ઇન્સિનરેશન માટે મોકલો.",
+            "title": "પીળી કચરાપેટી માર્ગદર્શિકા: ચેપી અને શારીરિક કચરો",
+            "summary": "પીળી કચરાપેટી ફક્ત ચેપી, શારીરિક અને પેથોલોજીકલ કચરા માટે છે. તેમાં નાખવાની વસ્તુઓ: માનવ અંગો, પેશીઓ અને પ્લેસેન્ટા; લોહીવાળો પાટો, રૂ અને પ્લાસ્ટર; એક્સપાયર દવાઓ; અને લેબ કલ્ચર તથા રસી. તેમાં સોય, બ્લેડ કે કાચ નાખશો નહીં. પીળી બેગમાં ભરીને ૧૦૫૦ ડિગ્રીએ બાળી નાખો.",
             "steps": [
-                "પીળી થેલી જ વાપરો.",
-                "૪૮ કલાકમાં નષ્ટ કરો."
+                "ચેપી અને શારીરિક કચરો પીળી બેગમાં નાખો.",
+                "માનવ અંગો અને લોહીવાળો પાટો સામેલ.",
+                "સોય કે કાચ નાખશો નહીં."
             ]
         },
         "red": {
-            "title": "લાલ વર્ગ: રિસાયકલ પ્લાસ્ટિક કચરો",
-            "summary": "સોય વગરની પ્લાસ્ટિક સિરીંજ અને આઈવી પાઈપ લાલ ડબ્બામાં નાખો. સિરીંજની સોય કાપ્યા પછી જ ડબ્બામાં નાખો.",
+            "title": "લાલ કચરાપેટી માર્ગદર્શિકા: દૂષિત રિસાયકલ પ્લાસ્ટિક",
+            "summary": "લાલ કચરાપેટી ફક્ત રિસાયકલ પ્લાસ્ટિક કચરા માટે છે. તેમાં નાખવાની વસ્તુઓ: સોય વગરની પ્લાસ્ટિક સિરીંજ, આઇવી બોટલ અને નળીઓ, કેથેટર, યુરીન બેગ અને ગ્લોવ્ઝ. સોય કે કાચ નાખશો નહીં. સિરીંજની સોય કાપીને અને પ્રવાહી ખાલી કરીને રિસાયક્લિંગમાં મોકલો.",
             "steps": [
-                "સોય કાપીને સિરીંજ લાલ ડબ્બામાં નાખો."
+                "સોય કાપીને સિરીંજ લાલ ડબ્બામાં નાખો.",
+                "આઇવી બોટલ અને નળીઓ નાખો.",
+                "રિસાયક્લિંગમાં મોકલો."
             ]
         },
         "white": {
-            "title": "સફેદ વર્ગ: તીક્ષ્ણ સોય અને બ્લેડ",
-            "summary": "ઇન્જેક્શનની સોય અને બ્લેડ પંચર-પ્રૂફ સફેદ કન્ટેનરમાં નાખો. સોયને હાથથી રીકેપ ન કરો.",
+            "title": "સફેદ કન્ટેનર માર્ગદર્શિકા: તીક્ષ્ણ સોય અને બ્લેડ",
+            "summary": "સફેદ પંચર-પ્રૂફ કન્ટેનર ફક્ત તીક્ષ્ણ સોય, સર્જિકલ બ્લેડ, ટાંકાની સોય અને કાચના ટુકડા માટે છે. તેમાં રૂ કે પ્લાસ્ટિક નાખશો નહીં. હાથથી સોય ઢાંકશો નહીં. ભરાઈ ગયા પછી કન્ટેનર લોક કરો.",
             "steps": [
                 "સફેદ કન્ટેનરમાં સોય નાખો.",
-                "હાથથી ઢાંકશો નહીં."
+                "હાથથી કેપ ન લગાવો.",
+                "લોક કરી દો."
             ]
         },
         "blue": {
-            "title": "વાદળી વર્ગ: કાચનો કચરો અને ધાતુઓ",
-            "summary": "દવાની કાચની બોટલો વાદળી બોક્સમાં રાખો. તૂટેલા કાચને ચીપિયા વડે જ ઉપાડો.",
+            "title": "વાદળી કચરાપેટી માર્ગદર્શિકા: કાચ અને ધાતુ",
+            "summary": "વાદળી બોક્સમાં દવાની કાચની બોટલ, એમ્પ્યુલ, ટેસ્ટ ટ્યુબ અને ઓર્થોપેડિક ધાતુની પ્લેટ તથા સ્ક્રૂ નાખો. તૂટેલા કાચને ચીપિયાથી ઉપાડો. જંતુમુક્ત કરીને રિસાયક્લિંગમાં મોકલો.",
             "steps": [
-                "કાચની બોટલો વાદળી બોક્સમાં રાખો.",
-                "ચીપિયો વાપરો."
+                "વાદળી બોક્સમાં કાચ અને ધાતુ નાખો.",
+                "ચીપિયાથી કાચ ઉપાડો."
             ]
         },
         "purple": {
-            "title": "સાયટોટોક્સિક કીમોથેરાપી કચરો",
-            "summary": "કીમોથેરાપી કચરા માટે જાંબલી બેગ વાપરો અને બારસો ડિગ્રીથી વધુ તાપમાને નષ્ટ કરો.",
+            "title": "સાયટોટોક્સિક કીમોથેરાપી કેન્સર કચરો",
+            "summary": "કીમોથેરાપી દવાઓ અને કચરા માટે જાંબલી બેગ વાપરો. ડબલ ગ્લોવ્ઝ પહેરો અને ૧૨૦૦ ડિગ્રીથી વધુ તાપમાને બાળો.",
             "steps": [
-                "જાંબલી થેલી વાપરો."
+                "જાંબલી બેગમાં કીમો કચરો નાખો.",
+                "૧૨૦૦ ડિગ્રીએ બાળો."
             ]
         },
         "general": {
-            "title": "સામાન્ય બિન-જોખમી કચરો",
-            "summary": "સાફ કાગળ અને વધેલું ભોજન લીલા અથવા કાળા ડબ્બામાં નાખો.",
+            "title": "સામાન્ય સલામત કચરો",
+            "summary": "સ્વચ્છ કાગળ અને ખોરાક લીલા ડબ્બામાં નાખો. ચેપી કચરો ભેળવશો નહીં.",
             "steps": [
-                "લીલા કે કાળા ડબ્બામાં કચરો નાખો."
+                "લીલા ડબ્બામાં કાગળ નાખો."
             ]
         },
         "emergency": {
-            "title": "ઇમરજન્સી સોય વાગવા અને બ્લડ સ્પિલ પ્રોટોકોલ",
-            "summary": "સોય વાગે તો: ૫ મિનિટ વહેતા પાણી અને સાબુથી ઘા ધોવો. ૨ કલાકમાં પેપ સારવાર લો.",
+            "title": "ઇમરજન્સી સોય વાગવા અંગેનો પ્રોટોકોલ",
+            "summary": "સોય વાગે તો: ૫ મિનિટ સાબુ અને વહેતા પાણીથી ધુઓ. દબાવશો નહીં. ૨ કલાકમાં પેપ સારવાર શરૂ કરો. લોહી ઢોળાય તો: ૧% બ્લીચ નાખી ૨૦ મિનિટ પછી સાફ કરો.",
             "steps": [
-                "૫ મિનિટ સાબુથી ધોવો.",
-                "૨ કલાકમાં સારવાર લો."
+                "૫ મિનિટ પાણીથી ધુઓ.",
+                "૨ કલાકમાં પેપ લો."
             ]
         }
     },
     "kn": {
         "master": {
-            "title": "ಕ್ಲಿನಿಕಲ್ ಸುರಕ್ಷತೆ ಮತ್ತು ಬಯೋಮೆಡಿಕಲ್ ತ್ಯಾಜ್ಯ ಮಾರ್ಗದರ್ಶಿ",
-            "summary": "ಬಯೋಮೆಡಿಕಲ್ ತ್ಯಾಜ್ಯ ವಿಲೇವಾರಿ ಮಾರ್ಗದರ್ಶಿಗೆ ಸುಸ್ವಾಗತ. ಆರೋಗ್ಯ ಸಿಬ್ಬಂದಿ ಕಡ್ಡಾಯವಾಗಿ ಪಿಪಿಇ ಕಿಟ್ ಮತ್ತು ಕೈಗವಸು ಧರಿಸಬೇಕು. ತ್ಯಾಜ್ಯವನ್ನು ನಾಲ್ಕು ಬಣ್ಣಗಳಲ್ಲಿ ವಿಂಗಡಿಸಿ: ಹಳದಿ - ಸೋಂಕು ತ್ಯಾಜ್ಯ; ಕೆಂಪು - ಪ್ಲಾಸ್ಟಿಕ್ ಸಿರಿಂಜ್‌ಗಳು; ಬಿಳಿ - ಸೂಜಿಗಳು ಮತ್ತು ಬ್ಲೇಡ್‌ಗಳು; ನೀಲಿ - ಗಾಜಿನ ಬಾಟಲಿಗಳು. ಸೂಜಿ ಚುಚ್ಚಿದರೆ 2 ಗಂಟೆಗಳಲ್ಲಿ ವರದಿ ಮಾಡಿ.",
+            "title": "ವೈದ್ಯಕೀಯ ತ್ಯಾಜ್ಯ ಸುರಕ್ಷತೆ ಮತ್ತು ನಿರ್ವಹಣೆ",
+            "summary": "ತ್ಯಾಜ್ಯವನ್ನು ನಾಲ್ಕು ಬಣ್ಣಗಳಲ್ಲಿ ವಿಂಗಡಿಸಿ: ಹಳದಿ - ಸಾಂಕ್ರಾಮಿಕ ಮತ್ತು ಮಾನವ ಅಂಗಾಂಗ ತ್ಯಾಜ್ಯ; ಕೆಂಪು - ಪ್ಲಾಸ್ಟಿಕ್; ಬಿಳಿ - ಚೂಪಾದ ಸೂಜಿಗಳು; ನೀಲಿ - ಗಾಜಿನ ಬಾಟಲಿಗಳು ಮತ್ತು ಲೋಹಗಳು. ಪಿಪಿಇ ಕಿಟ್ ಧರಿಸಿ. ಸೂಜಿ ಚುಚ್ಚಿದರೆ ೨ ಗಂಟೆಗಳಲ್ಲಿ ವರದಿ ಮಾಡಿ.",
             "steps": [
-                "ತ್ಯಾಜ್ಯ ಮುಟ್ಟುವ ಮೊದಲು ಪಿಪಿಇ ಧರಿಸಿ.",
-                "ನಾಲ್ಕು ಬಣ್ಣಗಳ ಡಬ್ಬಿಯಲ್ಲಿ ತ್ಯಾಜ್ಯ ಬೇರ್ಪಡಿಸಿ.",
-                "ಸೂಜಿಗೆ ಕೈಯಿಂದ ಮುಚ್ಚಳ ಹಾಕಬೇಡಿ.",
-                "ಚೀಲ ಮುಕ್ಕಾಲು ತುಂಬಿದಾಗ ಸೀಲ್ ಮಾಡಿ.",
-                "ಸೂಜಿ ಚುಚ್ಚಿದರೆ 5 ನಿಮಿಷ ತೊಳೆದು 2 ಗಂಟೆಯೊಳಗೆ ವರದಿ ಮಾಡಿ."
+                "ಪಿಪಿಇ ಧರಿಸಿ.",
+                "ನಾಲ್ಕು ಬಣ್ಣಗಳಲ್ಲಿ ವಿಂಗಡಿಸಿ.",
+                "ಸೂಜಿ ಚುಚ್ಚಿದರೆ ತಿಳಿಸಿ."
             ]
         },
         "yellow": {
-            "title": "ಹಳದಿ ವರ್ಗ: ಸೋಂಕು ಮತ್ತು ಅಂಗಾಂಶ ತ್ಯಾಜ್ಯ",
-            "summary": "ಮಾನವ ಅಂಗಾಂಶಗಳು, ರಕ್ತದ ಬ್ಯಾಂಡೇಜ್‌ಗಳನ್ನು ಹಳದಿ ಚೀಲದಲ್ಲಿ ಹಾಕಿ 48 ಗಂಟೆಗಳ ಒಳಗೆ ವಿಲೇವಾರಿ ಮಾಡಿ.",
+            "title": "ಹಳದಿ ಬಿನ್ ಮಾರ್ಗದರ್ಶಿ: ಸಾಂಕ್ರಾಮಿಕ ಮತ್ತು ಅಂಗಾಂಗ ತ್ಯಾಜ್ಯ",
+            "summary": "ಹಳದಿ ಬಿನ್ ಕೇವಲ ಸಾಂಕ್ರಾಮಿಕ ಮತ್ತು ಮಾನವ ಅಂಗಾಂಗ ತ್ಯಾಜ್ಯಕ್ಕಾಗಿ. ಇದರಲ್ಲಿ ಹಾಕಬೇಕಾದ ವಸ್ತುಗಳು: ಮಾನವ ಅಂಗಗಳು, ಅಂಗಾಂಶಗಳು ಮತ್ತು ಜರಾಯು; ರಕ್ತಸಿಕ್ತ ಹತ್ತಿ, ಬ್ಯಾಂಡೇಜ್ ಮತ್ತು ಪ್ಲಾಸ್ಟರ್; ಅವಧಿ ಮುಗಿದ ಔಷಧಿಗಳು; ಲ್ಯಾಬ್ ಕಲ್ಚರ್ ಮತ್ತು ಲಸಿಕೆಗಳು. ಇದರಲ್ಲಿ ಸೂಜಿ ಅಥವಾ ಗಾಜು ಹಾಕಬೇಡಿ. ಹಳದಿ ಚೀಲದಲ್ಲಿ ಹಾಕಿ ೧೦೫೦ ಡಿಗ್ರಿಯಲ್ಲಿ ಸುಟ್ಟುಹಾಕಿ.",
             "steps": [
-                "ಹಳದಿ ಚೀಲ ಬಳಸಿ.",
-                "48 ಗಂಟೆಗಳಲ್ಲಿ ವಿಲೇವಾರಿ ಮಾಡಿ."
+                "ಹಳದಿ ಚೀಲದಲ್ಲಿ ಸಾಂಕ್ರಾಮಿಕ ತ್ಯಾಜ್ಯ ಹಾಕಿ.",
+                "ಮಾನವ ಅಂಗಗಳು ಮತ್ತು ರಕ್ತಸಿಕ್ತ ಹತ್ತಿ ಸೇರಿವೆ.",
+                "ಸೂಜಿ ಅಥವಾ ಗಾಜು ಹಾಕಬೇಡಿ."
             ]
         },
         "red": {
-            "title": "ಕೆಂಪು ವರ್ಗ: ಮರುಬಳಕೆ ಪ್ಲಾಸ್ಟಿಕ್ ತ್ಯಾಜ್ಯ",
-            "summary": "ಸೂಜಿ ಇಲ್ಲದ ಸಿರಿಂಜ್‌ಗಳು ಮತ್ತು ಐವಿ ಟ್ಯೂಬ್‌ಗಳನ್ನು ಕೆಂಪು ಡಬ್ಬದಲ್ಲಿ ಹಾಕಿ ಸೋಂಕು ನಿವಾರಣೆ ಮಾಡಿ.",
+            "title": "ಕೆಂಪು ಬಿನ್ ಮಾರ್ಗದರ್ಶಿ: ಮರುಬಳಕೆಯ ಪ್ಲಾಸ್ಟಿಕ್",
+            "summary": "ಕೆಂಪು ಬಿನ್ ಪ್ಲಾಸ್ಟಿಕ್ ತ್ಯಾಜ್ಯಕ್ಕಾಗಿ ಮಾತ್ರ. ಇದರಲ್ಲಿ ಸೂಜಿ ರಹಿತ ಪ್ಲಾಸ್ಟಿಕ್ ಸಿರಿಂಜ್, ಐವಿ ಬಾಟಲ್ ಮತ್ತು ಟ್ಯೂಬ್‌ಗಳು, ಕ್ಯಾತಿಟರ್ ಮತ್ತು ಮೂತ್ರದ ಚೀಲಗಳನ್ನು ಹಾಕಿ. ಸೂಜಿ ಅಥವಾ ಗಾಜು ಹಾಕಬೇಡಿ. ದ್ರವವನ್ನು ಸಂಪೂರ್ಣವಾಗಿ ತೆಗೆದು ಮರುಬಳಕೆಗೆ ಕಳುಹಿಸಿ.",
             "steps": [
-                "ಸೂಜಿ ಕತ್ತರಿಸಿ ಸಿರಿಂಜ್ ಹಾಕಿ."
+                "ಸೂಜಿ ಕತ್ತರಿಸಿ ಸಿರಿಂಜ್ ಕೆಂಪು ಬಿನ್‌ನಲ್ಲಿ ಹಾಕಿ.",
+                "ಐವಿ ಬಾಟಲ್ ಮತ್ತು ಟ್ಯೂಬ್ ಹಾಕಿ.",
+                "ಮರುಬಳಕೆಗೆ ಕಳುಹಿಸಿ."
             ]
         },
         "white": {
-            "title": "ಬಿಳಿ ವರ್ಗ: ಚೂಪಾದ ಸೂಜಿಗಳು ಮತ್ತು ಬ್ಲೇಡ್‌ಗಳು",
-            "summary": "ಸೂಜಿಗಳನ್ನು ಪಂಕ್ಚರ್-ಪ್ರೂಫ್ ಬಿಳಿ ಡಬ್ಬದಲ್ಲಿ ಹಾಕಿ. ಕೈಯಿಂದ ಸೂಜಿಗೆ ಮುಚ್ಚಳ ಹಾಕಬೇಡಿ.",
+            "title": "ಬಿಳಿ ಕಂಟೈನರ್ ಮಾರ್ಗದರ್ಶಿ: ಚೂಪಾದ ಸೂಜಿಗಳು ಮತ್ತು ಬ್ಲೇಡ್‌ಗಳು",
+            "summary": "ಬಿಳಿ ಕಂಟೈನರ್ ಚೂಪಾದ ಸೂಜಿಗಳು, ಸರ್ಜಿಕಲ್ ಬ್ಲೇಡ್‌ಗಳು ಮತ್ತು ಹೊಲಿಗೆ ಸೂಜಿಗಳಿಗಾಗಿ ಮಾತ್ರ. ಕೈಯಿಂದ ಸೂಜಿಗೆ ಮುಚ್ಚಳ ಹಾಕಬೇಡಿ. ಮುಕ್ಕಾಲು ಭಾಗ ತುಂಬಿದ ನಂತರ ಲಾಕ್ ಮಾಡಿ.",
             "steps": [
-                "ಬಿಳಿ ಡಬ್ಬದಲ್ಲಿ ಸೂಜಿ ಹಾಕಿ."
+                "ಬಿಳಿ ಕಂಟೈನರ್‌ನಲ್ಲಿ ಸೂಜಿ ಹಾಕಿ.",
+                "ಕೈಯಿಂದ ಮುಚ್ಚಳ ಹಾಕಬೇಡಿ.",
+                "ಲಾಕ್ ಮಾಡಿ."
             ]
         },
         "blue": {
-            "title": "ನೀಲಿ ವರ್ಗ: ಗಾಜಿನ ಸಾಮಾನು ಮತ್ತು ಲೋಹ",
-            "summary": "ಔಷಧದ ಗಾಜಿನ ಸೀಸೆಗಳನ್ನು ನೀಲಿ ಪೆಟ್ಟಿಗೆಯಲ್ಲಿ ಇರಿಸಿ. ಒಡೆದ ಗಾಜನ್ನು ಇಕ್ಕಳದಿಂದ ಮಾತ್ರ ಎತ್ತಿ.",
+            "title": "ನೀಲಿ ಬಿನ್ ಮಾರ್ಗದರ್ಶಿ: ಗಾಜು ಮತ್ತು ಲೋಹಗಳು",
+            "summary": "ನೀಲಿ ಪೆಟ್ಟಿಗೆಯಲ್ಲಿ ಗಾಜಿನ ಔಷಧಿ ಬಾಟಲಿಗಳು, ಟ್ಯೂಬ್‌ಗಳು ಮತ್ತು ಆರ್ಥೋಪೆಡಿಕ್ ಲೋಹದ ಪ್ಲೇಟ್‌ಗಳನ್ನು ಹಾಕಿ. ಒಡೆದ ಗಾಜನ್ನು ಇಕ್ಕಳದಿಂದ ಎತ್ತಿ. ಮರುಬಳಕೆಗೆ ಕಳುಹಿಸಿ.",
             "steps": [
-                "ನೀಲಿ ಡಬ್ಬ ಬಳಸಿ."
+                "ನೀಲಿ ಬಿನ್‌ನಲ್ಲಿ ಗಾಜು ಮತ್ತು ಲೋಹ ಹಾಕಿ.",
+                "ಇಕ್ಕಳದಿಂದ ಗಾಜು ಎತ್ತಿ."
             ]
         },
         "purple": {
-            "title": "ಸೈಟೊಟಾಕ್ಸಿಕ್ ಕೀಮೋಥೆರಪಿ ತ್ಯಾಜ್ಯ",
-            "summary": "ಕೀಮೋಥೆರಪಿ ತ್ಯಾಜ್ಯಕ್ಕೆ ನೇರಳೆ ಚೀಲಗಳನ್ನು ಬಳಸಿ ಮತ್ತು ಹೆಚ್ಚಿನ ತಾಪಮಾನದಲ್ಲಿ ಸುಟ್ಟುಹಾಕಿ.",
+            "title": "ಕೀಮೋಥೆರಪಿ ಕ್ಯಾನ್ಸರ್ ತ್ಯಾಜ್ಯ",
+            "summary": "ಕೀಮೋಥೆರಪಿ ತ್ಯಾಜ್ಯಕ್ಕಾಗಿ ನೇರಳೆ ಚೀಲಗಳನ್ನು ಬಳಸಿ ಮತ್ತು ೧೨೦೦ ಡಿಗ್ರಿಗಿಂತ ಹೆಚ್ಚಿನ ತಾಪಮಾನದಲ್ಲಿ ಸುಟ್ಟುಹಾಕಿ.",
             "steps": [
-                "ನೇರಳೆ ಚೀಲ ಬಳಸಿ."
+                "ನೇರಳೆ ಚೀಲ ಬಳಸಿ.",
+                "೧೨೦೦ ಡಿಗ್ರಿಯಲ್ಲಿ ಸುಡಿ."
             ]
         },
         "general": {
-            "title": "ಸಾಮಾನ್ಯ ಅಪಾಯಕಾರಿಯಲ್ಲದ ತ್ಯಾಜ್ಯ",
-            "summary": "ಕಾಗದ ಮತ್ತು ಆಹಾರದ ತ್ಯಾಜ್ಯವನ್ನು ಹಸಿರು ಅಥವಾ ಕಪ್ಪು ಡಬ್ಬದಲ್ಲಿ ಹಾಕಿ.",
+            "title": "ಸಾಮಾನ್ಯ ತ್ಯಾಜ್ಯ",
+            "summary": "ಕಾಗದ ಮತ್ತು ಆಹಾರ ತ್ಯಾಜ್ಯವನ್ನು ಹಸಿರು ಬಿನ್‌ನಲ್ಲಿ ಹಾಕಿ.",
             "steps": [
-                "ಹಸಿರು ಡಬ್ಬ ಬಳಸಿ."
+                "ಹಸಿರು ಬಿನ್‌ನಲ್ಲಿ ಕಾಗದ ಹಾಕಿ."
             ]
         },
         "emergency": {
-            "title": "ತುರ್ತು ಸೂಜಿ ಚುಚ್ಚುವಿಕೆ ಪ್ರೋಟೋಕಾಲ್",
-            "summary": "ಸೂಜಿ ಚುಚ್ಚಿದರೆ: 5 ನಿಮಿಷ ಹರಿಯುವ ನೀರಿನಲ್ಲಿ ಸಾಬೂನಿನಿಂದ ತೊಳೆಯಿರಿ ಮತ್ತು 2 ಗಂಟೆಯೊಳಗೆ ಪಿಇಪಿ ಪರೀಕ್ಷೆ ಮಾಡಿಸಿಕೊಳ್ಳಿ.",
+            "title": "ತುರ್ತು ಸೂಜಿ ಚುಚ್ಚುವಿಕೆ ನಿಯಮಾವಳಿ",
+            "summary": "ಸೂಜಿ ಚುಚ್ಚಿದರೆ: ೫ ನಿಮಿಷ ಸೋಪು ಮತ್ತು ಹರಿಯುವ ನೀರಿನಲ್ಲಿ ತೊಳೆಯಿರಿ. ೨ ಗಂಟೆಯೊಳಗೆ ಪೆಪ್ ಚಿಕಿತ್ಸೆ ಪಡೆಯಿರಿ. ರಕ್ತ ಚೆಲ್ಲಿದರೆ: ೧% ಬ್ಲೀಚ್ ಹಾಕಿ ೨೦ ನಿಮಿಷ ಬಿಟ್ಟು ಸ್ವಚ್ಛಗೊಳಿಸಿ.",
             "steps": [
-                "5 ನಿಮಿಷ ಸಾಬೂನಿನಿಂದ ತೊಳೆಯಿರಿ.",
-                "2 ಗಂಟೆಯಲ್ಲಿ ಪಿಇಪಿ ಪರೀಕ್ಷೆ ಮಾಡಿ."
+                "೫ ನಿಮಿಷ ನೀರಿನಲ್ಲಿ ತೊಳೆಯಿರಿ.",
+                "೨ ಗಂಟೆಯಲ್ಲಿ ಪೆಪ್ ತೆಗೆದುಕೊಳ್ಳಿ."
             ]
         }
     },
     "ml": {
         "master": {
-            "title": "മാസ്റ്റർ ക്ലിനിക്കൽ സുരക്ഷയും ബയോമെഡിക്കൽ മാലിന്യ പരിപാലനവും",
-            "summary": "ബയോമെഡിക്കൽ മാലിന്യ സംസ്കരണ ഗൈഡിലേക്ക് സ്വാഗതം. ആരോഗ്യ പ്രവർത്തകർ പിപിഇ കിറ്റ്, കയ്യുറകൾ എന്നിവ ധരിക്കണം. മാലിന്യങ്ങൾ നാല് നിറങ്ങളിലായി തരംതിരിക്കുക: മഞ്ഞ - അണുബാധയുള്ള മാലിന്യങ്ങൾ; ചുവപ്പ് - പ്ലാസ്റ്റിക് സിറിഞ്ചുകൾ; വെളുപ്പ് - സൂചികളും ബ്ലേഡുകളും; നീല - കുപ്പികളും ഗ്ലാസും. സൂചി കൊണ്ടാൽ 2 മണിക്കൂറിനകം റിപ്പോർട്ട് ചെയ്യുക.",
+            "title": "മെഡിക്കൽ മാലിന്യ സുരക്ഷാ മാർഗ്ഗനിർദ്ദേശങ്ങൾ",
+            "summary": "മാലിന്യങ്ങൾ നാല് നിറങ്ങളിലായി തരംതിരിക്കുക: മഞ്ഞ - അണുബാധയുള്ളതും ശാരീരികവുമായ മാലിന്യങ്ങൾ; ചുവപ്പ് - പ്ലാസ്റ്റിക്; വെള്ള - മൂർച്ചയുള്ള സൂചികൾ; നീല - ഗ്ലാസ് കുപ്പികളും ലോഹങ്ങളും. പിപിഇ കിറ്റ് നിർബന്ധമായും ധരിക്കുക.",
             "steps": [
-                "മാലിന്യങ്ങൾ കൈകാര്യം ചെയ്യുമ്പോൾ പിപിഇ ധരിക്കുക.",
-                "നാല് നിറങ്ങളിലായി തരംതിരിക്കുക.",
-                "സൂചികൾ റീക്യാപ്പ് ചെയ്യരുത്.",
-                "മുക്കാൽ ഭാഗം നിറഞ്ഞാൽ സീൽ ചെയ്യുക.",
-                "സൂചി കൊണ്ടാൽ 5 മിനിറ്റ് കഴുകി 2 മണിക്കൂറിൽ അറിയിക്കുക."
+                "പിപിഇ ധരിക്കുക.",
+                "നാല് നിറങ്ങളിൽ തരംതിരിക്കുക.",
+                "സൂചി കൊണ്ടാൽ ഉടൻ അറിയിക്കുക."
             ]
         },
         "yellow": {
-            "title": "മഞ്ഞ വിഭാഗം: അണുബാധയുള്ള ജൈവ മാലിന്യങ്ങൾ",
-            "summary": "ശരീരഭാഗങ്ങൾ, രക്തം പുരണ്ട പഞ്ഞി എന്നിവ മഞ്ഞ ബാഗിൽ നിക്ഷേപിച്ച് 48 മണിക്കൂറിനകം സംസ്കരിക്കുക.",
+            "title": "മഞ്ഞ ബിൻ ഗൈഡ്: അണുബാധയുള്ളതും ശാരീരികവുമായ മാലിന്യങ്ങൾ",
+            "summary": "മഞ്ഞ ബിൻ അണുബാധയുള്ള മാലിന്യങ്ങൾക്കും മനുഷ്യ ശരീരഭാഗങ്ങൾക്കും വേണ്ടിയുള്ളതാണ്. ഇടേണ്ട വസ്തുക്കൾ: മനുഷ്യ അവയവങ്ങൾ, കോശങ്ങൾ, പ്ലാസന്റ; രക്തം പുരണ്ട പഞ്ഞി, ബാൻഡേജ്, പ്ലാസ്റ്റർ; കാലഹരണപ്പെട്ട മരുന്നുകൾ; ലാബ് കൾച്ചറുകൾ. സൂചികളോ ഗ്ലാസോ ഇടരുത്. മഞ്ഞ ബാഗിൽ സൂക്ഷിച്ചു 1050 ഡിഗ്രിയിൽ കത്തിക്കുക.",
             "steps": [
-                "മഞ്ഞ ബാഗിൽ നിക്ഷേപിക്കുക.",
-                "48 മണിക്കൂറിനകം സംസ്കരിക്കുക."
+                "മഞ്ഞ ബാഗിൽ അണുബാധ മാലിന്യം ഇടുക.",
+                "ശരീരഭാഗങ്ങളും രക്തം പുരണ്ട പഞ്ഞിയും ഉൾപ്പെടുന്നു.",
+                "സൂചികളോ ഗ്ലാസോ ഇടരുത്."
             ]
         },
         "red": {
-            "title": "ചുവപ്പ് വിഭാഗം: പുനരുപയോഗിക്കാവുന്ന പ്ലാസ്റ്റിക്",
-            "summary": "സൂചി മാറ്റിയ സിറിഞ്ചുകളും ഐവി ട്യൂബുകളും ചുവന്ന ബിന്നിൽ നിക്ഷേപിക്കുക.",
+            "title": "ചുവപ്പ് ബിൻ ഗൈഡ്: പുനരുപയോഗിക്കാവുന്ന പ്ലാസ്റ്റിക്",
+            "summary": "ചുവപ്പ് ബിൻ പ്ലാസ്റ്റിക് മാലിന്യങ്ങൾക്ക് മാത്രമുള്ളതാണ്. സൂചിയില്ലാത്ത സിറിഞ്ചുകൾ, ഐവി ബോട്ടിലുകൾ, ട്യൂബുകൾ, യൂറിൻ ബാഗുകൾ എന്നിവ ഇടുക. ദ്രാവകങ്ങൾ പൂർണ്ണമായി നീക്കം ചെയ്ത് റീസൈക്ലിംഗിന് അയക്കുക.",
             "steps": [
-                "സൂചി മുറിച്ച ശേഷം ഇടുക."
+                "സൂചി മുറിച്ചു സിറിഞ്ച് ചുവപ്പ് ബിന്നിൽ ഇടുക.",
+                "ഐവി ബോട്ടിലുകൾ ഇടുക.",
+                "റീസൈക്ലിംഗിന് അയക്കുക."
             ]
         },
         "white": {
-            "title": "വെള്ള വിഭാഗം: മൂർച്ചയുള്ള സൂചികളും ബ്ലേഡുകളും",
-            "summary": "സൂചികൾ തുളച്ചുകയറാത്ത വെളുത്ത ബോക്സിൽ നിക്ഷേപിക്കുക. കൈകൊണ്ട് സൂചി റീക്യാപ്പ് ചെയ്യരുത്.",
+            "title": "വെള്ള കണ്ടെയ്നർ ഗൈഡ്: മൂർച്ചയുള്ള സൂചികളും ബ്ലേഡുകളും",
+            "summary": "വെള്ള പഞ്ചർ പ്രൂഫ് ബോക്സ് മൂർച്ചയുള്ള സൂചികൾ, സർജിക്കൽ ബ്ലേഡുകൾ എന്നിവയ്ക്കുള്ളതാണ്. കൈകൊണ്ട് സൂചിക്ക് മൂടി ഇടരുത്. മുക്കാൽ ഭാഗം നിറഞ്ഞാൽ അടച്ചു പൂട്ടുക.",
             "steps": [
-                "വെളുത്ത ബോക്സ് ഉപയോഗിക്കുക."
+                "വെള്ള ബോക്സിൽ സൂചികൾ ഇടുക.",
+                "കൈകൊണ്ട് മൂടി ഇടരുത്.",
+                "ലോക്ക് ചെയ്യുക."
             ]
         },
         "blue": {
-            "title": "നീല വിഭാഗം: ഗ്ലാസ് മരുന്ന് കുപ്പികൾ",
-            "summary": "മരുന്ന് കുപ്പികൾ നീല പെട്ടിയിൽ സൂക്ഷിക്കുക. പൊട്ടിയ ഗ്ലാസ് കൈകൊണ്ട് എടുക്കരുത്.",
+            "title": "നീല ബിൻ ഗൈഡ്: ഗ്ലാസും ലോഹങ്ങളും",
+            "summary": "നീല പെട്ടിയിൽ മരുന്ന് ഗ്ലാസ് കുപ്പികളും ഓർത്തോപീഡിക് ലോഹ ഇംപ്ലാന്റുകളും ഇടുക. പൊട്ടിയ ഗ്ലാസ് കൊടിൽ ഉപയോഗിച്ച് എടുക്കുക.",
             "steps": [
-                "നീല ബോക്സിൽ ഇടുക."
+                "നീല ബിന്നിൽ ഗ്ലാസും ലോഹങ്ങളും ഇടുക.",
+                "കൊടിൽ ഉപയോഗിക്കുക."
             ]
         },
         "purple": {
-            "title": "കീമോതെറാപ്പി സൈറ്റോടോക്സിക് മാലിന്യങ്ങൾ",
-            "summary": "കീമോതെറാപ്പി മാലിന്യങ്ങൾക്ക് പർപ്പിൾ ബാഗുകൾ ഉപയോഗിക്കുക.",
+            "title": "കീമോതെറാപ്പി കാൻസർ മാലിന്യങ്ങൾ",
+            "summary": "കീമോതെറാപ്പി മാലിന്യങ്ങൾക്ക് പർപ്പിൾ ബാഗുകൾ ഉപയോഗിക്കുക. 1200 ഡിഗ്രിയിൽ കത്തിക്കുക.",
             "steps": [
                 "പർപ്പിൾ ബാഗ് ഉപയോഗിക്കുക."
             ]
         },
         "general": {
             "title": "സാധാരണ ആശുപത്രി മാലിന്യങ്ങൾ",
-            "summary": "ഭക്ഷണാവശിഷ്ടങ്ങളും പേപ്പറും പച്ച അല്ലെങ്കിൽ കറുപ്പ് ബിന്നിൽ ഇടുക.",
+            "summary": "ഭക്ഷണാവശിഷ്ടങ്ങളും പേപ്പറും പച്ച ബിന്നിൽ ഇടുക.",
             "steps": [
-                "പച്ച ബിൻ ഉപയോഗിക്കുക."
+                "പച്ച ബിന്നിൽ പേപ്പർ ഇടുക."
             ]
         },
         "emergency": {
-            "title": "അടിയന്തര സൂചി മുറിവും രക്തം ചിന്തലും",
-            "summary": "സൂചി കൊണ്ടാൽ: 5 മിനിറ്റ് ഒഴുകുന്ന വെള്ളത്തിൽ സോപ്പിട്ട് കഴുകുക. 2 മണിക്കൂറിനകം പെപ് എടുക്കുക.",
+            "title": "സൂചി കൊണ്ടാൽ അടിയന്തര നടപടി",
+            "summary": "സൂചി കൊണ്ടാൽ: 5 മിനിറ്റ് ഒഴുകുന്ന വെള്ളത്തിൽ സോപ്പിട്ട് കഴുകുക. 2 മണിക്കൂറിനകം പെപ് ചികിത്സ ആരംഭിക്കുക. രക്തം ചിന്തിയാൽ: 1% ബ്ലീച്ച് ഒഴിച്ച് 20 മിനിറ്റിനു ശേഷം തുടയ്ക്കുക.",
             "steps": [
-                "5 മിനിറ്റ് കഴുകുക.",
-                "2 മണിക്കൂറിനകം പെപ് എടുക്കുക."
+                "5 മിനിറ്റ് വെള്ളത്തിൽ കഴുകുക.",
+                "2 മണിക്കൂറിൽ പെപ് എടുക്കുക."
             ]
         }
     },
     "pa": {
         "master": {
             "title": "ਕਲੀਨਿਕਲ ਸੁਰੱਖਿਆ ਅਤੇ ਬਾਇਓਮੈਡੀਕਲ ਕੂੜਾ ਪ੍ਰਬੰਧਨ",
-            "summary": "ਬਾਇਓਮੈਡੀਕਲ ਕੂੜਾ ਪ੍ਰਬੰਧਨ ਗਾਈਡ ਵਿੱਚ ਤੁਹਾਡਾ ਸੁਆਗਤ ਹੈ। ਸਾਰੇ ਸਟਾਫ ਨੂੰ ਪੀਪੀਈ ਕਿੱਟ ਅਤੇ ਦਸਤਾਨੇ ਪਾਉਣੇ ਚਾਹੀਦੇ ਹਨ। ਕੂੜੇ ਨੂੰ ਚਾਰ ਰੰਗਾਂ ਵਿੱਚ ਵੰਡੋ: ਪੀਲਾ - ਲਾਗ ਵਾਲਾ ਕੂੜਾ; ਲਾਲ - ਪਲਾਸਟਿਕ ਸਰਿੰਜਾਂ; ਚਿੱਟਾ - ਸੂਈਆਂ ਅਤੇ ਬਲੇਡ; ਨੀਲਾ - ਕੱਚ ਦੀਆਂ ਸ਼ੀਸ਼ੀਆਂ। ਸੂਈ ਚੁੱਭਣ 'ਤੇ 2 ਘੰਟਿਆਂ ਵਿੱਚ ਰਿਪੋਰਟ ਕਰੋ।",
+            "summary": "ਕੂੜੇ ਨੂੰ ਚਾਰ ਰੰਗਾਂ ਵਿੱਚ ਵੰਡੋ: ਪੀਲਾ - ਲਾਗ ਵਾਲਾ ਤੇ ਸਰੀਰਕ ਕੂੜਾ; ਲਾਲ - ਰੀਸਾਈਕਲ ਪਲਾਸਟਿਕ; ਚਿੱਟਾ - ਤਿੱਖੀਆਂ ਸੂਈਆਂ; ਨੀਲਾ - ਕੱਚ ਦੀਆਂ ਸ਼ੀਸ਼ੀਆਂ ਅਤੇ ਧਾਤ। ਪੀਪੀਈ ਕਿੱਟ ਪਹਿਨੋ ਅਤੇ ਸੂਈ ਚੁੱਭਣ 'ਤੇ ੨ ਘੰਟਿਆਂ ਵਿੱਚ ਰਿਪੋਰਟ ਕਰੋ।",
             "steps": [
-                "ਕੂੜਾ ਛੂਹਣ ਤੋਂ ਪਹਿਲਾਂ ਪੀਪੀਈ ਪਾਓ।",
+                "ਪੀਪੀਈ ਪਹਿਨੋ।",
                 "ਚਾਰ ਰੰਗਾਂ ਵਿੱਚ ਕੂੜਾ ਵੰਡੋ।",
-                "ਸੂਈ ਨੂੰ ਹੱਥ ਨਾਲ ਕੈਪ ਨਾ ਕਰੋ।",
-                "ਪੌਣਾ ਭਰ ਜਾਣ 'ਤੇ ਸੀਲ ਕਰੋ।",
-                "ਸੂਈ ਚੁੱਭਣ 'ਤੇ 5 ਮਿੰਟ ਧੋਵੋ ਅਤੇ 2 ਘੰਟੇ ਵਿੱਚ ਦੱਸੋ।"
+                "ਸੂਈ ਚੁੱਭਣ 'ਤੇ ਦੱਸੋ।"
             ]
         },
         "yellow": {
-            "title": "ਪੀਲਾ ਵਰਗ: ਲਾਗ ਵਾਲਾ ਅਤੇ ਸਰੀਰਕ ਕੂੜਾ",
-            "summary": "ਮਨੁੱਖੀ ਅੰਗ ਅਤੇ ਖੂਨ ਨਾਲ ਭਰੀਆਂ ਪੱਟੀਆਂ ਪੀਲੇ ਬੈਗ ਵਿੱਚ ਪਾਓ ਅਤੇ 48 ਘੰਟਿਆਂ ਵਿੱਚ ਨਸ਼ਟ ਕਰੋ।",
+            "title": "ਪੀਲਾ ਡੱਬਾ ਗਾਈਡ: ਲਾਗ ਵਾਲਾ ਅਤੇ ਸਰੀਰਕ ਕੂੜਾ",
+            "summary": "ਪੀਲਾ ਡੱਬਾ ਸਿਰਫ਼ ਲਾਗ ਵਾਲੇ ਅਤੇ ਮਨੁੱਖੀ ਅੰਗਾਂ ਦੇ ਕੂੜੇ ਲਈ ਹੈ। ਇਸ ਵਿੱਚ ਪਾਉਣ ਵਾਲੀਆਂ ਚੀਜ਼ਾਂ: ਮਨੁੱਖੀ ਅੰਗ, ਟਿਸ਼ੂ ਅਤੇ ਪਲੈਸੈਂਟਾ; ਖੂਨ ਨਾਲ ਭਰੀਆਂ ਪੱਟੀਆਂ, ਰੂੰ ਅਤੇ ਪਲਾਸਟਰ; ਮਿਆਦ ਪੁੱਗ ਚੁੱਕੀਆਂ ਦਵਾਈਆਂ; ਲੈਬ ਕਲਚਰ। ਇਸ ਵਿੱਚ ਸੂਈਆਂ ਜਾਂ ਕੱਚ ਨਾ ਪਾਓ। ਪੀਲੇ ਬੈਗ ਵਿੱਚ ਪਾ ਕੇ ੧੦੫੦ ਡਿਗਰੀ 'ਤੇ ਸਾੜੋ।",
             "steps": [
-                "ਪੀਲੇ ਬੈਗ ਵਿੱਚ ਪਾਓ।",
-                "48 ਘੰਟੇ ਵਿੱਚ ਨਸ਼ਟ ਕਰੋ।"
+                "ਪੀਲੇ ਬੈਗ ਵਿੱਚ ਲਾਗ ਵਾਲਾ ਕੂੜਾ ਪਾਓ।",
+                "ਮਨੁੱਖੀ ਅੰਗ ਅਤੇ ਖੂਨ ਦੀਆਂ ਪੱਟੀਆਂ ਸ਼ਾਮਲ।",
+                "ਸੂਈਆਂ ਜਾਂ ਕੱਚ ਨਾ ਪਾਓ।"
             ]
         },
         "red": {
-            "title": "ਲਾਲ ਵਰਗ: ਰੀਸਾਈਕਲ ਪਲਾਸਟਿਕ ਕੂੜਾ",
-            "summary": "ਬਿਨਾਂ ਸੂਈ ਵਾਲੀਆਂ ਪਲਾਸਟਿਕ ਸਰਿੰਜਾਂ ਅਤੇ ਆਈਵੀ ਸੈੱਟ ਲਾਲ ਡੱਬੇ ਵਿੱਚ ਪਾਓ।",
+            "title": "ਲਾਲ ਡੱਬਾ ਗਾਈਡ: ਰੀਸਾਈਕਲ ਪਲਾਸਟਿਕ ਕੂੜਾ",
+            "summary": "ਲਾਲ ਡੱਬਾ ਪਲਾਸਟਿਕ ਦੇ ਕੂੜੇ ਲਈ ਹੈ। ਸੂਈ ਤੋਂ ਬਿਨਾਂ ਪਲਾਸਟਿਕ ਸਰਿੰਜਾਂ, ਆਈਵੀ ਬੋਤਲਾਂ ਅਤੇ ਪਾਈਪਾਂ, ਕੈਥੀਟਰ ਅਤੇ ਯੂਰੀਨ ਬੈਗ ਇਸ ਵਿੱਚ ਪਾਓ। ਸੂਈ ਕੱਟ ਕੇ ਅਤੇ ਤਰਲ ਪੂਰੀ ਤਰ੍ਹਾਂ ਕੱਢ ਕੇ ਰੀਸਾਈਕਲਿੰਗ ਲਈ ਭੇਜੋ।",
             "steps": [
-                "ਸੂਈ ਕੱਟ ਕੇ ਸਰਿੰਜ ਪਾਓ।"
+                "ਸੂਈ ਕੱਟ ਕੇ ਸਰਿੰਜ ਲਾਲ ਡੱਬੇ ਵਿੱਚ ਪਾਓ।",
+                "ਆਈਵੀ ਬੋਤਲਾਂ ਪਾਓ।",
+                "ਰੀਸਾਈਕਲਿੰਗ ਲਈ ਭੇਜੋ।"
             ]
         },
         "white": {
-            "title": "ਚਿੱਟਾ ਵਰਗ: ਤਿੱਖੀਆਂ ਸੂਈਆਂ ਅਤੇ ਬਲੇਡ",
-            "summary": "ਸੂਈਆਂ ਅਤੇ ਸਰਜੀਕਲ ਬਲੇਡ ਚਿੱਟੇ ਪੰਕਚਰ-ਪਰੂਫ ਡੱਬੇ ਵਿੱਚ ਪਾਓ। ਹੱਥ ਨਾਲ ਸੂਈ ਨੂੰ ਕੈਪ ਨਾ ਕਰੋ।",
+            "title": "ਚਿੱਟਾ ਡੱਬਾ ਗਾਈਡ: ਤਿੱਖੀਆਂ ਸੂਈਆਂ ਅਤੇ ਬਲੇਡ",
+            "summary": "ਚਿੱਟਾ ਪੰਕਚਰ-ਪਰੂਫ ਡੱਬਾ ਤਿੱਖੀਆਂ ਸੂਈਆਂ, ਸਰਜੀਕਲ ਬਲੇਡਾਂ ਅਤੇ ਟਾਂਕੇ ਵਾਲੀਆਂ ਸੂਈਆਂ ਲਈ ਹੈ। ਹੱਥ ਨਾਲ ਸੂਈ ਨੂੰ ਕੈਪ ਨਾ ਕਰੋ। ਭਰ ਜਾਣ 'ਤੇ ਲਾਕ ਕਰੋ।",
             "steps": [
-                "ਚਿੱਟੇ ਡੱਬੇ ਵਿੱਚ ਸੂਈ ਪਾਓ।"
+                "ਚਿੱਟੇ ਡੱਬੇ ਵਿੱਚ ਸੂਈਆਂ ਪਾਓ।",
+                "ਹੱਥ ਨਾਲ ਕੈਪ ਨਾ ਲਗਾਓ।",
+                "ਲਾਕ ਕਰੋ।"
             ]
         },
         "blue": {
-            "title": "ਨੀਲਾ ਵਰਗ: ਕੱਚ ਦੀਆਂ ਸ਼ੀਸ਼ੀਆਂ ਅਤੇ ਧਾਤ",
-            "summary": "ਕੱਚ ਦੀਆਂ ਦਵਾਈਆਂ ਦੀਆਂ ਸ਼ੀਸ਼ੀਆਂ ਨੀਲੇ ਬਕਸੇ ਵਿੱਚ ਰੱਖੋ। ਟੁੱਟੇ ਕੱਚ ਨੂੰ ਚਿਮਟੇ ਨਾਲ ਚੁੱਕੋ।",
+            "title": "ਨੀਲਾ ਡੱਬਾ ਗਾਈਡ: ਕੱਚ ਦੀਆਂ ਸ਼ੀਸ਼ੀਆਂ ਅਤੇ ਧਾਤ",
+            "summary": "ਨੀਲੇ ਡੱਬੇ ਵਿੱਚ ਕੱਚ ਦੀਆਂ ਦਵਾਈਆਂ ਦੀਆਂ ਸ਼ੀਸ਼ੀਆਂ, ਟੈਸਟ ਟਿਊਬਾਂ ਅਤੇ ਹੱਡੀਆਂ ਦੀਆਂ ਧਾਤ ਦੀਆਂ ਪਲੇਟਾਂ ਪਾਓ। ਟੁੱਟੇ ਕੱਚ ਨੂੰ ਚਿਮਟੇ ਨਾਲ ਚੁੱਕੋ।",
             "steps": [
-                "ਨੀਲੇ ਬਕਸੇ ਵਿੱਚ ਰੱਖੋ।"
+                "ਨੀਲੇ ਡੱਬੇ ਵਿੱਚ ਕੱਚ ਅਤੇ ਧਾਤ ਪਾਓ।",
+                "ਚਿਮਟੇ ਨਾਲ ਕੱਚ ਚੁੱਕੋ।"
             ]
         },
         "purple": {
             "title": "ਕੀਮੋਥੈਰੇਪੀ ਕੈਂਸਰ ਕੂੜਾ",
-            "summary": "ਕੀਮੋਥੈਰੇਪੀ ਕੂੜੇ ਲਈ ਜਾਮਣੀ ਬੈਗ ਵਰਤੋ ਅਤੇ ਉੱਚ ਤਾਪਮਾਨ 'ਤੇ ਸਾੜੋ।",
+            "summary": "ਕੀਮੋਥੈਰੇਪੀ ਕੂੜੇ ਲਈ ਜਾਮਣੀ ਬੈਗ ਵਰਤੋ ਅਤੇ ੧੨੦੦ ਡਿਗਰੀ 'ਤੇ ਸਾੜੋ।",
             "steps": [
                 "ਜਾਮਣੀ ਬੈਗ ਵਰਤੋ।"
             ]
         },
         "general": {
-            "title": "ਆਮ ਗੈਰ-ਖਤਰਨਾਕ ਕੂੜਾ",
-            "summary": "ਸਾਫ਼ ਕਾਗਜ਼ ਅਤੇ ਭੋਜਨ ਹਰੇ ਜਾਂ ਕਾਲੇ ਡੱਬੇ ਵਿੱਚ ਪਾਓ।",
+            "title": "ਆਮ ਕੂੜਾ",
+            "summary": "ਸਾਫ਼ ਕਾਗਜ਼ ਅਤੇ ਭੋਜਨ ਹਰੇ ਡੱਬੇ ਵਿੱਚ ਪਾਓ।",
             "steps": [
-                "ਹਰੇ ਜਾਂ ਕਾਲੇ ਡੱਬੇ ਵਿੱਚ ਪਾਓ।"
+                "ਹਰੇ ਡੱਬੇ ਵਿੱਚ ਕਾਗਜ਼ ਪਾਓ।"
             ]
         },
         "emergency": {
             "title": "ਐਮਰਜੈਂਸੀ ਸੂਈ ਚੁੱਭਣ ਦਾ ਪ੍ਰੋਟੋਕੋਲ",
-            "summary": "ਸੂਈ ਚੁੱਭਣ 'ਤੇ: 5 ਮਿੰਟ ਵਗਦੇ ਪਾਣੀ ਅਤੇ ਸਾਬਣ ਨਾਲ ਧੋਵੋ ਅਤੇ 2 ਘੰਟਿਆਂ ਦੇ ਅੰਦਰ ਪੈਪ ਇਲਾਜ ਲਵੋ।",
+            "summary": "ਸੂਈ ਚੁੱਭਣ 'ਤੇ: ੫ ਮਿੰਟ ਵਗਦੇ ਪਾਣੀ ਅਤੇ ਸਾਬਣ ਨਾਲ ਧੋਵੋ। ਜ਼ਖ਼ਮ ਨੂੰ ਨਾ ਦਬਾਓ। ੨ ਘੰਟਿਆਂ ਅੰਦਰ ਪੈਪ ਇਲਾਜ ਸ਼ੁਰੂ ਕਰੋ। ਖੂਨ ਡੁੱਲ੍ਹਣ 'ਤੇ: ੧% ਬਲੀਚ ਪਾ ਕੇ ੨੦ ਮਿੰਟ ਬਾਅਦ ਸਾਫ਼ ਕਰੋ।",
             "steps": [
-                "5 ਮਿੰਟ ਸਾਬਣ ਨਾਲ ਧੋਵੋ।",
-                "2 ਘੰਟੇ ਵਿੱਚ ਪੈਪ ਇਲਾਜ ਲਓ।"
+                "੫ ਮਿੰਟ ਪਾਣੀ ਨਾਲ ਧੋਵੋ।",
+                "੨ ਘੰਟਿਆਂ ਵਿੱਚ ਪੈਪ ਲਵੋ।"
             ]
         }
     },
     "or": {
         "master": {
-            "title": "ମାଷ୍ଟର କ୍ଲିନିକାଲ ସୁରକ୍ଷା ଏବଂ ବାୟୋମେଡିକାଲ ବର୍ଜ୍ୟବସ୍ତୁ ପରିଚାଳନା",
-            "summary": "ବାୟୋମେଡିକାଲ ବର୍ଜ୍ୟବସ୍ତୁ ପରିଚାଳନା ଗାଇଡରେ ଆପଣଙ୍କୁ ସ୍ୱାଗତ। ସମସ୍ତ କର୍ମଚାରୀ ପିପିଇ କିଟ୍ ଏବଂ ଗ୍ଲୋଭସ୍ ବ୍ୟବହାର କରିବା ଉଚିତ। ବର୍ଜ୍ୟବସ୍ତୁକୁ ଚାରି ରଙ୍ଗରେ ପୃଥକ କରନ୍ତୁ: ହଳଦିଆ - ସଂକ୍ରାମକ ବର୍ଜ୍ୟ; ଲାଲ୍ - ପ୍ଲାଷ୍ଟିକ ସିରିଞ୍ଜ; ଧଳା - ଛୁଞ୍ଚି ଏବଂ ବ୍ଲେଡ୍; ନୀଳ - କାଚ ବୋତଲ। ଛୁଞ୍ଚି ଫୁଟିଲେ ୨ ଘଣ୍ଟା ମଧ୍ୟରେ ଜଣାନ୍ତୁ।",
+            "title": "ମାଷ୍ଟର କ୍ଲିନିକାଲ ସୁରକ୍ଷା ଏବଂ ବାୟୋମେଡିକାଲ ବର୍ଜ୍ୟ ପରିଚାଳନା",
+            "summary": "ବର୍ଜ୍ୟବସ୍ତୁକୁ ଚାରି ରଙ୍ଗରେ ଅଲଗା କରନ୍ତୁ: ହଳଦିଆ - ସଂକ୍ରାମକ ଏବଂ ଶାରୀରିକ ବର୍ଜ୍ୟ; ଲାଲ୍ - ପ୍ଲାଷ୍ଟିକ୍; ଧଳା - ଧାରୁଆ ଛୁଞ୍ଚି; ନୀଳ - କାଚ ଶିଶି ଏବଂ ଧାତୁ। ପିପିଇ ପିନ୍ଧନ୍ତୁ ଏବଂ ଛୁଞ୍ଚି ଫୁଟିଲେ ୨ ଘଣ୍ଟା ମଧ୍ୟରେ ଜଣାନ୍ତୁ।",
             "steps": [
-                "ବର୍ଜ୍ୟ ଛୁଇଁବା ପୂର୍ବରୁ ପିପିଇ ପିନ୍ଧନ୍ତୁ।",
+                "ପିପିଇ ପିନ୍ଧନ୍ତୁ।",
                 "ଚାରି ରଙ୍ଗରେ ବର୍ଜ୍ୟ ଅଲଗା କରନ୍ତୁ।",
-                "ଛୁଞ୍ଚିରେ ହାତରେ ଠିପି ଲଗାନ୍ତୁ ନାହିଁ।",
-                "ପାଉଣ ଭରିଲେ ସିଲ୍ କରନ୍ତୁ।",
-                "ଛୁଞ୍ଚି ଫୁଟିଲେ ୫ ମିନିଟ୍ ଧୋଇ ୨ ଘଣ୍ଟାରେ ଜଣାନ୍ତୁ।"
+                "ଛୁଞ୍ଚି ଫୁଟିଲେ ଜଣାନ୍ତୁ।"
             ]
         },
         "yellow": {
-            "title": "ହଳଦିଆ ବର୍ଗ: ସଂକ୍ରାମକ ଏବଂ ଶାରୀରିକ ବର୍ଜ୍ୟ",
-            "summary": "ରକ୍ତଭିଜା ପଟି, ତୁଳା ଏବଂ ଶାରୀରିକ ଅଂଶକୁ ହଳଦିଆ ବ୍ୟାଗରେ ରଖି ୪୮ ଘଣ୍ଟା ମଧ୍ୟରେ ନଷ୍ଟ କରନ୍ତୁ।",
+            "title": "ହଳଦିଆ ଡବା ଗାଇଡ୍: ସଂକ୍ରାମକ ଏବଂ ଶାରୀରିକ ବର୍ଜ୍ୟ",
+            "summary": "ହଳଦିଆ ଡବା କେବଳ ସଂକ୍ରାମକ ଏବଂ ମାନବ ଶାରୀରିକ ବର୍ଜ୍ୟ ପାଇଁ। ଏଥିରେ ପକାଇବା ସାମଗ୍ରୀ: ମାନବ ଅଙ୍ଗ, ତନ୍ତୁ ଏବଂ ପ୍ଲାସେଣ୍ଟା; ରକ୍ତଭିଜା ତୁଳା, ପଟି ଏବଂ ପ୍ଲାଷ୍ଟର; ମିଆଦ ପୁରିଥିବା ଔଷଧ; ଲ୍ୟାବ୍ କଲଚର୍। ଏଥିରେ ଛୁଞ୍ଚି ବା କାଚ ପକାନ୍ତୁ ନାହିଁ। ହଳଦିଆ ବ୍ୟାଗରେ ରଖି ୧୦୫୦ ଡିଗ୍ରୀରେ ଜଳାନ୍ତୁ।",
             "steps": [
-                "ହଳଦିଆ ବ୍ୟାଗ୍ ବ୍ୟବହାର କରନ୍ତୁ।",
-                "୪୮ ଘଣ୍ଟାରେ ନଷ୍ଟ କରନ୍ତୁ।"
+                "ହଳଦିଆ ବ୍ୟାଗରେ ସଂକ୍ରାମକ ବର୍ଜ୍ୟ ରଖନ୍ତୁ।",
+                "ମାନବ ଅଙ୍ଗ ଓ ରକ୍ତଭିଜା ତୁଳା ସାମିଲ।",
+                "ଛୁଞ୍ଚି ବା କାଚ ପକାନ୍ତୁ ନାହିଁ।"
             ]
         },
         "red": {
-            "title": "ଲାଲ୍ ବର୍ଗ: ପୁନଃବ୍ୟବହାରଯୋଗ୍ୟ ପ୍ଲାଷ୍ଟିକ",
-            "summary": "ଛୁଞ୍ଚି ବିହୀନ ପ୍ଲାଷ୍ଟିକ ସିରିଞ୍ଜ ଏବଂ ଆଇଭି ପାଇପ୍ ଲାଲ୍ ଡବାରେ ପକାନ୍ତୁ।",
+            "title": "ଲାଲ୍ ଡବା ଗାଇଡ୍: ପୁନଃବ୍ୟବହାରଯୋଗ୍ୟ ପ୍ଲାଷ୍ଟିକ୍",
+            "summary": "ଲାଲ୍ ଡବା କେବଳ ପ୍ଲାଷ୍ଟିକ୍ ବର୍ଜ୍ୟ ପାଇଁ। ଛୁଞ୍ଚି ବିହୀନ ପ୍ଲାଷ୍ଟିକ୍ ସିରିଞ୍ଜ, ଆଇଭି ବୋତଲ, ପାଇପ୍, କ୍ୟାଥେଟର ଏବଂ ପରିସ୍ରା ବ୍ୟାଗ୍ ଏଥିରେ ପକାନ୍ତୁ। ଛୁଞ୍ଚି କାଟି ଏବଂ ତରଳ ପଦାର୍ଥ ସମ୍ପୂର୍ଣ୍ଣ ବାହାର କରି ରିସାଇକ୍ଲିଂ ପାଇଁ ପଠାନ୍ତୁ।",
             "steps": [
-                "ଛୁଞ୍ଚି କାଟି ସିରିଞ୍ଜ ପକାନ୍ତୁ।"
+                "ଛୁଞ୍ଚି କାଟି ସିରିଞ୍ଜ ଲାଲ୍ ଡବାରେ ପକାନ୍ତୁ।",
+                "ଆଇଭି ବୋତଲ ପକାନ୍ତୁ।",
+                "ରିସାଇକ୍ଲିଂ ପାଇଁ ପଠାନ୍ତୁ।"
             ]
         },
         "white": {
-            "title": "ଧଳା ବର୍ଗ: ଧାରୁଆ ଛୁଞ୍ଚି ଏବଂ ବ୍ଲେଡ୍",
-            "summary": "ଛୁଞ୍ଚି ଏବଂ ବ୍ଲେଡକୁ ଧଳା ପଙ୍କଚର-ପ୍ରୁଫ୍ ପାତ୍ରରେ ରଖନ୍ତୁ। ହାତରେ ଛୁଞ୍ଚି ଠିପି ଲଗାନ୍ତୁ ନାହିଁ।",
+            "title": "ଧଳା ପାତ୍ର ଗାଇଡ୍: ଧାରୁଆ ଛୁଞ୍ଚି ଏବଂ ବ୍ଲେଡ୍",
+            "summary": "ଧଳା ପାତ୍ର କେବଳ ଧାରୁଆ ଛୁଞ୍ଚି, ସର୍ଜିକାଲ୍ ବ୍ଲେଡ୍ ଏବଂ ସିଲେଇ ଛୁଞ୍ଚି ପାଇଁ। ହାତରେ ଛୁଞ୍ଚି ଠିପି ଲଗାନ୍ତୁ ନାହିଁ। ପୂର୍ଣ୍ଣ ହେଲେ ଲକ୍ କରନ୍ତୁ।",
             "steps": [
-                "ଧଳା ପାତ୍ରରେ ଛୁଞ୍ଚି ରଖନ୍ତୁ।"
+                "ଧଳା ପାତ୍ରରେ ଛୁଞ୍ଚି ରଖନ୍ତୁ।",
+                "ହାତରେ ଠିପି ଲଗାନ୍ତୁ ନାହିଁ।",
+                "ଲକ୍ କରନ୍ତୁ।"
             ]
         },
         "blue": {
-            "title": "ନୀଳ ବର୍ଗ: କାଚ ସାମଗ୍ରୀ ଏବଂ ଧାତୁ",
-            "summary": "ଔଷଧ କାଚ ଶିଶି ନୀଳ ବାକ୍ସରେ ରଖନ୍ତୁ। ଭଙ୍ଗା କାଚକୁ ଚିମୁଟା ସାହାଯ୍ୟରେ ଉଠାନ୍ତୁ।",
+            "title": "ନୀଳ ଡବା ଗାଇଡ୍: କାଚ ସାମଗ୍ରୀ ଏବଂ ଧାତୁ",
+            "summary": "ନୀଳ ବାକ୍ସରେ ଔଷଧ କାଚ ଶିଶି, ଟେଷ୍ଟ ଟ୍ୟୁବ୍ ଏବଂ ଧାତୁ ପ୍ଲେଟ୍ ରଖନ୍ତୁ। ଭଙ୍ଗା କାଚକୁ ଚିମୁଟା ସାହାଯ୍ୟରେ ଉଠାନ୍ତୁ।",
             "steps": [
-                "ନୀଳ ବାକ୍ସରେ ରଖନ୍ତୁ।"
+                "ନୀଳ ଡବାରେ କାଚ ଓ ଧାତୁ ରଖନ୍ତୁ।",
+                "ଚିମୁଟା ବ୍ୟବହାର କରନ୍ତୁ।"
             ]
         },
         "purple": {
             "title": "କେମୋଥେରାପି କର୍କଟ ବର୍ଜ୍ୟ",
-            "summary": "କେମୋଥେରାପି ବର୍ଜ୍ୟ ପାଇଁ ବାଇଗଣୀ ବ୍ୟାଗ୍ ବ୍ୟବହାର କରନ୍ତୁ।",
+            "summary": "କେମୋଥେରାପି ବର୍ଜ୍ୟ ପାଇଁ ବାଇଗଣୀ ବ୍ୟାଗ୍ ବ୍ୟବହାର କରନ୍ତୁ ଏବଂ ୧୨୦୦ ଡିଗ୍ରୀରେ ଜଳାନ୍ତୁ।",
             "steps": [
                 "ବାଇଗଣୀ ବ୍ୟାଗ୍ ବ୍ୟବହାର କରନ୍ତୁ।"
             ]
         },
         "general": {
-            "title": "ସାଧାରଣ ବିପଦମୁକ୍ତ ବର୍ଜ୍ୟ",
-            "summary": "କାଗଜ ଏବଂ ଖାଦ୍ୟ ବଳକା ସବୁଜ କିମ୍ବା କଳା ଡବାରେ ପକାନ୍ତୁ।",
+            "title": "ସାଧାରଣ ବର୍ଜ୍ୟ",
+            "summary": "କାଗଜ ଏବଂ ଖାଦ୍ୟ ବଳକା ସବୁଜ ଡବାରେ ପକାନ୍ତୁ।",
             "steps": [
-                "ସବୁଜ କିମ୍ବା କଳା ଡବାରେ ପକାନ୍ତୁ।"
+                "ସବୁଜ ଡବାରେ କାଗଜ ପକାନ୍ତୁ।"
             ]
         },
         "emergency": {
             "title": "ଜରୁରୀକାଳୀନ ଛୁଞ୍ଚି ଫୁଟିବା ନିୟମ",
-            "summary": "ଛୁଞ୍ଚି ଫୁଟିଲେ: ୫ ମିନିଟ୍ ଧରି ଚାଲୁଥିବା ପାଣି ଏବଂ ସାବୁନରେ ଧୁଅନ୍ତୁ ଏବଂ ୨ ଘଣ୍ଟା ମଧ୍ୟରେ ପେପ୍ ଚିକିତ୍ସା କରାନ୍ତୁ।",
+            "summary": "ଛୁଞ୍ଚି ଫୁଟିଲେ: ୫ ମିନିଟ୍ ଧରି ପାଣି ଏବଂ ସାବୁନରେ ଧୁଅନ୍ତୁ। କ୍ଷତକୁ ଚିପନ୍ତୁ ନାହିଁ। ୨ ଘଣ୍ଟା ମଧ୍ୟରେ ପେପ୍ ଚିକିତ୍ସା ନିଅନ୍ତୁ। ରକ୍ତ ପଡ଼ିଲେ: ୧% ବ୍ଲିଚ୍ ପକାଇ ୨୦ ମିନିଟ୍ ପରେ ପୋଛନ୍ତୁ।",
             "steps": [
-                "୫ ମିନିଟ୍ ସାବୁନରେ ଧୁଅନ୍ତୁ।",
+                "୫ ମିନିଟ୍ ପାଣିରେ ଧୁଅନ୍ତୁ।",
                 "୨ ଘଣ୍ଟାରେ ପେପ୍ ନିଅନ୍ତୁ।"
             ]
         }
@@ -873,61 +927,65 @@ const PRECAUTION_TRANSCRIPTS_I18N = {
     "ur": {
         "master": {
             "title": "بائیو میڈیکل ویسٹ اور طبی حفاظتی رہنمائی",
-            "summary": "بائیو میڈیکل ویسٹ مینجمنٹ گائیڈ میں خوش آمدید۔ تمام طبی عملے کو پی پی ای اور دستانے لازمی پہننے چاہئیں۔ کچرے کو چار رنگوں میں الگ کریں: پیلا - متعدی اور جسمانی فضلہ؛ سرخ - ری سائیکل پلاسٹک؛ سفید - سوئیاں اور بلیڈ؛ نیلا - شیشے کی بوتلیں اور دھات۔ سوئی چبھنے پر دو گھنٹے کے اندر رپورٹ کریں۔",
+            "summary": "کچرے کو چار رنگوں میں الگ کریں: پیلا - متعدی اور جسمانی فضلہ؛ سرخ - ری سائیکل پلاسٹک؛ سفید - تیز دھار سوئیاں اور بلیڈ؛ نیلا - شیشے کی بوتلیں اور دھات۔ مکمل پی پی ای پہنیں اور سوئی چبھنے پر دو گھنٹے کے اندر رپورٹ کریں۔",
             "steps": [
-                "فضلہ چھونے سے پہلے مکمل پی پی ای پہنیں۔",
-                "چار رنگوں کے ڈبوں میں کچرا الگ کریں۔",
-                "سوئی پر ہاتھ سے ڈھکن نہ لگائیں۔",
-                "تین چوتھائی بھر جانے پر سیل کریں۔",
-                "سوئی چبھنے پر پانچ منٹ دھوئیں اور دو گھنٹے میں رپورٹ کریں۔"
+                "مکمل پی پی ای پہنیں۔",
+                "چار رنگوں میں کچرا الگ کریں۔",
+                "سوئی چبھنے پر رپورٹ کریں۔"
             ]
         },
         "yellow": {
-            "title": "پیلا زمرہ: متعدی اور جسمانی فضلہ",
-            "summary": "خون آلود پٹیاں، روئی اور انسانی اعضاء پیلے تھیلے میں ڈالیں اور 48 گھنٹے کے اندر تلف کریں۔",
+            "title": "پیلا ڈبہ گائیڈ: متعدی اور جسمانی فضلہ",
+            "summary": "پیلا ڈبہ صرف متعدی، انسانی اعضاء اور پیتھولوجیکل فضلے کے لیے مخصوص ہے۔ اس میں ڈالنے والی اشیاء: انسانی اعضاء، بافتیں اور نال؛ خون آلود پٹیاں، روئی، گوز اور پلستر؛ زائد المیعاد دوائیں؛ لیب کلچرز اور ویکسین۔ اس میں سوئیاں، بلیڈ یا شیشہ نہ ڈالیں۔ نان کلورینیٹڈ پیلے تھیلے میں رکھ کر 1050 ڈگری پر جلائیں۔",
             "steps": [
-                "پیلے تھیلے کا استعمال کریں۔",
-                "48 گھنٹے میں تلف کریں۔"
+                "پیلے تھیلے میں متعدی فضلہ ڈالیں۔",
+                "انسانی اعضاء اور خون آلود پٹیاں شامل ہیں۔",
+                "سوئیاں یا شیشہ نہ ڈالیں۔"
             ]
         },
         "red": {
-            "title": "سرخ زمرہ: ری سائیکل پلاسٹک فضلہ",
-            "summary": "سوئی کے بغیر پلاسٹک سرنج اور آئی وی سیٹ سرخ ڈبے میں ڈالیں۔ سوئی کاٹنے کے بعد ہی سرنج ڈالیں۔",
+            "title": "سرخ ڈبہ گائیڈ: ری سائیکل پلاسٹک فضلہ",
+            "summary": "سرخ ڈبہ صرف پلاسٹک کے ری سائیکل طبی فضلے کے لیے ہے۔ اس میں ڈالنے والی اشیاء: بغیر سوئی والی پلاسٹک سرنج، آئی وی بوتلیں اور ٹیوبیں، کیتھیٹر، پیشاب کے تھیلے اور دستانے۔ سوئیاں یا شیشہ نہ ڈالیں۔ سوئی کاٹنے اور سیال مکمل نکالنے کے بعد ری سائیکلنگ کے لیے بھیجیں۔",
             "steps": [
-                "سوئی کاٹ کر سرنج سرخ ڈبے میں ڈالیں۔"
+                "سوئی کاٹ کر سرنج سرخ ڈبے میں ڈالیں۔",
+                "آئی وی بوتلیں اور نلیاں ڈالیں۔",
+                "ری سائیکلنگ کے لیے بھیجیں۔"
             ]
         },
         "white": {
-            "title": "سفید زمرہ: تیز دھار سوئیاں اور بلیڈ",
-            "summary": "سوئیاں اور سرجیکل بلیڈ سفید سخت کنٹینر میں ڈالیں۔ سوئی کو ہاتھ سے دوبارہ بند نہ کریں۔",
+            "title": "سفید کنٹینر گائیڈ: تیز دھار سوئیاں اور بلیڈ",
+            "summary": "سفید پنکچر پروف کنٹینر صرف تیز دھار سوئیوں، سرجیکل بلیڈوں اور ٹانکے والی سوئیوں کے لیے ہے۔ ہاتھ سے سوئی پر ڈھکن نہ لگائیں۔ تین چوتھائی بھر جانے پر مستقل طور پر لاک کریں۔",
             "steps": [
-                "سفید کنٹینر میں سوئیاں ڈالیں۔"
+                "سفید کنٹینر میں سوئیاں ڈالیں۔",
+                "ہاتھ سے ڈھکن نہ لگائیں۔",
+                "لاک کریں۔"
             ]
         },
         "blue": {
-            "title": "نیلا زمرہ: شیشے کے برتن اور دھات",
-            "summary": "شیشے کی شیشیاں نیلے ڈبے میں رکھیں۔ ٹوٹا ہوا شیشہ چمٹے سے اٹھائیں۔",
+            "title": "نیلا ڈبہ گائیڈ: شیشے کے برتن اور دھات",
+            "summary": "نیلے ڈبے میں دوائیوں کی شیشے کی شیشیاں، ایمپول، ٹیسٹ ٹیوبیں اور ہڈیوں کی دھاتی پلیٹیں ڈالیں۔ ٹوٹا ہوا شیشہ چمٹے سے اٹھائیں۔",
             "steps": [
-                "نیلے ڈبے میں رکھیں۔"
+                "نیلے ڈبے میں شیشہ اور دھات رکھیں۔",
+                "چمٹے سے شیشہ اٹھائیں۔"
             ]
         },
         "purple": {
             "title": "کیموتھراپی کینسر کا فضلہ",
-            "summary": "کیموتھراپی کے فضلے کے لیے جامنی تھیلے استعمال کریں اور انتہائی درجہ حرارت پر جلائیں۔",
+            "summary": "کیموتھراپی کے فضلے کے لیے جامنی تھیلے استعمال کریں اور 1200 ڈگری سے زیادہ پر جلائیں۔",
             "steps": [
                 "جامنی تھیلے استعمال کریں۔"
             ]
         },
         "general": {
-            "title": "عام غیر مضر ہسپتال کا فضلہ",
-            "summary": "کاغذ اور بچا ہوا کھانا سبز یا کالے ڈبے میں ڈالیں۔",
+            "title": "عام غیر مضر فضلہ",
+            "summary": "صاف کاغذ اور بچا ہوا کھانا سبز ڈبے میں ڈالیں۔",
             "steps": [
-                "سبز یا کالے ڈبے میں ڈالیں۔"
+                "سبز ڈبے میں کاغذ ڈالیں۔"
             ]
         },
         "emergency": {
             "title": "ہنگامی سوئی چبھنے کا پروٹوکول",
-            "summary": "سوئی چبھنے پر: 5 منٹ بہتے پانی اور صابن سے دھوئیں اور 2 گھنٹے کے اندر پی ای پی علاج حاصل کریں۔",
+            "summary": "سوئی چبھنے پر: 5 منٹ بہتے پانی اور صابن سے دھوئیں اور 2 گھنٹے کے اندر پی ای پی علاج حاصل کریں۔ زخم کو نہ دبائیں۔ خون گرنے پر: 1% بلیچ ڈال کر 20 منٹ بعد صاف کریں۔",
             "steps": [
                 "5 منٹ صابن سے دھوئیں।",
                 "2 گھنٹے میں علاج لیں۔"
@@ -936,7 +994,7 @@ const PRECAUTION_TRANSCRIPTS_I18N = {
     }
 };
 
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
     window.SUPPORTED_LANGUAGES = SUPPORTED_LANGUAGES;
     window.PRECAUTION_TRANSCRIPTS_I18N = PRECAUTION_TRANSCRIPTS_I18N;
 }
