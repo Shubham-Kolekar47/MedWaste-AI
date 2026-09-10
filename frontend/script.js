@@ -1738,8 +1738,12 @@ function renderClassificationResult(classification, imageUrl, shouldSave = true)
     
     // Format Digital Record Weight and Scale
     if (weightEl) {
-        if (weightVal < 0.05) {
+        if (st4.weight_display) {
+            weightEl.innerText = st4.weight_display;
+        } else if (weightVal < 0.05) {
             weightEl.innerText = `${weightVal} kg (${Math.round(weightVal * 1000)}g Single Item)`;
+        } else if (scaleLabel && (scaleLabel.toLowerCase().includes("container") || scaleLabel.toLowerCase().includes("vault"))) {
+            weightEl.innerText = `${weightVal} kg (Sharps Container / Vault Full)`;
         } else if (scaleLabel && scaleLabel.toLowerCase().includes("bag")) {
             weightEl.innerText = `${weightVal} kg (Bag Full / Bulk Batch)`;
         } else if (scaleLabel && scaleLabel.toLowerCase().includes("pile")) {
@@ -1752,7 +1756,7 @@ function renderClassificationResult(classification, imageUrl, shouldSave = true)
     }
 
     if (scaleEl) {
-        scaleEl.innerText = scaleLabel || (weightVal < 0.05 ? "1x Single Syringe (1 Unit)" : "Bulk Clinical Waste Bag");
+        scaleEl.innerText = scaleLabel || (weightVal < 0.05 ? "1x Single Syringe (1 Unit)" : "Bulk Clinical Waste Receptacle");
     }
 
     if (timeEl) timeEl.innerText = st5.timestamp || new Date().toLocaleString();

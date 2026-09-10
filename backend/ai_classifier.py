@@ -291,7 +291,7 @@ def analyze_image_scale_and_density(image_path, combined_context=""):
     yellow_sheet = 0.0
     red_sheet = 0.0
 
-    if HAS_PIL and HAS_NUMPY and image_path and os.path.exists(image_path):
+    if HAS_PIL and image_path and os.path.exists(image_path):
         try:
             with Image.open(image_path) as img:
                 img = img.convert("RGB")
@@ -303,45 +303,93 @@ def analyze_image_scale_and_density(image_path, combined_context=""):
                     img = img.resize((int(w * scale), int(h * scale)))
                     w, h = img.size
 
-                # 1. Edge & Texture Complexity
-                gray = img.convert("L")
-                edges = gray.filter(ImageFilter.FIND_EDGES)
-                edge_arr = np.array(edges, dtype=np.uint8)
-                edge_density = float(np.mean(edge_arr > 32))
+                if HAS_NUMPY:
+                    # 1. Edge & Texture Complexity
+                    gray = img.convert("L")
+                    edges = gray.filter(ImageFilter.FIND_EDGES)
+                    edge_arr = np.array(edges, dtype=np.uint8)
+                    edge_density = float(np.mean(edge_arr > 32))
 
-                # 2. Foreground vs Background Segmentation
-                arr = np.array(img, dtype=float)
-                cw = max(int(w * 0.08), 2)
-                ch = max(int(h * 0.08), 2)
-                corners = np.vstack([
-                    arr[:ch, :cw].reshape(-1, 3),
-                    arr[:ch, -cw:].reshape(-1, 3),
-                    arr[-ch:, :cw].reshape(-1, 3),
-                    arr[-ch:, -cw:].reshape(-1, 3)
-                ])
-                bg_color = np.median(corners, axis=0)
-                diff = np.sqrt(np.sum((arr - bg_color) ** 2, axis=2))
-                fg_mask = diff > 24.0
-                fg_ratio = float(np.mean(fg_mask))
+                    # 2. Foreground vs Background Segmentation
+                    arr = np.array(img, dtype=float)
+                    cw = max(int(w * 0.08), 2)
+                    ch = max(int(h * 0.08), 2)
+                    corners = np.vstack([
+                        arr[:ch, :cw].reshape(-1, 3),
+                        arr[:ch, -cw:].reshape(-1, 3),
+                        arr[-ch:, :cw].reshape(-1, 3),
+                        arr[-ch:, -cw:].reshape(-1, 3)
+                    ])
+                    bg_color = np.median(corners, axis=0)
+                    diff = np.sqrt(np.sum((arr - bg_color) ** 2, axis=2))
+                    fg_mask = diff > 24.0
+                    fg_ratio = float(np.mean(fg_mask))
 
-                center_mask = fg_mask[int(h * 0.15):int(h * 0.85), int(w * 0.15):int(w * 0.85)]
-                center_fill = float(np.mean(center_mask)) if center_mask.size > 0 else 0.0
+                    center_mask = fg_mask[int(h * 0.15):int(h * 0.85), int(w * 0.15):int(w * 0.85)]
+                    center_fill = float(np.mean(center_mask)) if center_mask.size > 0 else 0.0
 
-                # 3. Bounding Box & Aspect Ratio of Waste Object
-                ys, xs = np.where(fg_mask)
-                if len(ys) > 50:
-                    box_w = np.max(xs) - np.min(xs) + 1
-                    box_h = np.max(ys) - np.min(ys) + 1
-                    aspect_ratio = max(box_w, box_h) / max(min(box_w, box_h), 1)
+                    # 3. Bounding Box & Aspect Ratio of Waste Object
+                    ys, xs = np.where(fg_mask)
+                    if len(ys) > 50:
+                        box_w = np.max(xs) - np.min(xs) + 1
+                        box_h = np.max(ys) - np.min(ys) + 1
+                        aspect_ratio = max(box_w, box_h) / max(min(box_w, box_h), 1)
 
-                # 4. Plastic Biohazard Bag Color Signatures
-                r, g, b = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
-                max_c = np.maximum(np.maximum(r, g), b)
-                min_c = np.minimum(np.minimum(r, g), b)
-                sat = (max_c - min_c) / (max_c + 1e-5)
+                    # 4. Plastic Biohazard Bag Color Signatures
+                    r, g, b = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
+                    max_c = np.maximum(np.maximum(r, g), b)
+                    min_c = np.minimum(np.minimum(r, g), b)
+                    sat = (max_c - min_c) / (max_c + 1e-5)
 
-                yellow_sheet = float(np.mean((r > 130) & (g > 110) & (b < 95) & (r > b * 1.35) & (sat > 0.28)))
-                red_sheet = float(np.mean((r > 135) & (g < 90) & (b < 90) & (sat > 0.35)))
+                    yellow_sheet = float(np.mean((r > 130) & (g > 110) & (b < 95) & (r > b * 1.35) & (sat > 0.28)))
+                    red_sheet = float(np.mean((r > 135) & (g < 90) & (b < 90) & (sat > 0.35)))
+                else:
+                    # Pure PIL robust fallback (no numpy required)
+                    gray = img.convert("L")
+                    edges = gray.filter(ImageFilter.FIND_EDGES)
+                    edge_bytes = edges.tobytes()
+                    edge_density = sum(1 for b in edge_bytes if b > 32) / max(len(edge_bytes), 1)
+
+                    pixels = list(img.getdata())
+                    corners = [pixels[0], pixels[w - 1], pixels[(h - 1) * w], pixels[h * w - 1]]
+                    bg_r = sum(p[0] for p in corners) / 4.0
+                    bg_g = sum(p[1] for p in corners) / 4.0
+                    bg_b = sum(p[2] for p in corners) / 4.0
+
+                    fg_count = 0
+                    center_fg = 0
+                    center_total = 0
+                    y1, y2 = int(h * 0.15), int(h * 0.85)
+                    x1, x2 = int(w * 0.15), int(w * 0.85)
+
+                    y_sheet_count = 0
+                    r_sheet_count = 0
+
+                    for idx, (r, g, b) in enumerate(pixels):
+                        diff_sq = (r - bg_r) ** 2 + (g - bg_g) ** 2 + (b - bg_b) ** 2
+                        is_fg = diff_sq > 576.0
+                        if is_fg:
+                            fg_count += 1
+                        y = idx // w
+                        x = idx % w
+                        if y1 <= y < y2 and x1 <= x < x2:
+                            center_total += 1
+                            if is_fg:
+                                center_fg += 1
+
+                        max_c = max(r, g, b)
+                        min_c = min(r, g, b)
+                        sat = (max_c - min_c) / (max_c + 1e-5)
+                        if r > 130 and g > 110 and b < 95 and r > b * 1.35 and sat > 0.28:
+                            y_sheet_count += 1
+                        if r > 135 and g < 90 and b < 90 and sat > 0.35:
+                            r_sheet_count += 1
+
+                    total_px = max(len(pixels), 1)
+                    fg_ratio = fg_count / total_px
+                    center_fill = center_fg / max(center_total, 1)
+                    yellow_sheet = y_sheet_count / total_px
+                    red_sheet = r_sheet_count / total_px
         except Exception as e:
             print(f"[!] Scale analysis warning: {e}")
 
@@ -361,18 +409,29 @@ def analyze_image_scale_and_density(image_path, combined_context=""):
         scale_label = "1x Single Waste Item (1 Unit)"
         item_count = 1
         reason = "Solitary single-item clinical specimen profile on examination substrate."
-    elif (center_fill > 0.52 and fg_ratio > 0.40 and edge_density > 0.045):
-        # Volumetric mass occupying most of the frame
-        if edge_density > 0.08 or fg_ratio > 0.65:
+    elif (center_fill > 0.48 and fg_ratio > 0.38 and edge_density > 0.040):
+        # Volumetric mass or container occupying most of the frame (like a container full of syringes)
+        if yellow_sheet > 0.16:
             scale_type = "bag_full"
-            scale_label = "Dense Bag / Bulk Cluster (~70-90 Units)"
-            item_count = random.randint(70, 90)
-            reason = f"High-volume volumetric mass detected (center_fill={center_fill*100:.1f}%, edge_density={edge_density:.4f})."
+            item_count = random.randint(65, 85)
+            scale_label = f"Yellow Biohazard Bag Full (~{item_count} Units)"
+            reason = f"Continuous yellow biohazard containment detected (center_fill={center_fill*100:.1f}%, yellow={yellow_sheet:.2f})."
+        elif red_sheet > 0.16:
+            scale_type = "bag_full"
+            item_count = random.randint(65, 85)
+            scale_label = f"Red Biohazard Bag Full (~{item_count} Units)"
+            reason = f"Continuous red clinical waste bag detected (center_fill={center_fill*100:.1f}%, red={red_sheet:.2f})."
+        elif edge_density > 0.075 or fg_ratio > 0.60:
+            # Receptacle / Bin / Vault packed with syringes and sharps
+            scale_type = "bag_full"
+            item_count = random.randint(65, 85)
+            scale_label = f"Sharps Vault / Container Full (~{item_count} Units)"
+            reason = f"High-density clinical waste container/vault detected (center_fill={center_fill*100:.1f}%, edge_density={edge_density:.4f})."
         else:
             scale_type = "pile"
-            scale_label = "Pile of Waste Items (~25-35 Units)"
-            item_count = random.randint(25, 35)
-            reason = f"Multi-item pile / heap distribution detected (fg_ratio={fg_ratio*100:.1f}%, edge_density={edge_density:.4f})."
+            item_count = random.randint(25, 40)
+            scale_label = f"Pile of Waste Items (~{item_count} Units)"
+            reason = f"Multi-item loose heap profile detected (fg_ratio={fg_ratio*100:.1f}%, edge_density={edge_density:.4f})."
     elif has_pile_kw:
         scale_type = "pile"
         scale_label = "Pile of Waste Items (~25-35 Units)"
@@ -425,8 +484,9 @@ def estimate_item_weight(detected_item=None, primary_category=None, sub_stream=N
     txt = f"{detected_item or ''} {primary_category or ''} {sub_stream or ''} {combined_context or ''}".lower()
 
     # Base single item unit identification
+    has_no_needle = any(k in txt for k in ["without needle", "no needle", "needle destroyed", "hub cut", "needle-less", "needleless"])
     is_syringe = any(k in txt for k in ["syringe", "dispovan", "plunger", "barrel", "piston"])
-    is_sharp = any(k in txt for k in ["needle", "scalpel", "blade", "lancet", "suture", "sharps"])
+    is_sharp = any(k in txt for k in ["needle", "scalpel", "blade", "lancet", "suture", "sharps"]) and not has_no_needle
     is_cotton = any(k in txt for k in ["cotton", "gauze", "swab", "bandage", "dressing", "pad", "tissue"])
     is_glass = any(k in txt for k in ["vial", "ampoule", "cullet", "slide", "test tube", "glass"])
     is_ppe = any(k in txt for k in ["glove", "mask", "cap", "latex", "nitrile"])
@@ -472,12 +532,35 @@ def estimate_item_weight(detected_item=None, primary_category=None, sub_stream=N
             pass
 
     # Scale-driven weight synthesis
-    if is_syringe:
+    if is_syringe and is_sharp:
+        # Syringes with attached needles (e.g. 2ml-10ml barrel + needle hub)
+        # Unit weight: ~26g - 35g
+        if st == "single":
+            w = round(random.uniform(0.026, 0.034), 3)
+            scale_lbl = "1x Syringe with Needle (1 Unit)"
+            disp = f"{w} kg ({int(round(w * 1000))}g Single Item)"
+        elif st == "multiple":
+            u = cnt if (cnt and cnt > 1) else random.randint(6, 12)
+            w = round(u * random.uniform(0.026, 0.032), 3)
+            scale_lbl = f"Multiple Syringes & Needles (~{u} Units)"
+            disp = f"{w} kg (~{u} Units)"
+        elif st in ["pile", "bag_full"]:
+            # Container or pile with 45-80 syringes with needles
+            u = cnt if (cnt and cnt > 20) else random.randint(55, 80)
+            w = round(u * random.uniform(0.025, 0.030), 3)
+            scale_lbl = f"Sharps Vault Container Full (~{u} Syringes & Sharps)"
+            disp = f"{w} kg (Sharps Container Full / ~{u} Units)"
+        else: # bulk
+            w = round(random.uniform(4.50, 7.50), 3)
+            scale_lbl = "Bulk Sharps Vault Receptacle (>100 Syringes)"
+            disp = f"{w} kg (Bulk Haul)"
+
+    elif is_syringe:
         # Single syringe: strictly 25g - 35g (0.025 - 0.035 kg)
         if st == "single":
             w = round(random.uniform(0.026, 0.034), 3)
             scale_lbl = "1x Single Syringe (1 Unit)"
-            disp = f"{w} kg ({int(round(w * 1000))}g)"
+            disp = f"{w} kg ({int(round(w * 1000))}g Single Item)"
         elif st == "multiple":
             # 5-12 syringes: 0.18 - 0.38 kg
             u = cnt if (cnt and cnt > 1) else random.randint(7, 12)
@@ -505,7 +588,7 @@ def estimate_item_weight(detected_item=None, primary_category=None, sub_stream=N
         if st == "single":
             w = round(random.uniform(0.015, 0.032), 3)
             scale_lbl = "1x Cotton Swab / Gauze Dressing (1 Unit)"
-            disp = f"{w} kg ({int(round(w * 1000))}g)"
+            disp = f"{w} kg ({int(round(w * 1000))}g Single Item)"
         elif st == "multiple":
             w = round(random.uniform(0.12, 0.32), 3)
             scale_lbl = "Multiple Soiled Dressings (~6-10 Units)"
@@ -523,25 +606,27 @@ def estimate_item_weight(detected_item=None, primary_category=None, sub_stream=N
         if st == "single":
             w = round(random.uniform(0.008, 0.016), 3)
             scale_lbl = "1x Surgical Needle / Scalpel (1 Unit)"
-            disp = f"{w} kg ({int(round(w * 1000))}g)"
+            disp = f"{w} kg ({int(round(w * 1000))}g Single Item)"
         elif st == "multiple":
-            w = round(random.uniform(0.06, 0.22), 3)
-            scale_lbl = "Multiple Sharps & Blades (~8-15 Units)"
-            disp = f"{w} kg"
+            u = cnt if (cnt and cnt > 1) else random.randint(8, 15)
+            w = round(u * random.uniform(0.009, 0.014), 3)
+            scale_lbl = f"Multiple Sharps & Blades (~{u} Units)"
+            disp = f"{w} kg (~{u} Sharps)"
         elif st in ["pile", "bag_full"]:
-            w = round(random.uniform(1.20, 2.80), 3)
-            scale_lbl = "Sharps Puncture Container Full"
-            disp = f"{w} kg"
+            u = cnt if (cnt and cnt > 20) else random.randint(50, 80)
+            w = round(u * random.uniform(0.012, 0.018), 3)
+            scale_lbl = f"Sharps Puncture Container Full (~{u} Units)"
+            disp = f"{w} kg (Sharps Container Full / ~{u} Units)"
         else:
             w = round(random.uniform(3.50, 6.00), 3)
             scale_lbl = "Bulk Sharps Vault Container"
-            disp = f"{w} kg"
+            disp = f"{w} kg (Bulk Haul)"
 
     elif is_glass:
         if st == "single":
             w = round(random.uniform(0.030, 0.060), 3)
             scale_lbl = "1x Medicine Vial / Ampoule (1 Unit)"
-            disp = f"{w} kg ({int(round(w * 1000))}g)"
+            disp = f"{w} kg ({int(round(w * 1000))}g Single Item)"
         elif st == "multiple":
             w = round(random.uniform(0.20, 0.55), 3)
             scale_lbl = "Multiple Vials & Ampoules (~6-10 Units)"
@@ -884,15 +969,28 @@ def analyze_clinical_features(image_path, scale_info=None):
 
             # RULE 3: White stream - Sharps, needles, blades
             if sharp_ratio >= 0.10 or (specular_highlights > 35 and sharp_ratio >= 0.05):
+                has_syringes_too = (plastic_ratio >= 0.18 or translucent_plastic_polymer >= 20)
                 if scale_type in ["bag_full", "bulk", "pile"]:
-                    det_item = f"Contaminated Sharps & Needles Vault (~{item_count} Units)"
-                    v_reas = f"Detected high-density cluster of metallic specular sharps, scalpels, and puncture-hazard needles (~{item_count} units). Routed to White puncture-proof container."
+                    if has_syringes_too:
+                        det_item = f"Contaminated Syringes & Needles Vault (~{item_count} Units)"
+                        v_reas = f"Detected high-density cluster of plastic syringe barrels with attached steel needles and puncture-hazard sharps (~{item_count} units). Routed to White puncture-proof container."
+                    else:
+                        det_item = f"Contaminated Sharps & Needles Vault (~{item_count} Units)"
+                        v_reas = f"Detected high-density cluster of metallic specular sharps, scalpels, and puncture-hazard needles (~{item_count} units). Routed to White puncture-proof container."
                 elif scale_type == "multiple":
-                    det_item = f"Multiple Contaminated Needles & Sharps (~{item_count} Units)"
-                    v_reas = f"Detected cluster of metallic sharp needles/blades (~{item_count} units). Routed to White puncture-proof container."
+                    if has_syringes_too:
+                        det_item = f"Multiple Contaminated Syringes with Needles (~{item_count} Units)"
+                        v_reas = f"Detected cluster of disposable syringes with attached needles and sharps (~{item_count} units). Routed to White puncture-proof container."
+                    else:
+                        det_item = f"Multiple Contaminated Needles & Sharps (~{item_count} Units)"
+                        v_reas = f"Detected cluster of metallic sharp needles/blades (~{item_count} units). Routed to White puncture-proof container."
                 else:
-                    det_item = "Contaminated Hypodermic Needle / Scalpel Blade"
-                    v_reas = "Detected solitary metallic specular reflection and sharp beveled needle/blade edge profile. Routed to White puncture-proof container."
+                    if has_syringes_too:
+                        det_item = "Single-Use Disposable Syringe with Attached Needle"
+                        v_reas = "Detected solitary plastic syringe barrel with attached fixed metallic hypodermic needle. Classified into WHITE stream under CPCB rules due to puncture hazard."
+                    else:
+                        det_item = "Contaminated Hypodermic Needle / Scalpel Blade"
+                        v_reas = "Detected solitary metallic specular reflection and sharp beveled needle/blade edge profile. Routed to White puncture-proof container."
 
                 return {
                     "category": "White/Blue",
