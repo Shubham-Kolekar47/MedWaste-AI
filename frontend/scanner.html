@@ -131,7 +131,7 @@
                 <div class="node-meta">
                     <span class="node-step-tag">STAGE 3</span>
                     <strong class="node-title">Identify Waste Type</strong>
-                    <span class="node-sub">Yellow • Red • White/Blue</span>
+                    <span class="node-sub" id="stageNode3Sub">Yellow • Red • White/Blue</span>
                 </div>
             </div>
 
@@ -146,7 +146,7 @@
                 <div class="node-meta">
                     <span class="node-step-tag">STAGE 4</span>
                     <strong class="node-title">Software "Segregates"</strong>
-                    <span class="node-sub">Automated Bin Routing</span>
+                    <span class="node-sub" id="stageNode4Sub">Automated Bin Routing</span>
                 </div>
             </div>
 
@@ -373,47 +373,53 @@
                         </div>
 
                         <!-- 3 Streams Side-by-Side: Yellow, Red, White/Blue -->
-                        <div class="three-categories-grid">
+                        <div class="three-categories-grid" id="threeCategoriesGrid">
 
                             <!-- Yellow Category Card -->
-                            <div class="category-stream-card" id="catCardYellow">
+                            <div class="category-stream-card" id="catCardYellow" onclick="manualSelectWasteType('Yellow')" role="button" tabindex="0" title="Click to select or verify Yellow Category">
                                 <div class="stream-card-header">
                                     <span class="stream-dot dot-yellow"></span>
                                     <h4>Yellow Category</h4>
                                     <i class="fa-solid fa-biohazard stream-icon"></i>
+                                    <span class="stream-selection-pill"><i class="fa-solid fa-circle-check"></i> SELECTED</span>
                                 </div>
                                 <div class="stream-label">Infectious & Anatomical</div>
                                 <div class="stream-items-summary">Gauze, Cotton, Bandages, Tissues</div>
-                                <div class="stream-active-marker"><i class="fa-solid fa-circle-check"></i> DETECTED
-                                </div>
+                                <div class="stream-active-marker"><i class="fa-solid fa-circle-check"></i> IDENTIFIED: YELLOW STREAM</div>
                             </div>
 
                             <!-- Red Category Card -->
-                            <div class="category-stream-card" id="catCardRed">
+                            <div class="category-stream-card" id="catCardRed" onclick="manualSelectWasteType('Red')" role="button" tabindex="0" title="Click to select or verify Red Category">
                                 <div class="stream-card-header">
                                     <span class="stream-dot dot-red"></span>
                                     <h4>Red Category</h4>
                                     <i class="fa-solid fa-syringe stream-icon"></i>
+                                    <span class="stream-selection-pill"><i class="fa-solid fa-circle-check"></i> SELECTED</span>
                                 </div>
                                 <div class="stream-label">Contaminated Plastics</div>
                                 <div class="stream-items-summary">Syringes, IV Tubing, Catheters</div>
-                                <div class="stream-active-marker"><i class="fa-solid fa-circle-check"></i> DETECTED
-                                </div>
+                                <div class="stream-active-marker"><i class="fa-solid fa-circle-check"></i> IDENTIFIED: RED STREAM</div>
                             </div>
 
                             <!-- White/Blue Category Card -->
-                            <div class="category-stream-card" id="catCardWhiteBlue">
+                            <div class="category-stream-card" id="catCardWhiteBlue" onclick="manualSelectWasteType('White/Blue')" role="button" tabindex="0" title="Click to select or verify White/Blue Category">
                                 <div class="stream-card-header">
                                     <span class="stream-dot dot-white-blue"></span>
                                     <h4>White/Blue Category</h4>
                                     <i class="fa-solid fa-shield-halved stream-icon"></i>
+                                    <span class="stream-selection-pill"><i class="fa-solid fa-circle-check"></i> SELECTED</span>
                                 </div>
                                 <div class="stream-label">Sharps & Glassware</div>
                                 <div class="stream-items-summary">Needles, Blades, Glass Vials</div>
-                                <div class="stream-active-marker"><i class="fa-solid fa-circle-check"></i> DETECTED
-                                </div>
+                                <div class="stream-active-marker"><i class="fa-solid fa-circle-check"></i> IDENTIFIED: SHARPS/GLASS STREAM</div>
                             </div>
 
+                        </div>
+
+                        <!-- Manual Verification & Override Tip -->
+                        <div class="stream-interactive-hint">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <span>AI automatic selection active. You can also click any category card above to verify or switch streams.</span>
                         </div>
 
                         <!-- Sub-stream specification notice if applicable -->

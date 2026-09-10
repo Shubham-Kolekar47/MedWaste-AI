@@ -66,6 +66,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* =========================
+   SECURITY & STRING HELPERS
+========================= */
+
+function escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function escapeQuote(str) {
+    if (!str) return "";
+    return String(str).replace(/'/g, "\\'").replace(/"/g, "&quot;");
+}
+
+
+/* =========================
    API CLIENT HELPER
 ========================= */
 
@@ -172,6 +192,9 @@ async function fetchLiveDashboardData(silent = false) {
     // Also reload bins and fleet
     await loadBinsData();
     await loadFleetData();
+    if (document.getElementById("pickupPageContainer") && typeof loadPickupPageData === "function") {
+        await loadPickupPageData(true);
+    }
 }
 
 function syncBackendData() {
@@ -273,7 +296,15 @@ function renderBins(bins) {
         };
 
         const level = Math.min(Math.round(bin.current_level), 100);
-        const weight = (bin.weight || 0).toFixed(1);
+        const rawWeight = parseFloat(bin.weight || 0);
+        let weight;
+        if (rawWeight === 0) {
+            weight = "0.0";
+        } else if (rawWeight % 1 === 0) {
+            weight = rawWeight.toFixed(1);
+        } else {
+            weight = parseFloat(rawWeight.toFixed(3)).toString();
+        }
 
         // Status badge styling
         let statusClass = "status-normal";
@@ -288,7 +319,12 @@ function renderBins(bins) {
                         <i class="fa-solid ${conf.icon}" style="color:${conf.color}"></i>
                         <span>${conf.name}</span>
                     </div>
-                    <span class="bin-code-pill">${bin.bin_code}</span>
+                    <div class="bin-header-badges">
+                        <span class="bin-code-pill">${bin.bin_code}</span>
+                        <button class="bin-btn-delete-header" title="Delete smart bin ${bin.bin_code}" onclick="deleteSmartBin(${bin.id}, '${bin.bin_code}')">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="bin-meter">
@@ -322,6 +358,56 @@ function renderBins(bins) {
             </div>
         `;
     }).join("");
+}
+
+/* =========================
+   DELETE SMART BIN
+========================= */
+
+async function deleteSmartBin(binId, binCode) {
+    const confirmed = confirm(
+        `Are you sure you want to delete smart bin "${binCode}"?\n\nThis will permanently delete this bin from telemetry monitoring and remove its linked collection logs.`
+    );
+    if (!confirmed) return;
+
+    showToast(`Deleting smart bin ${binCode}...`, "info");
+
+    const res = await apiCall(`/bins/${binId}`, "DELETE");
+
+    if (res.ok && res.data.success) {
+        showToast(res.data.message || `Smart bin ${binCode} deleted successfully`, "success");
+
+        // Animate card removal from DOM if present
+        const cardEl = document.getElementById(`binCard-${binId}`);
+        if (cardEl) {
+            cardEl.style.transition = "all 0.3s ease";
+            cardEl.style.opacity = "0";
+            cardEl.style.transform = "scale(0.85)";
+        }
+
+        // Remove from local array
+        allBins = allBins.filter(b => b.id !== binId);
+
+        setTimeout(() => {
+            renderBins(allBins);
+        }, 280);
+
+        // If on pickup page, also refresh fleet telemetry and collection records
+        if (document.getElementById("pickupPageContainer") && typeof loadPickupPageData === "function") {
+            setTimeout(() => {
+                loadPickupPageData(true);
+            }, 300);
+        }
+
+        // If on dashboard, refresh dashboard stats
+        if (document.getElementById("activeBinsDisplay") && typeof fetchLiveDashboardData === "function") {
+            setTimeout(() => {
+                fetchLiveDashboardData(true);
+            }, 300);
+        }
+    } else {
+        showToast(res.data.message || `Failed to delete smart bin ${binCode}`, "error");
+    }
 }
 
 
@@ -633,7 +719,7 @@ function renderPickupTable() {
         const stream = (req.waste_type || "Yellow").toLowerCase();
         const binCode = req.bin_code || `BIN-${req.bin_id || '001'}`;
         const timeStr = formatPickupTime(req.requested_at);
-        const weightDisplay = req.weight ? (parseFloat(req.weight).toFixed(1) + ' kg') : (req.current_level ? req.current_level + '%' : '1.8 kg');
+        const weightDisplay = req.weight ? (parseFloat(req.weight) < 0.1 ? parseFloat(req.weight).toFixed(3) + ' kg' : parseFloat(req.weight).toFixed(1) + ' kg') : (req.current_level ? req.current_level + '%' : '0.035 kg');
         
         let statusClass = "status-pill-pending";
         let statusLabel = req.status;
@@ -930,7 +1016,7 @@ function handleImageFileSelect(event) {
     }
 }
 
-function updatePipelineTracker(stageNumber) {
+function updatePipelineTracker(stageNumber, streamCategory = "") {
     for (let i = 1; i <= 5; i++) {
         const node = document.getElementById(`stageNode${i}`);
         const conn = document.getElementById(`connector${i}`);
@@ -946,6 +1032,44 @@ function updatePipelineTracker(stageNumber) {
             node.className = "flow-stage-node";
             if (conn) conn.className = "flow-connector";
         }
+    }
+
+    const st3Sub = document.getElementById("stageNode3Sub");
+    const st4Sub = document.getElementById("stageNode4Sub");
+    const node3 = document.getElementById("stageNode3");
+    const node4 = document.getElementById("stageNode4");
+
+    if (node3) {
+        node3.classList.remove("stream-yellow", "stream-red", "stream-blue");
+    }
+    if (node4) {
+        node4.classList.remove("stream-yellow", "stream-red", "stream-blue");
+    }
+
+    if (stageNumber >= 3 && streamCategory) {
+        const cat = String(streamCategory).toLowerCase();
+        if (cat.includes("yellow")) {
+            if (node3) node3.classList.add("stream-yellow");
+            if (st3Sub) st3Sub.innerHTML = '<strong style="color: #ca8a04;">🟡 Yellow Category (Selected)</strong>';
+            if (node4) node4.classList.add("stream-yellow");
+            if (st4Sub) st4Sub.innerHTML = '<span style="color: #ca8a04;">Yellow Biohazard Receptacle</span>';
+        } else if (cat.includes("red")) {
+            if (node3) node3.classList.add("stream-red");
+            if (st3Sub) st3Sub.innerHTML = '<strong style="color: #dc2626;">🔴 Red Category (Selected)</strong>';
+            if (node4) node4.classList.add("stream-red");
+            if (st4Sub) st4Sub.innerHTML = '<span style="color: #dc2626;">Red Autoclavable Plastic Bin</span>';
+        } else if (cat.includes("white") || cat.includes("blue")) {
+            if (node3) node3.classList.add("stream-blue");
+            if (st3Sub) st3Sub.innerHTML = '<strong style="color: #0284c7;">⚪/🔵 White/Blue (Selected)</strong>';
+            if (node4) node4.classList.add("stream-blue");
+            if (st4Sub) st4Sub.innerHTML = '<span style="color: #0284c7;">Puncture Sharps / Glass Box</span>';
+        } else if (cat.includes("multi")) {
+            if (st3Sub) st3Sub.innerHTML = '<strong style="color: #7c3aed;">🔄 4-Stream Multi Station</strong>';
+            if (st4Sub) st4Sub.innerHTML = '<span style="color: #7c3aed;">Central Station Bins Synchronized</span>';
+        }
+    } else if (stageNumber < 3) {
+        if (st3Sub) st3Sub.innerText = "Yellow • Red • White/Blue";
+        if (st4Sub) st4Sub.innerText = "Automated Bin Routing";
     }
 }
 
@@ -983,6 +1107,10 @@ async function handleImageFile(file, hint = "") {
     if (hint) {
         formData.append("hint", hint);
     }
+    const savedGeminiKey = localStorage.getItem("medwaste_gemini_key") || "";
+    if (savedGeminiKey) {
+        formData.append("api_key", savedGeminiKey);
+    }
 
     try {
         const res = await apiCall("/classify", "POST", formData, true);
@@ -993,6 +1121,7 @@ async function handleImageFile(file, hint = "") {
 
         if (res.ok && res.data && res.data.success) {
             renderClassificationResult(res.data.classification, res.data.image_url);
+            syncScannedWasteWithTelemetry(res.data.classification);
         } else {
             console.error("Classification error:", res);
             showToast((res.data && res.data.message) || "Classification failed. Ensure Flask backend is running on :5000.", "error");
@@ -1377,9 +1506,11 @@ async function captureAndScan() {
 
     showToast("AI analyzing camera frame...", "info");
 
+    const savedGeminiKey = localStorage.getItem("medwaste_gemini_key") || "";
     const res = await apiCall("/classify", "POST", {
         image_base64: dataUrl,
-        hint: "live clinical camera capture plastic syringe"
+        hint: "live clinical camera capture",
+        api_key: savedGeminiKey
     });
 
     if (hudStatus) {
@@ -1390,6 +1521,7 @@ async function captureAndScan() {
         const img = document.getElementById("imagePreviewImg");
         if (img) img.src = dataUrl;
         renderClassificationResult(res.data.classification, res.data.image_url);
+        syncScannedWasteWithTelemetry(res.data.classification);
     } else {
         showToast(res.data.message || "Camera classification failed.", "error");
     }
@@ -1419,8 +1551,12 @@ function renderClassificationResult(classification, imageUrl, shouldSave = true)
         resultBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
 
-    // Advance tracker through all stages
-    updatePipelineTracker(5);
+    // Advance tracker through all stages with the detected stream category
+    const catTitle = (classification.stage_3_waste_type && classification.stage_3_waste_type.primary_category) 
+        || classification.waste_type 
+        || "Yellow";
+
+    updatePipelineTracker(5, catTitle);
 
     // ==========================================
     // STAGE 2: AI MODEL WASTE DETECTION
@@ -1443,7 +1579,15 @@ function renderClassificationResult(classification, imageUrl, shouldSave = true)
             "Biohazard pathogen trace markers",
             "Non-chlorinated containment indicator"
         ];
-        featuresList.innerHTML = feats.map(f => `<span class="feature-pill"><i class="fa-solid fa-circle-check"></i> ${f}</span>`).join("");
+        let html = "";
+        const reasoning = classification.visual_reasoning || st2.visual_reasoning;
+        if (reasoning) {
+            html += `<div class="ai-reasoning-banner" style="grid-column: 1 / -1; width: 100%; margin-bottom: 8px; padding: 10px 14px; background: rgba(12, 140, 102, 0.08); border-left: 3px solid #0c8c66; border-radius: 6px; font-size: 13px; color: #1e293b; line-height: 1.4;">
+                <strong style="color: #0c8c66;"><i class="fa-solid fa-brain"></i> Clinical Visual Reasoning:</strong> ${escapeHtml(reasoning)}
+            </div>`;
+        }
+        html += feats.map(f => `<span class="feature-pill"><i class="fa-solid fa-circle-check"></i> ${escapeHtml(f)}</span>`).join("");
+        featuresList.innerHTML = html;
     }
 
     // ==========================================
@@ -1454,41 +1598,71 @@ function renderClassificationResult(classification, imageUrl, shouldSave = true)
     const catWhiteBlue = document.getElementById("catCardWhiteBlue");
     const subNotice = document.getElementById("subStreamNotice");
     const subText = document.getElementById("subStreamText");
+    const catConfirmedBadge = document.getElementById("categoryConfirmedBadge");
+    const categoriesGrid = document.getElementById("threeCategoriesGrid");
 
-    if (catYellow) catYellow.classList.remove("detected");
-    if (catRed) catRed.classList.remove("detected");
-    if (catWhiteBlue) catWhiteBlue.classList.remove("detected");
+    if (categoriesGrid) categoriesGrid.classList.add("has-selection");
 
-    const catTitle = (classification.stage_3_waste_type && classification.stage_3_waste_type.primary_category) 
-        || classification.waste_type 
-        || "Yellow";
+    if (catYellow) catYellow.classList.remove("detected", "selected");
+    if (catRed) catRed.classList.remove("detected", "selected");
+    if (catWhiteBlue) catWhiteBlue.classList.remove("detected", "selected");
 
     const isYellow = catTitle.toLowerCase().includes("yellow");
     const isRed = catTitle.toLowerCase().includes("red");
     const isWhiteBlue = catTitle.toLowerCase().includes("white") || catTitle.toLowerCase().includes("blue");
 
+    const detectedItemName = (classification.detected_items && classification.detected_items[0]) || "";
+
     if (isYellow && catYellow) {
-        catYellow.classList.add("detected");
+        catYellow.classList.add("detected", "selected");
+        const yellowSub = catYellow.querySelector(".stream-items-summary");
+        if (yellowSub && detectedItemName) {
+            yellowSub.innerText = detectedItemName;
+        }
         if (subNotice) subNotice.style.display = "none";
+        if (catConfirmedBadge) {
+            catConfirmedBadge.className = "category-confirmed-badge stream-badge-yellow";
+            catConfirmedBadge.innerHTML = '<i class="fa-solid fa-biohazard"></i> 🟡 Yellow Category Identified (Infectious)';
+        }
     } else if (isRed && catRed) {
-        catRed.classList.add("detected");
+        catRed.classList.add("detected", "selected");
+        const redSub = catRed.querySelector(".stream-items-summary");
+        if (redSub && detectedItemName) {
+            redSub.innerText = detectedItemName;
+        }
         if (subNotice) subNotice.style.display = "none";
+        if (catConfirmedBadge) {
+            catConfirmedBadge.className = "category-confirmed-badge stream-badge-red";
+            catConfirmedBadge.innerHTML = '<i class="fa-solid fa-syringe"></i> 🔴 Red Category Identified (Plastics)';
+        }
     } else if (catWhiteBlue) {
-        catWhiteBlue.classList.add("detected");
+        catWhiteBlue.classList.add("detected", "selected");
+        const wbSub = catWhiteBlue.querySelector(".stream-items-summary");
+        if (wbSub && detectedItemName) {
+            wbSub.innerText = detectedItemName;
+        }
         if (subNotice && subText) {
             subNotice.style.display = "flex";
             const sub = (classification.stage_3_waste_type && classification.stage_3_waste_type.sub_stream) || "Sharps & Glassware Stream";
             subText.innerText = `Sub-stream routing: ${sub}`;
         }
+        if (catConfirmedBadge) {
+            catConfirmedBadge.className = "category-confirmed-badge stream-badge-blue";
+            catConfirmedBadge.innerHTML = '<i class="fa-solid fa-shield-halved"></i> ⚪/🔵 Sharps & Glassware Identified';
+        }
     }
 
     if (classification.is_multi_bin) {
-        if (catYellow) catYellow.classList.add("detected");
-        if (catRed) catRed.classList.add("detected");
-        if (catWhiteBlue) catWhiteBlue.classList.add("detected");
+        if (catYellow) catYellow.classList.add("detected", "selected");
+        if (catRed) catRed.classList.add("detected", "selected");
+        if (catWhiteBlue) catWhiteBlue.classList.add("detected", "selected");
         if (subNotice && subText) {
             subNotice.style.display = "flex";
             subText.innerText = "Central Multi-Stream Station Audit: Yellow, Red, and White/Blue streams synchronized.";
+        }
+        if (catConfirmedBadge) {
+            catConfirmedBadge.className = "category-confirmed-badge stream-badge-multi";
+            catConfirmedBadge.innerHTML = '<i class="fa-solid fa-layer-group"></i> 🔄 4-Stream Multi-Station Audit';
         }
     }
 
@@ -1503,15 +1677,19 @@ function renderClassificationResult(classification, imageUrl, shouldSave = true)
     const meterText = document.getElementById("segMeterText");
 
     const st4 = classification.stage_4_segregation || {};
-    const weightVal = st4.deposit_weight_kg || (classification.fulfillment ? classification.fulfillment.deposit_weight_kg : 1.8);
-    const impactVal = st4.impact_pct || (classification.fulfillment ? classification.fulfillment.deposit_impact_pct : 3.6);
+    const weightVal = st4.deposit_weight_kg || (classification.fulfillment ? classification.fulfillment.deposit_weight_kg : 0.035);
+    const impactVal = st4.impact_pct !== undefined ? st4.impact_pct : (classification.fulfillment ? classification.fulfillment.deposit_impact_pct : 0.07);
     const curFill = st4.current_bin_fill_pct || (classification.fulfillment ? classification.fulfillment.current_level_pct : 78);
-    const projFill = st4.projected_fill_pct || (classification.fulfillment ? classification.fulfillment.projected_level_pct : 81.6);
+    const projFill = st4.projected_fill_pct || (classification.fulfillment ? classification.fulfillment.projected_level_pct : 78.1);
     const thresholdCap = (classification.stage_6_collection_alert && classification.stage_6_collection_alert.threshold_pct) || 80.0;
+
+    const weightDisplay = weightVal < 0.1 
+        ? `${weightVal} kg (${Math.round(weightVal * 1000)}g)` 
+        : `${weightVal} kg`;
 
     if (segTarget) segTarget.innerText = st4.target_bin || classification.target_bin || "Designated Smart Receptacle";
     if (segTreat) segTreat.innerText = st4.treatment_method || classification.treatment_method || "High-Temperature Thermal Treatment";
-    if (segWeight) segWeight.innerText = `${weightVal} kg (+${impactVal}% Bin Fill Impact)`;
+    if (segWeight) segWeight.innerText = `${weightDisplay} (+${impactVal}% Bin Fill Impact)`;
     if (segRule) segRule.innerText = st4.regulatory_standard || "Bio-Medical Waste Management Rules 2016 - Schedule II";
 
     if (meterFill) meterFill.style.width = `${Math.min(projFill, 100)}%`;
@@ -1538,14 +1716,27 @@ function renderClassificationResult(classification, imageUrl, shouldSave = true)
     if (weightEl) weightEl.innerText = `${weightVal} kg`;
     if (timeEl) timeEl.innerText = st5.timestamp || new Date().toLocaleString();
 
+    const isUnder10 = (weightVal < 10.0);
+    const isAlert = !isUnder10 || st6.alert_triggered || (projFill >= thresholdCap);
+
     if (chipEl) {
-        chipEl.className = "status-chip success-chip";
-        chipEl.innerHTML = `<i class="fa-solid fa-shield-check"></i> Ready to Commit`;
+        if (isUnder10) {
+            chipEl.className = "status-chip success-chip";
+            chipEl.innerHTML = `<i class="fa-solid fa-shield-check"></i> Ready: Direct to Facility Smart Bin (<10 kg)`;
+        } else {
+            chipEl.className = "status-chip alert-chip";
+            chipEl.innerHTML = `<i class="fa-solid fa-truck-fast"></i> Heavy Load (>=10 kg: Auto-Dispatch)`;
+        }
     }
     if (commitBtn) {
         commitBtn.disabled = false;
-        commitBtn.innerHTML = `<i class="fa-solid fa-database"></i> Commit to Digital Ledger`;
-        commitBtn.style.background = "";
+        if (isUnder10) {
+            commitBtn.innerHTML = `<i class="fa-solid fa-database"></i> Commit to Facility Smart Bin (<10 kg)`;
+            commitBtn.style.background = "#0d9488";
+        } else {
+            commitBtn.innerHTML = `<i class="fa-solid fa-truck-fast"></i> Commit & Dispatch Fleet (>=10 kg)`;
+            commitBtn.style.background = "#dc2626";
+        }
     }
 
     // ==========================================
@@ -1559,39 +1750,312 @@ function renderClassificationResult(classification, imageUrl, shouldSave = true)
     const alertChip = document.getElementById("alertStatusChip");
     const fleetBtn = document.getElementById("dispatchFleetBtn");
 
-    const isAlert = st6.alert_triggered || (projFill >= thresholdCap);
-
     if (alertCapacity) alertCapacity.innerText = `${projFill}%`;
-    if (alertLevel) alertLevel.innerText = isAlert ? "Collection Threshold Exceeded" : "Capacity Safe";
-    if (alertThreshold) alertThreshold.innerText = `Threshold: ${thresholdCap}% • CPCB 48h Evacuation Standard`;
+    if (alertLevel) {
+        if (!isUnder10) {
+            alertLevel.innerText = "Heavy Batch (>=10 kg) — Fleet Required";
+        } else {
+            alertLevel.innerText = isAlert ? "Collection Threshold Exceeded" : "Safe (<10 kg ➔ Smart Bin Telemetry)";
+        }
+    }
+    if (alertThreshold) alertThreshold.innerText = `Threshold: 10 kg Batch / ${thresholdCap}% Bin Limit • CPCB Standard`;
+
     if (alertDispatch) {
-        alertDispatch.innerText = isAlert 
-            ? "CBWTF Fleet Dispatch Recommended immediately" 
-            : "Capacity safe. Automated collection scheduled normally.";
+        if (!isUnder10) {
+            alertDispatch.innerText = `Bulk deposit of ${weightVal} kg (>= 10 kg): Requires direct collection fleet dispatch to Pickup Logistics.`;
+        } else {
+            alertDispatch.innerText = `Small deposit of ${weightDisplay} (< 10 kg): Will be updated in Facility Smart Bin Telemetry (${segTarget ? segTarget.innerText : 'Designated Bin'}).`;
+        }
     }
 
     if (alertChip) {
-        if (isAlert) {
+        if (!isUnder10) {
             alertChip.className = "status-chip alert-chip";
-            alertChip.innerText = "Alert Triggered";
+            alertChip.innerText = "Bulk Dispatch (>=10kg)";
+        } else if (isAlert) {
+            alertChip.className = "status-chip alert-chip";
+            alertChip.innerText = "Threshold Warning";
         } else {
             alertChip.className = "status-chip success-chip";
-            alertChip.innerText = "Capacity Normal";
+            alertChip.innerText = "Smart Bin Telemetry (<10kg)";
         }
     }
 
     if (fleetBtn) {
         fleetBtn.disabled = false;
-        fleetBtn.innerHTML = isAlert 
-            ? `<i class="fa-solid fa-truck-ramp-box"></i> Dispatch Collection Fleet` 
-            : `<i class="fa-solid fa-truck-fast"></i> Request Early Collection`;
-        fleetBtn.style.background = isAlert ? "" : "#2563eb";
+        if (!isUnder10) {
+            fleetBtn.innerHTML = `<i class="fa-solid fa-truck-ramp-box"></i> Dispatch Collection Fleet (>=10 kg)`;
+            fleetBtn.style.background = "#dc2626";
+        } else {
+            fleetBtn.innerHTML = `<i class="fa-solid fa-trash-can-arrow-up"></i> Update Smart Bin Telemetry (<10 kg)`;
+            fleetBtn.style.background = "#0d9488";
+        }
     }
 
     const viewLink = document.getElementById("viewPickupLogisticsLink");
     if (viewLink) viewLink.style.display = "none";
 
     showToast(`AI Segregation Complete: Identified ${(classification.stage_3_waste_type && classification.stage_3_waste_type.category_title) || classification.category_name}!`, "success");
+}
+
+/* ==========================================================
+   AUTO-SYNC SCANNED WASTE WITH TELEMETRY / DISPATCH (< 10kg vs >= 10kg)
+   ========================================================== */
+async function syncScannedWasteWithTelemetry(classification) {
+    if (!classification) return;
+
+    try {
+        const hospId = (currentUser && currentUser.hospital_id) ? currentUser.hospital_id : 1;
+
+        // 1. Identify weight from digital record or stage 4
+        let weight = 0;
+        const st5 = classification.stage_5_digital_record || {};
+        const st4 = classification.stage_4_segregation || {};
+        if (st5.weight_kg) {
+            weight = parseFloat(st5.weight_kg);
+        } else if (st4.deposit_weight_kg) {
+            weight = parseFloat(st4.deposit_weight_kg);
+        } else if (classification.fulfillment && classification.fulfillment.deposit_weight_kg) {
+            weight = parseFloat(classification.fulfillment.deposit_weight_kg);
+        } else if (classification.weight) {
+            weight = parseFloat(classification.weight);
+        }
+        if (isNaN(weight) || weight <= 0) weight = 0.035;
+        weight = Math.round(weight * 1000) / 1000;
+
+        // 2. Identify the correct bin color
+        let rawType = classification.db_waste_type || classification.waste_type || "Red";
+        if (rawType === "Multi") rawType = "Red";
+        if (rawType.includes("/")) {
+            const sub = (classification.stage_3_waste_type && classification.stage_3_waste_type.sub_stream) || "";
+            rawType = sub.toLowerCase().includes("blue") ? "Blue" : "White";
+        }
+        const wasteType = rawType.charAt(0).toUpperCase() + rawType.slice(1).toLowerCase();
+
+        const isUnder10 = (weight < 10.0);
+
+        // 3. Post to backend pipeline-segregate endpoint
+        const res = await apiCall("/scanner/pipeline-segregate", "POST", {
+            classification: classification,
+            hospital_id: hospId,
+            waste_type: wasteType,
+            weight: weight
+        });
+
+        if (res.ok && res.data && res.data.success) {
+            const dr = res.data.digital_record || {};
+            const ca = res.data.collection_alert || {};
+            const binCode = res.data.target_bin_code || dr.bin_code || `BIN-${wasteType.slice(0, 3).toUpperCase()}`;
+
+            const chip = document.getElementById("recordStatusChip");
+            const commitBtn = document.getElementById("commitRecordBtn");
+            const alertChip = document.getElementById("alertStatusChip");
+            const fleetBtn = document.getElementById("dispatchFleetBtn");
+            const alertDispatch = document.getElementById("alertDispatchStatus");
+            const alertLevel = document.getElementById("alertLevelText");
+            const viewLink = document.getElementById("viewPickupLogisticsLink");
+
+            if (isUnder10) {
+                // < 10 kg: Put into Facility Smart Bin Telemetry
+                if (chip) {
+                    chip.className = "status-chip success-chip";
+                    chip.innerHTML = `<i class="fa-solid fa-check-double"></i> Added to ${binCode} Telemetry (+${weight} kg)`;
+                }
+                if (commitBtn) {
+                    commitBtn.innerHTML = `<i class="fa-solid fa-circle-check"></i> In ${wasteType} Bin Telemetry (<10kg)`;
+                    commitBtn.style.background = "#059669";
+                    commitBtn.disabled = true;
+                }
+                if (alertChip) {
+                    alertChip.className = "status-chip success-chip";
+                    alertChip.innerText = "In Bin Telemetry (<10kg)";
+                }
+                if (fleetBtn) {
+                    fleetBtn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Added to ${binCode} (${wasteType})`;
+                    fleetBtn.style.background = "#0d9488";
+                    fleetBtn.disabled = true;
+                }
+                if (alertDispatch) {
+                    alertDispatch.innerText = `Small deposit of ${weight} kg (< 10 kg): Successfully added to ${binCode} (${wasteType} Bin) in Facility Smart Bin Telemetry. No collection dispatch needed.`;
+                }
+                if (alertLevel) {
+                    alertLevel.innerText = `Safe Deposit (<10 kg ➔ Smart Bin Telemetry)`;
+                }
+                if (viewLink) {
+                    viewLink.style.display = "flex";
+                    viewLink.innerHTML = `<i class="fa-solid fa-arrow-up-right-from-square" style="margin-right: 6px;"></i> View ${binCode} in Facility Smart Bin Telemetry`;
+                }
+                showToast(`✅ Digital Record: ${weight} kg (< 10 kg) added to ${binCode} (${wasteType} Bin) in Facility Smart Bin Telemetry! <a href="pickup.html" style="color:#ffffff;text-decoration:underline;font-weight:700;margin-left:6px;">View on Pickup Page &rarr;</a>`, "success");
+            } else {
+                // >= 10 kg: Directly add into Dispatched Collection Requests
+                if (chip) {
+                    chip.className = "status-chip alert-chip";
+                    chip.innerHTML = `<i class="fa-solid fa-truck-fast"></i> Fleet Ticket Created (>=10kg)`;
+                }
+                if (commitBtn) {
+                    commitBtn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Fleet Dispatched (${weight} kg)`;
+                    commitBtn.style.background = "#dc2626";
+                    commitBtn.disabled = true;
+                }
+                if (alertChip) {
+                    alertChip.className = "status-chip alert-chip";
+                    alertChip.innerText = "Fleet Ticket Created (>=10kg)";
+                }
+                if (fleetBtn) {
+                    fleetBtn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Dispatched to Fleet (Ticket #${ca.collection_id || ''})`;
+                    fleetBtn.style.background = "#dc2626";
+                    fleetBtn.disabled = true;
+                }
+                if (alertDispatch) {
+                    alertDispatch.innerText = `Bulk deposit of ${weight} kg (>= 10 kg): Directly added into Dispatched Collection Requests on Pickup page (Ticket #${ca.collection_id || ''}).`;
+                }
+                if (alertLevel) {
+                    alertLevel.innerText = "Heavy Batch (>=10 kg) — Fleet Dispatched";
+                }
+                if (viewLink) {
+                    viewLink.style.display = "flex";
+                    viewLink.innerHTML = `<i class="fa-solid fa-arrow-up-right-from-square" style="margin-right: 6px;"></i> View Dispatched Request on Pickup Page`;
+                }
+                showToast(`🚚 High Load (${weight} kg >= 10 kg): Directly added into Dispatched Collection Requests on Pickup Page! <a href="pickup.html" style="color:#ffffff;text-decoration:underline;font-weight:700;margin-left:6px;">View on Pickup Page &rarr;</a>`, "info");
+            }
+        }
+    } catch (e) {
+        console.error("Auto-sync telemetry error:", e);
+    }
+}
+
+function manualSelectWasteType(category) {
+    const placeholder = document.getElementById("classifierPlaceholder");
+    const resultBox = document.getElementById("classifierResult");
+
+    // If scanner was idle, activate output panel with fallback template
+    if (placeholder && placeholder.style.display !== "none") {
+        placeholder.style.display = "none";
+    }
+    if (resultBox && resultBox.style.display === "none") {
+        resultBox.style.display = "block";
+    }
+
+    if (!lastClassifiedResult) {
+        lastClassifiedResult = {
+            success: true,
+            waste_type: category,
+            confidence: 0.98,
+            category_name: category === "Yellow" ? "Infectious & Anatomical Waste" : (category === "Red" ? "Contaminated Recyclable Plastics" : "Sharps & Glassware"),
+            target_bin: category === "Yellow" ? "Yellow Non-Chlorinated Biohazard Bin" : (category === "Red" ? "Red Autoclavable Plastic Receptacle" : "White Puncture-Proof Sharps Container"),
+            treatment_method: category === "Yellow" ? "Double-Chamber Incineration (1050°C)" : (category === "Red" ? "Autoclave & Mechanical Shredding" : "Dry Heat Sterilization & Encapsulation"),
+            stage_3_waste_type: {
+                primary_category: category,
+                category_title: `${category} Category`,
+                category_name: category === "Yellow" ? "Infectious & Anatomical Waste" : (category === "Red" ? "Contaminated Recyclable Plastics" : "Sharps & Glassware")
+            }
+        };
+    }
+
+    const catYellow = document.getElementById("catCardYellow");
+    const catRed = document.getElementById("catCardRed");
+    const catWhiteBlue = document.getElementById("catCardWhiteBlue");
+    const catConfirmedBadge = document.getElementById("categoryConfirmedBadge");
+    const grid = document.getElementById("threeCategoriesGrid");
+    const subNotice = document.getElementById("subStreamNotice");
+    const subText = document.getElementById("subStreamText");
+
+    if (grid) grid.classList.add("has-selection");
+
+    [catYellow, catRed, catWhiteBlue].forEach(card => {
+        if (card) {
+            card.classList.remove("detected", "selected");
+        }
+    });
+
+    const isYellow = String(category).toLowerCase().includes("yellow");
+    const isRed = String(category).toLowerCase().includes("red");
+    const isWhiteBlue = String(category).toLowerCase().includes("white") || String(category).toLowerCase().includes("blue");
+
+    const segTarget = document.getElementById("segTargetBin");
+    const segTreat = document.getElementById("segTreatment");
+    const segRule = document.getElementById("segRule");
+
+    if (isYellow && catYellow) {
+        catYellow.classList.add("selected", "detected");
+        if (catConfirmedBadge) {
+            catConfirmedBadge.className = "category-confirmed-badge stream-badge-yellow";
+            catConfirmedBadge.innerHTML = '<i class="fa-solid fa-biohazard"></i> 🟡 Yellow Category Selected (Infectious)';
+        }
+        if (subNotice) subNotice.style.display = "none";
+        if (segTarget) segTarget.innerText = "Yellow Non-Chlorinated Biohazard Bin";
+        if (segTreat) segTreat.innerText = "Double-Chamber Incineration (1050°C)";
+        if (segRule) segRule.innerText = "CPCB BMW Rules 2016 - Schedule I (Cat 1 & 2 Yellow Stream)";
+
+        lastClassifiedResult.waste_type = "Yellow";
+        if (lastClassifiedResult.stage_3_waste_type) {
+            lastClassifiedResult.stage_3_waste_type.primary_category = "Yellow";
+            lastClassifiedResult.stage_3_waste_type.category_title = "Yellow Category";
+            lastClassifiedResult.stage_3_waste_type.category_name = "Infectious & Anatomical Waste";
+        }
+        lastClassifiedResult.target_bin = "Yellow Non-Chlorinated Biohazard Bin";
+        lastClassifiedResult.treatment_method = "Double-Chamber Incineration (1050°C)";
+
+        updatePipelineTracker(5, "Yellow");
+        showToast("Step 3 Waste Type Selected: Yellow Category (Infectious)", "success");
+    } else if (isRed && catRed) {
+        catRed.classList.add("selected", "detected");
+        if (catConfirmedBadge) {
+            catConfirmedBadge.className = "category-confirmed-badge stream-badge-red";
+            catConfirmedBadge.innerHTML = '<i class="fa-solid fa-syringe"></i> 🔴 Red Category Selected (Plastics)';
+        }
+        if (subNotice) subNotice.style.display = "none";
+        if (segTarget) segTarget.innerText = "Red Autoclavable Recyclable Plastic Receptacle";
+        if (segTreat) segTreat.innerText = "Autoclave / Hydroclave & Mechanical Shredding";
+        if (segRule) segRule.innerText = "CPCB BMW Rules 2016 - Schedule I (Cat 3 Red Stream Recyclable)";
+
+        lastClassifiedResult.waste_type = "Red";
+        if (lastClassifiedResult.stage_3_waste_type) {
+            lastClassifiedResult.stage_3_waste_type.primary_category = "Red";
+            lastClassifiedResult.stage_3_waste_type.category_title = "Red Category";
+            lastClassifiedResult.stage_3_waste_type.category_name = "Contaminated Recyclable Plastics";
+        }
+        lastClassifiedResult.target_bin = "Red Autoclavable Recyclable Plastic Receptacle";
+        lastClassifiedResult.treatment_method = "Autoclave / Hydroclave & Mechanical Shredding";
+
+        updatePipelineTracker(5, "Red");
+        showToast("Step 3 Waste Type Selected: Red Category (Plastics)", "success");
+    } else if (catWhiteBlue) {
+        catWhiteBlue.classList.add("selected", "detected");
+        if (catConfirmedBadge) {
+            catConfirmedBadge.className = "category-confirmed-badge stream-badge-blue";
+            catConfirmedBadge.innerHTML = '<i class="fa-solid fa-shield-halved"></i> ⚪/🔵 White/Blue Stream Selected (Sharps/Glass)';
+        }
+        if (subNotice && subText) {
+            subNotice.style.display = "flex";
+            subText.innerText = "Sub-stream routing: White Translucent Puncture-Proof Container / Blue Glass Box";
+        }
+        if (segTarget) segTarget.innerText = "White Translucent Puncture-Proof Sharps Container";
+        if (segTreat) segTreat.innerText = "Dry Heat Sterilization & Autoclave / Sharp Encapsulation";
+        if (segRule) segRule.innerText = "CPCB BMW Rules 2016 - Schedule I (Cat 4 White Sharps Stream)";
+
+        lastClassifiedResult.waste_type = "White";
+        if (lastClassifiedResult.stage_3_waste_type) {
+            lastClassifiedResult.stage_3_waste_type.primary_category = "White/Blue";
+            lastClassifiedResult.stage_3_waste_type.category_title = "White/Blue Category";
+            lastClassifiedResult.stage_3_waste_type.category_name = "Sharps & Glassware";
+        }
+        lastClassifiedResult.target_bin = "White Translucent Puncture-Proof Sharps Container";
+        lastClassifiedResult.treatment_method = "Dry Heat Sterilization & Encapsulation";
+
+        updatePipelineTracker(5, "White/Blue");
+        showToast("Step 3 Waste Type Selected: White/Blue Category (Sharps/Glass)", "success");
+    }
+
+    try {
+        const previewImg = document.getElementById("imagePreviewImg");
+        sessionStorage.setItem("medwaste_active_scan", JSON.stringify({
+            classification: lastClassifiedResult,
+            imageUrl: lastClassifiedResult.imageUrl || "",
+            previewSrc: previewImg ? previewImg.src : null,
+            time: Date.now()
+        }));
+    } catch (e) {}
 }
 
 async function commitDigitalRecordAndAlert() {
@@ -1608,34 +2072,83 @@ async function commitDigitalRecordAndAlert() {
     }
 
     try {
+        let rawWasteType = lastClassifiedResult.db_waste_type || lastClassifiedResult.waste_type || "Red";
+        if (rawWasteType === "Multi") rawWasteType = "Red";
+        if (rawWasteType.includes("/")) {
+            const sub = (lastClassifiedResult.stage_3_waste_type && lastClassifiedResult.stage_3_waste_type.sub_stream) || "";
+            rawWasteType = sub.toLowerCase().includes("blue") ? "Blue" : "White";
+        }
+        const dbWasteType = rawWasteType.charAt(0).toUpperCase() + rawWasteType.slice(1).toLowerCase();
+
+        let scannerWeight = 0;
+        const weightEl = document.getElementById("recordWeight");
+        if (weightEl && weightEl.innerText) {
+            const match = weightEl.innerText.match(/([\d.]+)\s*kg/i);
+            if (match) {
+                const parsed = parseFloat(match[1]);
+                if (!isNaN(parsed) && parsed > 0) scannerWeight = parsed;
+            }
+        }
+        if (scannerWeight <= 0 && lastClassifiedResult) {
+            const st5 = lastClassifiedResult.stage_5_digital_record || {};
+            const st4 = lastClassifiedResult.stage_4_segregation || {};
+            const w = st5.weight_kg || st4.deposit_weight_kg || (lastClassifiedResult.fulfillment && lastClassifiedResult.fulfillment.deposit_weight_kg) || lastClassifiedResult.weight;
+            if (w) {
+                const parsed = parseFloat(w);
+                if (!isNaN(parsed) && parsed > 0) scannerWeight = parsed;
+            }
+        }
+        if (scannerWeight <= 0) scannerWeight = 0.035;
+        scannerWeight = Math.round(scannerWeight * 1000) / 1000;
+
         const res = await apiCall("/scanner/pipeline-segregate", "POST", {
             classification: lastClassifiedResult,
-            hospital_id: currentUser ? currentUser.hospital_id : 1
+            hospital_id: currentUser ? currentUser.hospital_id : 1,
+            waste_type: dbWasteType,
+            weight: scannerWeight
         });
 
         if (res.ok && res.data && res.data.success) {
             const dr = res.data.digital_record || {};
             const ca = res.data.collection_alert || {};
+            const isUnder10 = res.data.is_under_10kg;
 
             if (btn) {
-                btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Committed to Digital Ledger`;
+                btn.innerHTML = isUnder10 
+                    ? `<i class="fa-solid fa-circle-check"></i> Added to ${dr.waste_type || ''} Telemetry`
+                    : `<i class="fa-solid fa-circle-check"></i> Fleet Dispatched (${dr.weight_kg || ''}kg)`;
                 btn.style.background = "#059669";
                 btn.disabled = true;
             }
             if (chip) {
-                chip.className = "status-chip success-chip";
-                chip.innerHTML = `<i class="fa-solid fa-check-double"></i> Committed (ID #${dr.record_id || 1})`;
+                chip.className = isUnder10 ? "status-chip success-chip" : "status-chip alert-chip";
+                chip.innerHTML = isUnder10
+                    ? `<i class="fa-solid fa-check-double"></i> In ${dr.bin_code || ''} Telemetry (${dr.weight_kg || ''}kg)`
+                    : `<i class="fa-solid fa-truck-fast"></i> Fleet Ticket Created (>=10kg)`;
             }
 
-            showToast(`Digital Record #${dr.manifest_id || ''} saved to SQLite & Smart Bin ${dr.bin_code || ''} updated!`, "success");
+            if (isUnder10) {
+                showToast(`✅ Digital Record #${dr.manifest_id || ''} saved! ${dr.weight_kg} kg (< 10 kg) added to ${dr.bin_code || ''} (${dr.waste_type || ''}) in Facility Smart Bin Telemetry! <a href="pickup.html" style="color:#ffffff;text-decoration:underline;font-weight:700;margin-left:6px;">View Bins &rarr;</a>`, "success");
+            } else {
+                showToast(`🚚 High Load (${dr.weight_kg} kg >= 10 kg): Collection alert generated: Ticket #${ca.collection_id || ''} added to Dispatched Collection Requests! <a href="pickup.html" style="color:#ffffff;text-decoration:underline;font-weight:700;margin-left:6px;">View on Pickup Page &rarr;</a>`, "info");
+            }
 
-            if (ca.alert_triggered) {
-                const alertChip = document.getElementById("alertStatusChip");
-                if (alertChip) {
-                    alertChip.innerText = "Fleet Ticket Created";
-                    alertChip.className = "status-chip alert-chip";
-                }
-                showToast(`Collection alert generated: Ticket #${ca.collection_id || ''} queued for fleet!`, "info");
+            const alertChip = document.getElementById("alertStatusChip");
+            if (alertChip) {
+                alertChip.innerText = isUnder10 ? "In Bin Telemetry (<10kg)" : "Fleet Ticket Created (>=10kg)";
+                alertChip.className = isUnder10 ? "status-chip success-chip" : "status-chip alert-chip";
+            }
+            const fleetBtn = document.getElementById("dispatchFleetBtn");
+            if (fleetBtn) {
+                fleetBtn.innerHTML = isUnder10
+                    ? `<i class="fa-solid fa-circle-check"></i> Added to ${dr.waste_type || ''} Telemetry (<10kg)`
+                    : `<i class="fa-solid fa-circle-check"></i> Dispatched to Fleet (>=10kg)`;
+                fleetBtn.style.background = "#059669";
+                fleetBtn.disabled = true;
+            }
+            const viewLink = document.getElementById("viewPickupLogisticsLink");
+            if (viewLink) {
+                viewLink.style.display = "flex";
             }
         } else {
             if (btn) {
@@ -1693,21 +2206,29 @@ async function dispatchCollectionFleet() {
             }
         }
 
-        const rawWasteType = lastClassifiedResult.db_waste_type || lastClassifiedResult.waste_type || "Yellow";
-        const dbWasteType = rawWasteType === "Multi" ? "Yellow" : rawWasteType;
+        let rawWasteType = lastClassifiedResult.db_waste_type || lastClassifiedResult.waste_type || "Red";
+        if (rawWasteType === "Multi") rawWasteType = "Red";
+        if (rawWasteType.includes("/")) {
+            const sub = (lastClassifiedResult.stage_3_waste_type && lastClassifiedResult.stage_3_waste_type.sub_stream) || "";
+            rawWasteType = sub.toLowerCase().includes("blue") ? "Blue" : "White";
+        }
+        const dbWasteType = rawWasteType;
 
-        // Find the matching container for this facility
+        // Find strictly matching container for this facility and waste_type
         let targetBin = allBins.find(b => 
             (!hospId || b.hospital_id == hospId) &&
             b.waste_type.toLowerCase() === dbWasteType.toLowerCase()
-        ) || allBins.find(b => !hospId || b.hospital_id == hospId) || allBins[0];
+        );
 
         // Extract accurate weight from AI scanner result or UI
         let scannerWeight = 0;
         const weightEl = document.getElementById("recordWeight");
         if (weightEl && weightEl.innerText) {
-            const parsed = parseFloat(weightEl.innerText.replace(/[^\d.]/g, ""));
-            if (!isNaN(parsed) && parsed > 0) scannerWeight = parsed;
+            const match = weightEl.innerText.match(/([\d.]+)\s*kg/i);
+            if (match) {
+                const parsed = parseFloat(match[1]);
+                if (!isNaN(parsed) && parsed > 0) scannerWeight = parsed;
+            }
         }
         if (scannerWeight <= 0 && lastClassifiedResult) {
             const st4 = lastClassifiedResult.stage_4_segregation || {};
@@ -1718,7 +2239,7 @@ async function dispatchCollectionFleet() {
                 if (!isNaN(parsed) && parsed > 0) scannerWeight = parsed;
             }
         }
-        if (scannerWeight <= 0) scannerWeight = 1.3;
+        if (scannerWeight <= 0) scannerWeight = 0.035;
 
         // Extract scanner / current local timestamp (YYYY-MM-DD HH:MM:SS)
         const d = new Date();
@@ -1733,6 +2254,60 @@ async function dispatchCollectionFleet() {
             }
         }
 
+        if (scannerWeight < 10.0) {
+            // < 10 kg: Put into Facility Smart Bin Telemetry (do not dispatch fleet unless bin overflow threshold >= 80% is reached)
+            const res = await apiCall("/scanner/pipeline-segregate", "POST", {
+                classification: lastClassifiedResult,
+                hospital_id: hospId,
+                waste_type: dbWasteType,
+                weight: scannerWeight
+            });
+
+            if (res.ok && res.data && res.data.success) {
+                const targetCode = res.data.target_bin_code || (targetBin && targetBin.bin_code) || `BIN-${dbWasteType.slice(0, 3).toUpperCase()}`;
+                
+                if (btn) {
+                    btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Added to ${dbWasteType} Telemetry (<10 kg)`;
+                    btn.style.background = "#0d9488";
+                    btn.disabled = true;
+                }
+
+                const alertChip = document.getElementById("alertStatusChip");
+                if (alertChip) {
+                    alertChip.innerText = "In Bin Telemetry (<10 kg)";
+                    alertChip.className = "status-chip success-chip";
+                }
+
+                const chip = document.getElementById("recordStatusChip");
+                if (chip) {
+                    chip.className = "status-chip success-chip";
+                    chip.innerHTML = `<i class="fa-solid fa-check-double"></i> In ${targetCode} Telemetry (${scannerWeight}kg)`;
+                }
+
+                const commitBtn = document.getElementById("commitRecordBtn");
+                if (commitBtn) {
+                    commitBtn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Committed to Telemetry`;
+                    commitBtn.style.background = "#059669";
+                    commitBtn.disabled = true;
+                }
+
+                const viewLink = document.getElementById("viewPickupLogisticsLink");
+                if (viewLink) {
+                    viewLink.style.display = "flex";
+                }
+
+                showToast(`✅ Item weight is ${scannerWeight} kg (< 10 kg threshold). Added to ${targetCode} (${dbWasteType} Smart Bin) in Facility Smart Bin Telemetry! <a href="pickup.html" style="color:#ffffff;text-decoration:underline;font-weight:700;margin-left:6px;">View on Pickup Page &rarr;</a>`, "success");
+            } else {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-trash-can-arrow-up"></i> Update Smart Bin Telemetry (<10 kg)`;
+                }
+                showToast((res.data && res.data.message) || "Failed to update facility smart bin telemetry", "error");
+            }
+            return;
+        }
+
+        // >= 10 kg: Directly add into Dispatched Collection Requests on pickup page
         const payload = {
             bin_id: targetBin ? targetBin.id : "auto",
             hospital_id: hospId,
@@ -1750,14 +2325,14 @@ async function dispatchCollectionFleet() {
             const reqId = res.data.collection_id;
 
             if (btn) {
-                btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${isEarly ? "Early Pickup Requested!" : "Fleet Dispatched!"}`;
+                btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Fleet Dispatched (${scannerWeight} kg >= 10 kg)!`;
                 btn.style.background = "#059669";
                 btn.disabled = true;
             }
 
             const alertChip = document.getElementById("alertStatusChip");
             if (alertChip) {
-                alertChip.innerText = isEarly ? "Early Pickup Queued" : "Vehicle En Route";
+                alertChip.innerText = "Vehicle En Route";
                 alertChip.className = "status-chip success-chip";
             }
 
@@ -1766,7 +2341,7 @@ async function dispatchCollectionFleet() {
                 viewLink.style.display = "flex";
             }
 
-            showToast(`Collection Request #REQ-${reqId} created for ${binCode}! Dispatched to Pickup Logistics. <a href="pickup.html" style="color:#ffffff;text-decoration:underline;font-weight:700;margin-left:6px;">View on Pickup Page &rarr;</a>`, "success");
+            showToast(`🚚 Bulk Collection Request #REQ-${reqId} (${scannerWeight} kg >= 10 kg) created for ${binCode}! Dispatched to Pickup Logistics. <a href="pickup.html" style="color:#ffffff;text-decoration:underline;font-weight:700;margin-left:6px;">View on Pickup Page &rarr;</a>`, "success");
         } else {
             if (btn) {
                 btn.disabled = false;
@@ -1823,13 +2398,21 @@ function resetClassifier(event) {
     // Reset tracker to Stage 1
     updatePipelineTracker(1);
 
-    // Reset 3 category cards
+    // Reset 3 category cards and badge
     const catYellow = document.getElementById("catCardYellow");
     const catRed = document.getElementById("catCardRed");
     const catWhiteBlue = document.getElementById("catCardWhiteBlue");
-    if (catYellow) catYellow.classList.remove("detected");
-    if (catRed) catRed.classList.remove("detected");
-    if (catWhiteBlue) catWhiteBlue.classList.remove("detected");
+    const categoriesGrid = document.getElementById("threeCategoriesGrid");
+    const catConfirmedBadge = document.getElementById("categoryConfirmedBadge");
+
+    if (categoriesGrid) categoriesGrid.classList.remove("has-selection");
+    if (catYellow) catYellow.classList.remove("detected", "selected");
+    if (catRed) catRed.classList.remove("detected", "selected");
+    if (catWhiteBlue) catWhiteBlue.classList.remove("detected", "selected");
+    if (catConfirmedBadge) {
+        catConfirmedBadge.className = "category-confirmed-badge";
+        catConfirmedBadge.innerText = "Category Identified";
+    }
 }
 
 

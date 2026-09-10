@@ -2146,6 +2146,82 @@ footer {
     background: #e2e8f0;
 }
 
+.bin-header-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bin-btn-delete-header {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #94a3b8;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.bin-btn-delete-header:hover {
+    background: #fee2e2;
+    border-color: #fecaca;
+    color: #ef4444;
+    transform: scale(1.08);
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+}
+
+.bin-btn-adjust {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    padding: 7px 9px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.bin-btn-adjust:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+    border-color: #94a3b8;
+}
+
+.bin-btn-delete-action {
+    background: #fff1f2;
+    border: 1px solid #fecdd3;
+    color: #e11d48;
+    padding: 7px 9px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.bin-btn-delete-action:hover {
+    background: #e11d48;
+    color: #ffffff;
+    border-color: #e11d48;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(225, 29, 72, 0.25);
+}
+
 /* --- Fleet & Collection Logistics --- */
 .fleet-section {
     margin-top: 35px;
@@ -4585,139 +4661,263 @@ input[type="range"] {
 
 /* STAGE 3: 3-WAY CATEGORY CARDS */
 .category-confirmed-badge {
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 12px;
+    font-weight: 800;
     color: #059669;
     background: #ecfdf5;
-    padding: 3px 8px;
+    border: 1px solid #a7f3d0;
+    padding: 4px 10px;
     border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+}
+
+.category-confirmed-badge.stream-badge-yellow {
+    background: #fef9c3 !important;
+    color: #854d0e !important;
+    border-color: #eab308 !important;
+    box-shadow: 0 2px 10px rgba(234, 179, 8, 0.25) !important;
+}
+
+.category-confirmed-badge.stream-badge-red {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+    border-color: #ef4444 !important;
+    box-shadow: 0 2px 10px rgba(239, 68, 68, 0.25) !important;
+}
+
+.category-confirmed-badge.stream-badge-blue {
+    background: #e0f2fe !important;
+    color: #0369a1 !important;
+    border-color: #0284c7 !important;
+    box-shadow: 0 2px 10px rgba(2, 132, 199, 0.25) !important;
+}
+
+.category-confirmed-badge.stream-badge-multi {
+    background: #f3e8ff !important;
+    color: #6b21a8 !important;
+    border-color: #a855f7 !important;
 }
 
 .three-categories-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-top: 6px;
+    gap: 14px;
+    margin-top: 10px;
 }
 
 .category-stream-card {
     background: #f8fafc;
     border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 14px 12px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 14px;
+    padding: 16px 14px;
+    transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     opacity: 0.55;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
     position: relative;
+    cursor: pointer;
+    user-select: none;
 }
 
-.category-stream-card.detected {
-    opacity: 1;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+.category-stream-card:hover {
+    opacity: 0.85;
+    transform: translateY(-3px);
+    border-color: #cbd5e1;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
 }
 
-.category-stream-card.detected#catCardYellow {
-    border-color: #eab308;
-    background: linear-gradient(180deg, #fefce8 0%, #ffffff 100%);
-    box-shadow: 0 8px 25px rgba(234, 179, 8, 0.2);
+.three-categories-grid.has-selection .category-stream-card:not(.detected):not(.selected) {
+    opacity: 0.38;
+    filter: grayscale(35%);
 }
 
-.category-stream-card.detected#catCardRed {
-    border-color: #ef4444;
-    background: linear-gradient(180deg, #fff1f2 0%, #ffffff 100%);
-    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.2);
+.three-categories-grid.has-selection .category-stream-card:not(.detected):not(.selected):hover {
+    opacity: 0.85;
+    filter: grayscale(0%);
+    border-color: #94a3b8;
 }
 
-.category-stream-card.detected#catCardWhiteBlue {
-    border-color: #0284c7;
-    background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%);
-    box-shadow: 0 8px 25px rgba(2, 132, 199, 0.2);
+.category-stream-card.detected,
+.category-stream-card.selected {
+    opacity: 1 !important;
+    filter: none !important;
+    transform: translateY(-4px);
+}
+
+.category-stream-card.detected#catCardYellow,
+.category-stream-card.selected#catCardYellow {
+    border: 3px solid #eab308 !important;
+    background: linear-gradient(180deg, #fef9c3 0%, #ffffff 100%) !important;
+    box-shadow: 0 0 0 4px rgba(234, 179, 8, 0.28), 0 12px 28px rgba(234, 179, 8, 0.22) !important;
+}
+
+.category-stream-card.detected#catCardRed,
+.category-stream-card.selected#catCardRed {
+    border: 3px solid #ef4444 !important;
+    background: linear-gradient(180deg, #fee2e2 0%, #ffffff 100%) !important;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.28), 0 12px 28px rgba(239, 68, 68, 0.22) !important;
+}
+
+.category-stream-card.detected#catCardWhiteBlue,
+.category-stream-card.selected#catCardWhiteBlue {
+    border: 3px solid #0284c7 !important;
+    background: linear-gradient(180deg, #e0f2fe 0%, #ffffff 100%) !important;
+    box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.28), 0 12px 28px rgba(2, 132, 199, 0.22) !important;
 }
 
 .stream-card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    position: relative;
 }
 
 .stream-card-header h4 {
-    font-size: 13px;
+    font-size: 13.5px;
     font-weight: 800;
     margin: 0;
     color: #0f172a;
     flex-grow: 1;
-    margin-left: 6px;
+    margin-left: 8px;
 }
 
-.stream-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.dot-yellow { background: #eab308; }
-.dot-red { background: #ef4444; }
-.dot-white-blue { background: #0284c7; }
-
-.stream-icon {
-    font-size: 16px;
-    color: #64748b;
-}
-
-.category-stream-card.detected#catCardYellow .stream-icon { color: #ca8a04; }
-.category-stream-card.detected#catCardRed .stream-icon { color: #dc2626; }
-.category-stream-card.detected#catCardWhiteBlue .stream-icon { color: #0284c7; }
-
-.stream-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: #475569;
-}
-
-.stream-items-summary {
-    font-size: 10px;
-    color: #64748b;
-    line-height: 1.3;
-}
-
-.stream-active-marker {
+.stream-selection-pill {
     display: none;
-    margin-top: 8px;
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 800;
-    padding: 3px 6px;
-    border-radius: 4px;
-    align-self: flex-start;
+    padding: 3px 7px;
+    border-radius: 5px;
     letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
-.category-stream-card.detected .stream-active-marker {
+.category-stream-card.detected .stream-selection-pill,
+.category-stream-card.selected .stream-selection-pill {
     display: inline-flex;
     align-items: center;
     gap: 4px;
 }
 
-.category-stream-card.detected#catCardYellow .stream-active-marker {
+.category-stream-card.detected#catCardYellow .stream-selection-pill,
+.category-stream-card.selected#catCardYellow .stream-selection-pill {
+    background: #ca8a04;
+    color: #ffffff;
+}
+
+.category-stream-card.detected#catCardRed .stream-selection-pill,
+.category-stream-card.selected#catCardRed .stream-selection-pill {
+    background: #dc2626;
+    color: #ffffff;
+}
+
+.category-stream-card.detected#catCardWhiteBlue .stream-selection-pill,
+.category-stream-card.selected#catCardWhiteBlue .stream-selection-pill {
+    background: #0284c7;
+    color: #ffffff;
+}
+
+.stream-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.dot-yellow { background: #eab308; box-shadow: 0 0 8px rgba(234, 179, 8, 0.6); }
+.dot-red { background: #ef4444; box-shadow: 0 0 8px rgba(239, 68, 68, 0.6); }
+.dot-white-blue { background: #0284c7; box-shadow: 0 0 8px rgba(2, 132, 199, 0.6); }
+
+.stream-icon {
+    font-size: 17px;
+    color: #64748b;
+    margin-right: 6px;
+}
+
+.category-stream-card.detected#catCardYellow .stream-icon,
+.category-stream-card.selected#catCardYellow .stream-icon { color: #ca8a04; }
+
+.category-stream-card.detected#catCardRed .stream-icon,
+.category-stream-card.selected#catCardRed .stream-icon { color: #dc2626; }
+
+.category-stream-card.detected#catCardWhiteBlue .stream-icon,
+.category-stream-card.selected#catCardWhiteBlue .stream-icon { color: #0284c7; }
+
+.stream-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #334155;
+}
+
+.stream-items-summary {
+    font-size: 11px;
+    color: #64748b;
+    line-height: 1.35;
+}
+
+.category-stream-card.detected .stream-items-summary,
+.category-stream-card.selected .stream-items-summary {
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.stream-active-marker {
+    display: none;
+    margin-top: 10px;
+    font-size: 10.5px;
+    font-weight: 800;
+    padding: 4px 8px;
+    border-radius: 6px;
+    align-self: flex-start;
+    letter-spacing: 0.5px;
+}
+
+.category-stream-card.detected .stream-active-marker,
+.category-stream-card.selected .stream-active-marker {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.category-stream-card.detected#catCardYellow .stream-active-marker,
+.category-stream-card.selected#catCardYellow .stream-active-marker {
     background: #fef08a;
-    color: #854d0e;
+    color: #713f12;
+    border: 1px solid #facc15;
 }
 
-.category-stream-card.detected#catCardRed .stream-active-marker {
+.category-stream-card.detected#catCardRed .stream-active-marker,
+.category-stream-card.selected#catCardRed .stream-active-marker {
     background: #fee2e2;
-    color: #991b1b;
+    color: #7f1d1d;
+    border: 1px solid #f87171;
 }
 
-.category-stream-card.detected#catCardWhiteBlue .stream-active-marker {
+.category-stream-card.detected#catCardWhiteBlue .stream-active-marker,
+.category-stream-card.selected#catCardWhiteBlue .stream-active-marker {
     background: #e0f2fe;
-    color: #0369a1;
+    color: #075985;
+    border: 1px solid #7dd3fc;
+}
+
+.stream-interactive-hint {
+    margin-top: 12px;
+    padding: 8px 12px;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    color: #64748b;
+    font-size: 11.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .sub-stream-notice {
-    margin-top: 12px;
+    margin-top: 10px;
     padding: 8px 12px;
     background: #f0f9ff;
     border: 1px solid #bae6fd;
@@ -4728,6 +4928,52 @@ input[type="range"] {
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+/* FLOW PIPELINE TRACKER STREAM HIGHLIGHTS */
+.flow-stage-node.stream-yellow {
+    border-color: #eab308 !important;
+    background: #fefce8 !important;
+    box-shadow: 0 4px 14px rgba(234, 179, 8, 0.2) !important;
+}
+
+.flow-stage-node.stream-yellow .node-icon-circle {
+    background: linear-gradient(135deg, #eab308, #ca8a04) !important;
+    color: #ffffff !important;
+}
+
+.flow-stage-node.stream-yellow .node-step-tag {
+    color: #ca8a04 !important;
+}
+
+.flow-stage-node.stream-red {
+    border-color: #ef4444 !important;
+    background: #fff1f2 !important;
+    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.2) !important;
+}
+
+.flow-stage-node.stream-red .node-icon-circle {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    color: #ffffff !important;
+}
+
+.flow-stage-node.stream-red .node-step-tag {
+    color: #dc2626 !important;
+}
+
+.flow-stage-node.stream-blue {
+    border-color: #0284c7 !important;
+    background: #f0f9ff !important;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.2) !important;
+}
+
+.flow-stage-node.stream-blue .node-icon-circle {
+    background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+    color: #ffffff !important;
+}
+
+.flow-stage-node.stream-blue .node-step-tag {
+    color: #0284c7 !important;
 }
 
 /* STAGE 4: SOFTWARE SEGREGATES */

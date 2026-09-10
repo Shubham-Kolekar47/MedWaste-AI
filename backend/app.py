@@ -401,6 +401,55 @@ def update_bin(bin_id):
 
 
 # ==========================================
+# DELETE BIN
+# ==========================================
+
+@app.route("/api/bins/<int:bin_id>", methods=["DELETE"])
+def delete_bin(bin_id):
+    """
+    Delete a smart bin and clean up linked collections and waste records.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id, bin_code FROM bins WHERE id = ?", (bin_id,))
+    bin_row = cursor.fetchone()
+
+    if not bin_row:
+        conn.close()
+        return jsonify({
+            "success": False,
+            "message": "Smart bin not found"
+        }), 404
+
+    bin_code = bin_row["bin_code"]
+
+    try:
+        # Delete or clean up linked references
+        cursor.execute("DELETE FROM collections WHERE bin_id = ?", (bin_id,))
+        cursor.execute("DELETE FROM waste_records WHERE bin_id = ?", (bin_id,))
+        cursor.execute("DELETE FROM bins WHERE id = ?", (bin_id,))
+
+        conn.commit()
+        conn.close()
+
+        return jsonify({
+            "success": True,
+            "message": f"Smart bin {bin_code} deleted successfully",
+            "deleted_bin_id": bin_id,
+            "bin_code": bin_code
+        })
+
+    except Exception as e:
+        conn.rollback()
+        conn.close()
+        return jsonify({
+            "success": False,
+            "message": f"Error deleting bin: {str(e)}"
+        }), 500
+
+
+# ==========================================
 # SYNC MULTI-BIN STATION TELEMETRY
 # ==========================================
 
@@ -511,9 +560,11 @@ def classify():
     file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
 
     # 1. Handle JSON base64 data (from Live Camera or Canvas snapshot)
+    api_key = request.headers.get("X-Gemini-Key") or os.environ.get("GEMINI_API_KEY")
     if request.is_json:
         data = request.get_json() or {}
         hint = data.get("hint", "")
+        api_key = data.get("api_key") or api_key
         img_b64 = data.get("image_base64") or data.get("image") or ""
 
         if not img_b64:
@@ -540,6 +591,7 @@ def classify():
     elif "image" in request.files:
         file = request.files["image"]
         hint = request.form.get("hint", "")
+        api_key = request.form.get("api_key") or api_key
 
         if file.filename == "":
             return jsonify({
@@ -561,8 +613,8 @@ def classify():
             "message": "Please upload an image file or provide base64 image data"
         }), 400
 
-    # Execute AI classification model
-    result = classify_waste(file_path, hint=hint)
+    # Execute AI classification model with multimodal or deep heuristic vision
+    result = classify_waste(file_path, hint=hint, api_key=api_key)
     if "stage_1_upload" in result:
         result["stage_1_upload"]["image_url"] = f"/uploads/{filename}"
 
@@ -587,11 +639,13 @@ def scanner_pipeline_segregate():
 
     classification_override = None
     hospital_id = 1
+    api_key = request.headers.get("X-Gemini-Key") or os.environ.get("GEMINI_API_KEY")
 
     if request.is_json:
         data = request.get_json() or {}
         hint = data.get("hint", "")
         hospital_id = data.get("hospital_id", 1)
+        api_key = data.get("api_key") or api_key
         img_b64 = data.get("image_base64") or data.get("image") or ""
         classification_override = data.get("classification")
 
@@ -608,6 +662,7 @@ def scanner_pipeline_segregate():
         file = request.files["image"]
         hint = request.form.get("hint", "")
         hospital_id = int(request.form.get("hospital_id", 1) or 1)
+        api_key = request.form.get("api_key") or api_key
         clean_name = secure_filename(file.filename) or f"pipe_{int(time.time())}.jpg"
         filename = clean_name
         file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
@@ -619,15 +674,27 @@ def scanner_pipeline_segregate():
         if not os.path.exists(file_path):
             with open(file_path, "wb") as f:
                 f.write(b"")
-        result = classify_waste(file_path, hint=hint)
+        result = classify_waste(file_path, hint=hint, api_key=api_key)
         if "stage_1_upload" in result:
             result["stage_1_upload"]["image_url"] = f"/uploads/{filename}"
 
-    db_waste_type = result.get("db_waste_type", "Yellow")
-    if db_waste_type == "Multi":
-        db_waste_type = "Yellow"
+    db_waste_type = (data.get("waste_type") if request.is_json else None) or result.get("db_waste_type") or "Red"
+    if "/" in db_waste_type:
+        db_waste_type = db_waste_type.split("/")[0].strip()
+    if db_waste_type.lower() == "multi":
+        db_waste_type = "Red"
+    db_waste_type = db_waste_type.capitalize()
 
-    est_weight = float(result.get("stage_4_segregation", {}).get("deposit_weight_kg", 1.5))
+    req_weight = data.get("weight") if request.is_json else None
+    if req_weight is not None:
+        try:
+            est_weight = float(req_weight)
+        except (ValueError, TypeError):
+            est_weight = float(result.get("stage_4_segregation", {}).get("deposit_weight_kg", 0.035))
+    else:
+        est_weight = float(result.get("stage_4_segregation", {}).get("deposit_weight_kg", 0.035))
+    est_weight = round(est_weight, 3)
+
     confidence = float(result.get("confidence", 0.95))
 
     conn = get_db()
@@ -642,19 +709,24 @@ def scanner_pipeline_segregate():
     bin_row = cursor.fetchone()
 
     if not bin_row:
+        # Auto-create the bin specifically for this hospital with the exact waste_type
+        cursor.execute("SELECT COUNT(*) FROM bins")
+        total_b = cursor.fetchone()[0]
+        bin_code = f"BIN-{db_waste_type[:3].upper()}-{total_b + 1:03d}"
         cursor.execute("""
-            SELECT id, bin_code, current_level, weight, capacity, status 
-            FROM bins 
-            WHERE LOWER(waste_type) = LOWER(?)
-            LIMIT 1
-        """, (db_waste_type,))
-        bin_row = cursor.fetchone()
-
-    bin_id = bin_row["id"] if bin_row else 1
-    bin_code = bin_row["bin_code"] if bin_row else f"BIN-{db_waste_type[:3].upper()}-001"
-    cur_level = float(bin_row["current_level"]) if bin_row else 50.0
-    cur_weight = float(bin_row["weight"]) if bin_row else 10.0
-    capacity = float(bin_row["capacity"]) if bin_row else 50.0
+            INSERT INTO bins (bin_code, hospital_id, waste_type, capacity, current_level, weight, status)
+            VALUES (?, ?, ?, 50.0, 15.0, 1.5, 'Normal')
+        """, (bin_code, hospital_id or 1, db_waste_type))
+        bin_id = cursor.lastrowid
+        cur_level = 15.0
+        cur_weight = 1.5
+        capacity = 50.0
+    else:
+        bin_id = bin_row["id"]
+        bin_code = bin_row["bin_code"]
+        cur_level = float(bin_row["current_level"])
+        cur_weight = float(bin_row["weight"])
+        capacity = float(bin_row["capacity"])
 
     cursor.execute("""
         INSERT INTO waste_records (bin_id, waste_type, weight, confidence, image_path)
@@ -662,11 +734,13 @@ def scanner_pipeline_segregate():
     """, (bin_id, db_waste_type, est_weight, confidence, f"/uploads/{filename}"))
     waste_record_id = cursor.lastrowid
 
-    new_weight = round(cur_weight + est_weight, 1)
-    new_level = min(round(cur_level + ((est_weight / capacity) * 100), 1), 100.0)
+    # Update bin telemetry in database
+    new_weight = round(cur_weight + est_weight, 3)
+    fill_impact = round((est_weight / capacity) * 100, 2)
+    new_level = min(round(cur_level + fill_impact, 1), 100.0)
 
     threshold_cap = 75.0 if db_waste_type.lower() == "white" else 80.0
-    is_urgent = new_level >= threshold_cap
+    is_urgent = (new_level >= threshold_cap)
 
     if new_level >= 90.0:
         bin_status = "Urgent"
@@ -683,10 +757,24 @@ def scanner_pipeline_segregate():
         WHERE id = ?
     """, (new_weight, new_level, bin_status, bin_id))
 
+    # CRITICAL 10KG SEGREGATION RULE:
+    # If weight < 10 kg -> Added to Facility Smart Bin Telemetry (do not dispatch fleet unless bin overflow threshold >= 80% is reached)
+    # If weight >= 10 kg -> Directly add into Dispatched Collection Requests on pickup page!
+    is_bulk_load = (est_weight >= 10.0)
+    should_dispatch_collection = is_bulk_load or is_urgent
+
     collection_id = None
     collection_created = False
 
-    if is_urgent:
+    if is_bulk_load:
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        cursor.execute("""
+            INSERT INTO collections (bin_id, vehicle_id, collector_name, status, weight, requested_at)
+            VALUES (?, 1, 'CBWTF Rapid Response Fleet', 'Pending', ?, ?)
+        """, (bin_id, est_weight, now_str))
+        collection_id = cursor.lastrowid
+        collection_created = True
+    elif is_urgent:
         cursor.execute("SELECT id FROM collections WHERE bin_id = ? AND status = 'Pending'", (bin_id,))
         existing_col = cursor.fetchone()
         if existing_col:
@@ -706,9 +794,21 @@ def scanner_pipeline_segregate():
     manifest_id = result.get("stage_5_digital_record", {}).get("manifest_id", f"MW-MNF-{waste_record_id:04d}")
     barcode_num = result.get("stage_5_digital_record", {}).get("barcode_number", f"CPCB-BMW-{waste_record_id:06d}")
 
+    action_msg = (
+        f"Bulk batch ({est_weight} kg >= 10 kg): Collection request dispatched to Pickup Logistics!"
+        if is_bulk_load else
+        f"Deposit ({est_weight} kg < 10 kg): Successfully updated {bin_code} ({db_waste_type}) in Facility Smart Bin Telemetry!"
+    )
+
     return jsonify({
         "success": True,
-        "message": "AI Waste Segregation, Digital Record, and Collection Alert Processed",
+        "message": action_msg,
+        "weight_kg": est_weight,
+        "is_under_10kg": (est_weight < 10.0),
+        "target_bin_code": bin_code,
+        "target_bin_id": bin_id,
+        "waste_type": db_waste_type,
+        "action_taken": "direct_collection_dispatch" if is_bulk_load else "facility_telemetry_updated",
         "architecture": "MedWaste-AI-6Stage-Model",
         "classification": result,
         "digital_record": {
@@ -720,16 +820,18 @@ def scanner_pipeline_segregate():
             "waste_type": db_waste_type,
             "weight_kg": est_weight,
             "confidence": confidence,
-            "status": "Committed to Digital Biohazard Ledger"
+            "status": "Committed to Facility Smart Bin Telemetry" if (est_weight < 10.0) else "Dispatched to Collection Fleet"
         },
         "collection_alert": {
-            "alert_triggered": is_urgent,
-            "collection_id": collection_id,
-            "collection_created": collection_created,
+            "alert_triggered": should_dispatch_collection,
+            "is_bulk_load": is_bulk_load,
             "bin_code": bin_code,
-            "threshold_pct": threshold_cap,
             "new_level_pct": new_level,
-            "status": "Automated CBWTF Fleet Dispatch Dispatched" if is_urgent else "Normal (Capacity Safe)"
+            "new_weight_kg": new_weight,
+            "threshold_pct": threshold_cap,
+            "collection_created": collection_created,
+            "collection_id": collection_id,
+            "status": "Automated CBWTF Fleet Dispatch Dispatched" if should_dispatch_collection else "Normal (Capacity Safe)"
         }
     })
 
@@ -982,30 +1084,63 @@ def create_collection():
 
     target_bin = None
 
-    # Step 1: If bin_id is specified, check if it belongs to requested hospital_id
+    # Normalize requested waste_type if provided
+    req_waste_type = (waste_type or "").strip()
+    if "/" in req_waste_type:
+        req_waste_type = req_waste_type.split("/")[0].strip()
+    if req_waste_type.lower() == "multi":
+        req_waste_type = "Red"
+
+    # Step 1: If bin_id is specified, check if it belongs to requested hospital_id AND matches req_waste_type
     if bin_id:
         cursor.execute("SELECT * FROM bins WHERE id = ?", (bin_id,))
         b_row = cursor.fetchone()
         if b_row:
-            # If hospital_id is specified and matches the bin, keep it
-            if hospital_id is None or b_row["hospital_id"] == hospital_id:
+            hosp_matches = (hospital_id is None or b_row["hospital_id"] == hospital_id)
+            type_matches = True
+            if req_waste_type:
+                type_matches = (b_row["waste_type"].strip().lower() == req_waste_type.lower())
+            
+            if hosp_matches and type_matches:
                 target_bin = dict(b_row)
 
-    # Step 2: If target_bin still not found, search by hospital_id and waste_type
+    # Step 2: If target_bin not resolved, search by hospital_id and req_waste_type
     if not target_bin:
         if hospital_id is not None:
-            if waste_type:
+            if req_waste_type:
                 cursor.execute("""
                     SELECT * FROM bins 
                     WHERE hospital_id = ? AND LOWER(waste_type) = LOWER(?)
+                    ORDER BY id ASC
                     LIMIT 1
-                """, (hospital_id, waste_type))
+                """, (hospital_id, req_waste_type))
                 b_row = cursor.fetchone()
                 if b_row:
                     target_bin = dict(b_row)
 
-            if not target_bin:
-                # Any existing bin for this hospital
+            # Auto-create bin if missing for this hospital and waste_type is specified
+            if not target_bin and req_waste_type:
+                wtype = req_waste_type.capitalize()
+                prefix = f"BIN-{wtype[:3].upper()}"
+                cursor.execute("SELECT COUNT(*) FROM bins")
+                total_b = cursor.fetchone()[0]
+                bin_code = f"{prefix}-{total_b + 1:03d}"
+                cursor.execute("""
+                    INSERT INTO bins (bin_code, hospital_id, waste_type, capacity, current_level, weight, status)
+                    VALUES (?, ?, ?, 50.0, 15.0, 1.5, 'Normal')
+                """, (bin_code, hospital_id, wtype))
+                new_id = cursor.lastrowid
+                target_bin = {
+                    "id": new_id,
+                    "bin_code": bin_code,
+                    "hospital_id": hospital_id,
+                    "waste_type": wtype,
+                    "current_level": 15.0,
+                    "weight": 1.5
+                }
+
+            # Only fallback to any bin if waste_type was completely unspecified
+            if not target_bin and not req_waste_type:
                 cursor.execute("""
                     SELECT * FROM bins 
                     WHERE hospital_id = ?
@@ -1016,31 +1151,17 @@ def create_collection():
                 if b_row:
                     target_bin = dict(b_row)
 
-            if not target_bin:
-                # Auto-initialize standard bin for this hospital
-                wtype = waste_type or "Yellow"
-                cursor.execute("SELECT COUNT(*) FROM bins")
-                total_b = cursor.fetchone()[0]
-                bin_code = f"BIN-{wtype[:3].upper()}-{total_b + 1:03d}"
-                cursor.execute("""
-                    INSERT INTO bins (bin_code, hospital_id, waste_type, capacity, current_level, weight, status)
-                    VALUES (?, ?, ?, 50.0, 10.0, 5.0, 'Normal')
-                """, (bin_code, hospital_id, wtype))
-                new_id = cursor.lastrowid
-                target_bin = {
-                    "id": new_id,
-                    "bin_code": bin_code,
-                    "hospital_id": hospital_id,
-                    "waste_type": wtype,
-                    "current_level": 10.0,
-                    "weight": 5.0
-                }
         else:
-            # Fallback to first available bin
-            cursor.execute("SELECT * FROM bins LIMIT 1")
-            b_row = cursor.fetchone()
-            if b_row:
-                target_bin = dict(b_row)
+            if req_waste_type:
+                cursor.execute("SELECT * FROM bins WHERE LOWER(waste_type) = LOWER(?) LIMIT 1", (req_waste_type,))
+                b_row = cursor.fetchone()
+                if b_row:
+                    target_bin = dict(b_row)
+            if not target_bin:
+                cursor.execute("SELECT * FROM bins LIMIT 1")
+                b_row = cursor.fetchone()
+                if b_row:
+                    target_bin = dict(b_row)
 
     if not target_bin:
         conn.close()
@@ -1053,8 +1174,8 @@ def create_collection():
     bin_code = target_bin.get("bin_code", f"BIN-{resolved_bin_id:03d}")
 
     if weight <= 0:
-        weight = float(target_bin.get("weight", 0.0) or 1.8)
-    weight = round(weight, 1)
+        weight = 0.035
+    weight = round(weight, 3)
 
     # Assign default vehicle if not provided
     if not vehicle_id:
