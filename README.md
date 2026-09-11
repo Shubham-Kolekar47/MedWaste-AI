@@ -1,5 +1,5 @@
 # MedWaste-AI
-Project for the segregation of the medical waste
+Project for the segregation of the medical waste.
 # 🏥 MedWasteAI
 
 ### AI-Powered Smart Biomedical Waste Collection, Segregation & Tracking System
